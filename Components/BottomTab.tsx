@@ -24,7 +24,7 @@ const BottomTab: React.FC<BottomTabProps> = ({ navigation }) => {
           <Ionicons name="search" size={24} color="black" />
         </View>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => handlePress('Home')}>
+      <TouchableOpacity onPress={() => handlePress('Profile')}>
         <View>
           <Ionicons name="person" size={24} color="black" />
         </View>

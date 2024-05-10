@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, BackHandler } from 'react-native';
 import BottomTab from '../Components/BottomTab';
 import { useTheme } from '../ThemeContext';
+import CreditCard from '../Components/CreditCard';
 
 const Home = ({ navigation }: { navigation: any }) => {
   const { theme } = useTheme();
@@ -32,7 +33,9 @@ const Home = ({ navigation }: { navigation: any }) => {
   return (
     <View style={[styles.container, { backgroundColor }]}>
       <View style={styles.content}>
-        <Text style={[styles.text, { color: textColor }]}>HOME</Text>
+        <View style={styles.cardContainer}>
+          <CreditCard />
+        </View>
       </View>
       <BottomTab navigation={navigation} />
     </View>
@@ -47,11 +50,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 20,
   },
   text: {
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
+    marginBottom: 30,
+  },
+  cardContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

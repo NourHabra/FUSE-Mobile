@@ -29,6 +29,11 @@
     },
     "plugins": [
       "react-native-nfc-manager"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "2644eee2-7807-4699-9f34-90ce0f924bae"
+      }
+    }
   }
 }

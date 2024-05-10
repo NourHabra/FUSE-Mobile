@@ -4,13 +4,15 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Login from './Screens/Login';
 import Signup from './Screens/Signup';
 import Home from './Screens/Home';
-import ThisATest from './Screens/This_A_Test'; // Add this import
+import ThisATest from './Screens/This_A_Test';
+import Profile from './Screens/profile'; // Add this import
 
 export type RootStackParamList = {
   Login: undefined;
   Signup: undefined;
   Home: undefined;
-  ThisATest: undefined; // Add this screen to the type
+  ThisATest: undefined;
+  Profile: undefined; // Add this screen to the type
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -37,6 +39,11 @@ const AppNavigator = () => {
         <Stack.Screen
           name="ThisATest"
           component={ThisATest}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Profile"
+          component={Profile}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
