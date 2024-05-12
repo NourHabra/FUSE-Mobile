@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "FUSE-EXPO",
-    "slug": "FUSE-EXPO",
+    "slug": "fuse",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,7 +12,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fusemobile.fuse"
     },
     "android": {
       "adaptiveIcon": {
@@ -20,7 +21,8 @@
         "backgroundColor": "#ffffff"
       },
       "permissions": [
-        "android.permission.NFC"
+        "android.permission.NFC",
+        "android.permission.NFC_TRANSACTION_EVENT"
       ],
       "package": "com.mustafa_alhasan12.FUSEEXPO"
     },
@@ -32,8 +34,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "2644eee2-7807-4699-9f34-90ce0f924bae"
+        "projectId": "3b00f604-e8aa-4126-a59b-91b1e8d978d0"
       }
-    }
+    },
+    "owner": "fuse-mobile"
   }
 }
