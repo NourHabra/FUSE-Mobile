@@ -1,60 +1,65 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Button, BackHandler, Alert } from 'react-native';
-import BottomTab from '../Components/BottomTab';
-import { useTheme } from '../ThemeContext';
-import NfcManager, {NfcTech} from 'react-native-nfc-manager';
+import { View, Text, StyleSheet, Button, Platform } from 'react-native';
+import NfcManager, { NfcTech, NfcEvents, TagEvent } from 'react-native-nfc-manager';
 
-const ThisATest = ({ navigation }: { navigation: any }) => {
-  const { theme } = useTheme();
-  const [nfcTag, setNfcTag] = useState<string | null>(null);
+const ThisATest = () => {
+  const [nfcSupported, setNfcSupported] = useState<boolean>(false);
+  const [nfcEnabled, setNfcEnabled] = useState<boolean>(false);
+  const [tagDetected, setTagDetected] = useState<boolean>(false);
+  const [tagDetails, setTagDetails] = useState<string>('');
 
   useEffect(() => {
-    NfcManager.start();
+    async function initNfc() {
+      const supported = await NfcManager.isSupported();
+      setNfcSupported(supported);
+      if (!supported) {
+        return;
+      }
 
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      handleBackButtonPress
-    );
+      await NfcManager.start();
+      const enabled = await NfcManager.isEnabled();
+      setNfcEnabled(enabled);
+
+      NfcManager.setEventListener(NfcEvents.DiscoverTag, (tag: TagEvent) => {
+        console.log('NFC Tag Detected:', tag);
+        setTagDetected(true);
+        setTagDetails(JSON.stringify(tag, null, 2)); // Store tag details in state
+        if (Platform.OS === 'ios') {
+          NfcManager.setAlertMessageIOS('NFC tag detected!');
+        }
+        NfcManager.unregisterTagEvent().catch(() => 0);
+      });
+
+      await NfcManager.registerTagEvent();
+    }
+
+    initNfc();
 
     return () => {
-      backHandler.remove();
-      NfcManager.cancelTechnologyRequest();
+      NfcManager.setEventListener(NfcEvents.DiscoverTag, null);
+      NfcManager.unregisterTagEvent().catch(() => 0);
     };
-  }, [navigation]);
-
-  const handleBackButtonPress = () => {
-    const navigationState = navigation.getState();
-    const currentRouteName = navigationState.routes[navigationState.index].name;
-
-    if (currentRouteName === 'Home') {
-      return true;
-    }
-
-    return false;
-  };
-
-  const readNfcData = async () => {
-    try {
-      await NfcManager.requestTechnology(NfcTech.Ndef);
-      const tag = await NfcManager.getTag();
-      setNfcTag(JSON.stringify(tag));
-      await NfcManager.cancelTechnologyRequest();
-    } catch (error) {
-      console.warn('Failed to read NFC tag', error);
-      setNfcTag(null);
-    }
-  };
-
-  const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
-  const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
+  }, []);
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
-      <View style={styles.content}>
-        <Text style={[styles.text, { color: textColor }]}>NFC Data: {nfcTag || "No tag read"}</Text>
-        <Button title="Read NFC Tag" onPress={readNfcData} />
-      </View>
-      <BottomTab navigation={navigation} />
+    <View style={styles.container}>
+      <Text style={styles.text}>
+        {nfcSupported ? (nfcEnabled ? (tagDetected ? 'NFC Tag Detected' : 'No NFC Tag Detected') : 'NFC is not enabled') : 'NFC is not supported'}
+      </Text>
+      {tagDetected && (
+        <Text style={styles.details}>
+          Tag Details: {tagDetails}
+        </Text>
+      )}
+      <Button
+        title="Check Again"
+        onPress={async () => {
+          setTagDetected(false);
+          setTagDetails(''); // Clear previous tag details
+          await NfcManager.unregisterTagEvent();
+          await NfcManager.registerTagEvent();
+        }}
+      />
     </View>
   );
 };
@@ -62,17 +67,19 @@ const ThisATest = ({ navigation }: { navigation: any }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  content: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 20,
   },
   text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    margin: 20,
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  details: {
+    fontSize: 16,
+    color: 'gray',
+    marginTop: 10,
+    textAlign: 'center'
   },
 });
 
