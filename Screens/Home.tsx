@@ -31,12 +31,14 @@ const Home = ({ navigation }: { navigation: any }) => {
   const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
-      <View style={styles.content}>
-        <View style={styles.cardContainer}>
-          <CreditCard />
-        </View>
-      </View>
+    // <View style={[styles.container, { backgroundColor }]}>
+    //   <View style={styles.content}>
+    //       <CreditCard />
+    //   </View>
+    //   <BottomTab navigation={navigation} />
+    // </View>
+    <View style={styles.page}>
+      <CreditCard />
       <BottomTab navigation={navigation} />
     </View>
   );
@@ -61,6 +63,13 @@ const styles = StyleSheet.create({
   cardContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  page: {
+    height: "100%",
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: "red",
   },
 });
 
