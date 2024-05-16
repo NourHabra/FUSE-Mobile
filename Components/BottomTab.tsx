@@ -19,12 +19,12 @@ const BottomTab: React.FC<BottomTabProps> = ({ navigation }) => {
           <Ionicons name="home" size={24} color="black" />
         </View>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => handlePress('ThisATest')}>
+      <TouchableOpacity onPress={() => handlePress('NfcFunctionality')}>
         <View>
           <Ionicons name="search" size={24} color="black" />
         </View>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => handlePress('Profile')}>
+      <TouchableOpacity onPress={() => handlePress('QrCodeFunctionality')}>
         <View>
           <Ionicons name="person" size={24} color="black" />
         </View>

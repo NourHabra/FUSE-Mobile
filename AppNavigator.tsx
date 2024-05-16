@@ -4,15 +4,15 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Login from './Screens/Login';
 import Signup from './Screens/Signup';
 import Home from './Screens/Home';
-import ThisATest from './Screens/This_A_Test';
-import Profile from './Screens/profile'; // Add this import
+import NfcFunctionality from './Screens/NfcFunctionality';
+import QrCodeFunctionality from './Screens/QrCodeFunctionality'; // Import QrCodeFunctionality
 
 export type RootStackParamList = {
   Login: undefined;
   Signup: undefined;
   Home: undefined;
-  ThisATest: undefined;
-  Profile: undefined; // Add this screen to the type
+  NfcFunctionality: undefined;
+  QrCodeFunctionality: undefined; // Add QrCodeFunctionality to the navigation stack
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -37,13 +37,13 @@ const AppNavigator = () => {
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="ThisATest"
-          component={ThisATest}
+          name="NfcFunctionality"
+          component={NfcFunctionality}
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="Profile"
-          component={Profile}
+          name="QrCodeFunctionality" // Add the QrCodeFunctionality screen to the navigator
+          component={QrCodeFunctionality}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
