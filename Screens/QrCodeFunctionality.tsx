@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Button, Alert } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { RNCamera, BarCodeReadEvent } from 'react-native-camera';
+import QRCodeStyled from 'react-native-qrcode-styled';
 
 const QrCodeFunctionality: React.FC = () => {
   const [scan, setScan] = useState<boolean>(false);
@@ -16,12 +17,23 @@ const QrCodeFunctionality: React.FC = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>QR Code Functionality</Text>
-      <QRCode
+      {/* <QRCode
         value="12345678"
         size={200}
         color="black"
         backgroundColor="white"
+      /> */}
+      <QRCodeStyled
+        data={'1234567890abcdefghijklmnopqrstuvwxyz'}
+        style={{ backgroundColor: 'white' }}
+        padding={20}
+        pieceSize={8}
+        pieceCornerType='rounded'
+        pieceBorderRadius={3}
+        isPiecesGlued={true}
+        
       />
+
       {scan ? (
         <RNCamera
           style={styles.preview}
