@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Image } from 'react-native';
 import { useTheme } from '../ThemeContext'; // Adjust the import path to where your ThemeContext is defined
 import App from '../App';
 import * as Font from 'expo-font';
@@ -11,7 +11,8 @@ const CreditCard = () => {
     try {
       await Font.loadAsync({
         // Don't include spaces in the path
-        KodeMono: require("../assets/fonts/KodeMono.ttf"),
+        // KodeMono: require("../assets/fonts/KodeMono.ttf"),
+        SometypeMono: require("../assets/fonts/SometypeMono.ttf"),
       });
       setFontsLoaded(true);
     } catch (error) {
@@ -35,11 +36,18 @@ const CreditCard = () => {
         style={styles.card}
         resizeMode="cover" // This prop ensures the image covers the entire background
       >
-        <Text style={styles.cardText}>Nour Habra</Text>
+        <Image source={require('../assets/credit-card-chip.png')} style={styles.chip} />
         {fontsLoaded && (
           <Text style={styles.cardNumber}>1234 5678 9012 3456</Text>
         )}
-        <Text style={styles.cardText}>12/25</Text>
+        <View style={styles.flexRow}>
+          <Text style={styles.cardText}>Nour Habra</Text>
+          <View style={styles.expirationText}>
+            <Text style={styles.smallLabel}>EXP</Text>
+            <Text style={styles.cardText}>12/25</Text>
+          </View>
+          <View></View>
+        </View>
       </ImageBackground>
     </View>
   );
@@ -62,15 +70,38 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: 'hidden',
   },
+  chip: {
+    height: "50%",
+    color: "black",
+    width: "50%",
+    marginBottom: -100,
+  },
   cardText: {
     fontSize: 18,
     letterSpacing: 2,
     marginVertical: 15,
   },
   cardNumber: {
-    fontFamily: "KodeMono",
+    fontFamily: "SometypeMono",
     fontSize: 24,
-    letterSpacing: 3,
+    letterSpacing: 1,
+    marginTop: 100
+  },
+  flexRow: {
+    flexDirection: "row",
+    width: "80%",
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  expirationText: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  smallLabel: {
+    fontSize: 12,
+    marginRight: 2
   },
 });
 

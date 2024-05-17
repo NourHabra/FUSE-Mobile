@@ -37,7 +37,10 @@ const Home = ({ navigation }: { navigation: any }) => {
     <View style={[styles.container, { backgroundColor }]}>
       <ScrollView contentContainerStyle={styles.content}>
         <CreditCard />
-        <BalanceDisplay />
+        <View style={styles.flexRow}>
+          <BalanceDisplay />
+          <BalanceDisplay />
+        </View>
         <PromotionalBanner />
         <RecentTransactions />
       </ScrollView>
@@ -61,6 +64,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 30,
+  },
+  flexRow: {
+    width: '90%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });
 

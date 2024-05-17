@@ -24,19 +24,21 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     marginVertical: 20,
+    marginHorizontal: 5,
     padding: 20,
     borderRadius: 10,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
+    width: "45%",
   },
   label: {
     fontSize: 18,
     marginBottom: 10,
   },
   balance: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: 'bold',
   },
 });
