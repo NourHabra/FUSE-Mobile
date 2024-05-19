@@ -1,3 +1,4 @@
+// FUSE-EXPO/Components/BottomTab.tsx
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,17 +15,25 @@ const BottomTab: React.FC<BottomTabProps> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.tab} onPress={() => handlePress('Home')}>
-        <Ionicons name="home" size={24} color="white" />
-        <Text style={styles.label}>Home</Text>
+      <TouchableOpacity style={styles.tab} onPress={() => handlePress('MyCard')}>
+        <Ionicons name="card" size={24} color="white" />
+        <Text style={styles.label}>My Card</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.tab} onPress={() => handlePress('NfcFunctionality')}>
         <Ionicons name="wifi" size={24} color="white" />
         <Text style={styles.label}>NFC</Text>
       </TouchableOpacity>
+      <TouchableOpacity style={styles.tab} onPress={() => handlePress('Home')}>
+        <Ionicons name="home" size={24} color="white" />
+        <Text style={styles.label}>Home</Text>
+      </TouchableOpacity>
       <TouchableOpacity style={styles.tab} onPress={() => handlePress('QrCodeFunctionality')}>
         <Ionicons name="qr-code" size={24} color="white" />
         <Text style={styles.label}>QR Code</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.tab} onPress={() => handlePress('Profile')}>
+        <Ionicons name="person" size={24} color="white" />
+        <Text style={styles.label}>Profile</Text>
       </TouchableOpacity>
     </View>
   );

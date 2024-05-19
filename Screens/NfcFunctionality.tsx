@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Button, ScrollView, Alert, Platform } from 'react-native';
 import NfcManager, { NfcTech, NfcEvents, TagEvent, Ndef } from 'react-native-nfc-manager';
+import BottomTab from '../Components/BottomTab'; // Import BottomTab
+import { useTheme } from '../ThemeContext'; // Import useTheme
 
-const NfcFunctionality = () => {
+const NfcFunctionality = ({ navigation }: { navigation: any }) => {
   const [nfcSupported, setNfcSupported] = useState<boolean>(false);
   const [nfcEnabled, setNfcEnabled] = useState<boolean>(false);
   const [tagDetected, setTagDetected] = useState<boolean>(false);
   const [tagDetails, setTagDetails] = useState<string>('');
+  const { theme } = useTheme(); // Use the theme
 
   useEffect(() => {
     async function initNfc() {
@@ -52,34 +55,42 @@ const NfcFunctionality = () => {
     setupTagDetection();
   };
 
+  const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
+  const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>NFC Functionality</Text>
-      <Text style={styles.status}>
-        {nfcSupported ? (nfcEnabled ? (tagDetected ? 'NFC Tag Detected' : 'No NFC Tag Detected') : 'NFC is not enabled') : 'NFC is not supported'}
-      </Text>
-      {tagDetected && (
-        <View style={styles.tagDetailsContainer}>
-          <Text style={styles.subHeader}>Tag Details:</Text>
-          <Text style={styles.details}>{tagDetails}</Text>
+    <View style={[styles.container, { backgroundColor }]}>
+      <ScrollView contentContainerStyle={[styles.content, { backgroundColor }]}>
+        <Text style={[styles.header, { color: textColor }]}>NFC Functionality</Text>
+        <Text style={[styles.status, { color: textColor }]}>
+          {nfcSupported ? (nfcEnabled ? (tagDetected ? 'NFC Tag Detected' : 'No NFC Tag Detected') : 'NFC is not enabled') : 'NFC is not supported'}
+        </Text>
+        {tagDetected && (
+          <View style={[styles.tagDetailsContainer, { backgroundColor: theme === 'light' ? '#E0E0E0' : '#505050' }]}>
+            <Text style={[styles.subHeader, { color: textColor }]}>Tag Details:</Text>
+            <Text style={[styles.details, { color: textColor }]}>{tagDetails}</Text>
+          </View>
+        )}
+        <View style={styles.buttonContainer}>
+          <Button title="Write to NFC Tag" onPress={() => {}} color="#2196F3" />
+          <Button title="Format NFC Tag" onPress={() => {}} color="#FF9800" />
+          <Button title="Check Again" onPress={handleCheckAgain} color="#F44336" />
         </View>
-      )}
-      <View style={styles.buttonContainer}>
-        <Button title="Write to NFC Tag" onPress={() => {}} color="#2196F3" />
-        <Button title="Format NFC Tag" onPress={() => {}} color="#FF9800" />
-        <Button title="Check Again" onPress={handleCheckAgain} color="#F44336" />
-      </View>
-    </ScrollView>
+      </ScrollView>
+      <BottomTab navigation={navigation} />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  content: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#FFF',
   },
   header: {
     fontSize: 24,
@@ -88,25 +99,21 @@ const styles = StyleSheet.create({
   },
   status: {
     fontSize: 18,
-    color: '#333',
     marginBottom: 10,
   },
   subHeader: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#000',
     marginBottom: 5,
   },
   tagDetailsContainer: {
     width: '100%',
-    backgroundColor: '#E0E0E0',
     padding: 10,
     borderRadius: 5,
     marginBottom: 20,
   },
   details: {
     fontSize: 16,
-    color: '#333',
   },
   buttonContainer: {
     width: '100%',
