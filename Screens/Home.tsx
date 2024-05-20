@@ -6,7 +6,7 @@ import { useTheme } from '../ThemeContext';
 import CreditCard from '../Components/CreditCard';
 import BalanceDisplay from '../Components/BalanceDisplay';
 import RecentTransactions from '../Components/RecentTransactions';
-import PromotionalBanner from '../Components/PromotionalBanner';
+// import PromotionalBanner from '../Components/PromotionalBanner';
 
 const Home = ({ navigation }: { navigation: any }) => {
   const { theme } = useTheme();
@@ -39,14 +39,17 @@ const Home = ({ navigation }: { navigation: any }) => {
   return (
     <View style={[tw`flex-1`, { backgroundColor }]}>
       <StatusBar barStyle={statusBarStyle} backgroundColor={backgroundColor} />
-      <ScrollView contentContainerStyle={tw`flex-grow items-center justify-center p-5`}>
-        <CreditCard />
-        <View style={tw`w-full flex-row justify-between`}>
-          <BalanceDisplay />
-        </View>
-        <PromotionalBanner />
-        <RecentTransactions />
-      </ScrollView>
+      <View style={tw`flex-1 p-4`}>
+        <Text style={tw`${textColorClass} text-2xl font-bold mb-4`}>Home</Text>
+        <ScrollView contentContainerStyle={tw`flex-grow items-center justify-center p-5`}>
+          <CreditCard />
+          <View style={tw`w-full flex-row justify-between`}>
+            <BalanceDisplay />
+          </View>
+          {/* <PromotionalBanner /> */}
+          <RecentTransactions />
+        </ScrollView>
+      </View>
       <BottomTab navigation={navigation} />
     </View>
   );

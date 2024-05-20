@@ -25,9 +25,10 @@ const CreditCard = () => {
 
   const { theme } = useTheme(); // Using the theme from ThemeContext using useTheme hook
 
-  // Determine the source of the image based on the theme
-  const imageSource = theme === 'dark' ? require('../assets/10.png') : require('../assets/09.png');
-  const textColor = theme === 'dark' ? '#000000' : '#FFFFFF'; // Set text color based on the theme
+  // Always use the '09.png' image
+  const imageSource = require('../assets/09.png');
+  // Text color is always white
+  const textColor = '#FFFFFF';
 
   return (
     <View style={styles.cardContainer}>

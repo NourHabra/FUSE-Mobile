@@ -5,19 +5,19 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Login from './Screens/Login';
 import Signup from './Screens/Signup';
 import Home from './Screens/Home';
-import NfcFunctionality from './Screens/NfcFunctionality';
-import QrCodeFunctionality from './Screens/QrCodeFunctionality';
+import MyExpenses from './Screens/MyExpenses'; // Import MyExpenses
+import MakeTransaction from './Screens/MakeTransaction'; // Import MakeTransaction
 import Profile from './Screens/profile';
-import MyCard from './Screens/MyCards'; // Import MyCard
+import MyCard from './Screens/MyCards';
 
 export type RootStackParamList = {
   Login: undefined;
   Signup: undefined;
   Home: undefined;
-  NfcFunctionality: undefined;
-  QrCodeFunctionality: undefined;
+  MyExpenses: undefined; // Add MyExpenses to the navigation stack
+  MakeTransaction: undefined; // Add MakeTransaction to the navigation stack
   Profile: undefined;
-  MyCard: undefined; // Add MyCard to the navigation stack
+  MyCard: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -42,13 +42,13 @@ const AppNavigator = () => {
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="NfcFunctionality"
-          component={NfcFunctionality}
+          name="MyExpenses" // Add the MyExpenses screen to the navigator
+          component={MyExpenses}
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="QrCodeFunctionality"
-          component={QrCodeFunctionality}
+          name="MakeTransaction" // Add the MakeTransaction screen to the navigator
+          component={MakeTransaction}
           options={{ headerShown: false }}
         />
         <Stack.Screen
@@ -57,7 +57,7 @@ const AppNavigator = () => {
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="MyCard" // Add the MyCard screen to the navigator
+          name="MyCard"
           component={MyCard}
           options={{ headerShown: false }}
         />

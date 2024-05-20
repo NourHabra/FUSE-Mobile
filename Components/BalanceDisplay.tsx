@@ -9,7 +9,7 @@ const BalanceDisplay = () => {
   const backgroundColor = theme === 'light' ? '#f0f8ff' : '#333';
   const shadowColor = theme === 'light' ? '#000' : 'transparent'; // Hide shadow in dark mode
   const labelColor = theme === 'light' ? '#888' : '#ccc';
-  const balanceColor = '#1E90FF';
+  const balanceColor = '#ADD8E6'; // Updated color
 
   const containerStyle = [
     tw`flex items-center justify-center my-5 mx-1.5 p-5 rounded-lg shadow-lg w-11/12`,

@@ -15,7 +15,7 @@ const RecentTransactions = () => {
   const backgroundColor = theme === 'light' ? '#f0f8ff' : '#333';
   const shadowColor = theme === 'light' ? '#000' : 'transparent'; // Hide shadow in dark mode
   const textColor = theme === 'light' ? '#888' : '#ccc';
-  const amountColor = '#1E90FF';
+  const amountColor = '#ADD8E6'; // Updated color
 
   const containerStyle = [
     tw`my-5 p-5 rounded-lg shadow-lg w-full`,
