@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useTheme } from '../ThemeContext';
+import { View, Text } from 'react-native';
+import { useTheme } from '../ThemeContext'; // Import the theme context
+import tw from 'twrnc';
 
 const transactions = [
   { id: 1, description: 'Grocery Store', amount: '-$50.00' },
@@ -9,58 +10,34 @@ const transactions = [
 ];
 
 const RecentTransactions = () => {
-  const { theme } = useTheme();
+  const { theme } = useTheme(); // Use the theme context
+
+  const backgroundColor = theme === 'light' ? '#f0f8ff' : '#333';
+  const shadowColor = theme === 'light' ? '#000' : 'transparent'; // Hide shadow in dark mode
+  const textColor = theme === 'light' ? '#888' : '#ccc';
+  const amountColor = '#1E90FF';
 
   const containerStyle = [
-    styles.container,
-    { backgroundColor: theme === 'light' ? '#f0f8ff' : '#444', shadowColor: theme === 'light' ? '#000' : '#fff' },
+    tw`my-5 p-5 rounded-lg shadow-lg w-full`,
+    { backgroundColor, shadowColor },
   ];
-  const titleStyle = [styles.title, { color: theme === 'light' ? '#000' : '#fff' }];
-  const descriptionStyle = [styles.description, { color: theme === 'light' ? '#000' : '#ccc' }];
-  const amountStyle = [styles.amount, { color: theme === 'light' ? '#1E90FF' : '#1E90FF' }];
+  const titleStyle = [tw`text-lg font-bold mb-2`, { color: textColor }];
+  const descriptionStyle = [tw`text-base`, { color: textColor }];
+  const amountStyle = [tw`text-base`, { color: amountColor }];
 
   return (
-    <View style={containerStyle}>
-      <Text style={titleStyle}>Recent Transactions</Text>
-      {transactions.map(transaction => (
-        <View key={transaction.id} style={styles.transaction}>
-          <Text style={descriptionStyle}>{transaction.description}</Text>
-          <Text style={amountStyle}>{transaction.amount}</Text>
-        </View>
-      ))}
+    <View style={tw`flex-1 items-center justify-center w-full`}>
+      <View style={containerStyle}>
+        <Text style={titleStyle}>Recent Transactions</Text>
+        {transactions.map(transaction => (
+          <View key={transaction.id} style={tw`flex-row justify-between py-2 border-b border-gray-300`}>
+            <Text style={descriptionStyle}>{transaction.description}</Text>
+            <Text style={amountStyle}>{transaction.amount}</Text>
+          </View>
+        ))}
+      </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 20,
-    padding: 20,
-    borderRadius: 10,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-    width: "90%",
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  transaction: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  description: {
-    fontSize: 16,
-  },
-  amount: {
-    fontSize: 16,
-  },
-});
 
 export default RecentTransactions;

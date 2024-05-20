@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, BackHandler, ScrollView } from 'react-native';
+import { View, Text, BackHandler, ScrollView, StatusBar } from 'react-native';
+import tw from 'twrnc';
 import BottomTab from '../Components/BottomTab';
 import { useTheme } from '../ThemeContext';
 import CreditCard from '../Components/CreditCard';
@@ -30,15 +31,17 @@ const Home = ({ navigation }: { navigation: any }) => {
     return false;
   };
 
-  const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
-  const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
+  // Define the background color for light and dark themes
+  const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030'; // Custom very dark blue
+  const textColorClass = theme === 'light' ? 'text-gray-800' : 'text-white';
+  const statusBarStyle = theme === 'light' ? 'dark-content' : 'light-content';
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
-      <ScrollView contentContainerStyle={styles.content}>
+    <View style={[tw`flex-1`, { backgroundColor }]}>
+      <StatusBar barStyle={statusBarStyle} backgroundColor={backgroundColor} />
+      <ScrollView contentContainerStyle={tw`flex-grow items-center justify-center p-5`}>
         <CreditCard />
-        <View style={styles.flexRow}>
-          <BalanceDisplay />
+        <View style={tw`w-full flex-row justify-between`}>
           <BalanceDisplay />
         </View>
         <PromotionalBanner />
@@ -48,28 +51,5 @@ const Home = ({ navigation }: { navigation: any }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flexGrow: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 30,
-  },
-  flexRow: {
-    width: '90%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-});
 
 export default Home;

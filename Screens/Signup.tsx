@@ -3,7 +3,6 @@ import { StatusBar, View, Text, TextInput, TouchableOpacity, StyleSheet } from '
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../AppNavigator';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useTheme } from '../ThemeContext'; // Import useTheme
 
 // Type the navigation prop
@@ -11,12 +10,7 @@ type SignupScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Signu
 
 const Signup = () => {
   const navigation = useNavigation<SignupScreenNavigationProp>();
-  const { theme, setTheme } = useTheme(); // Use theme from context
-
-  // Function to toggle theme
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  };
+  const { theme } = useTheme(); // Use theme from context
 
   // Conditional styling based on theme
   const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030'; // Explicit hex color values
@@ -27,9 +21,6 @@ const Signup = () => {
   return (
     <View style={{ flex: 1, backgroundColor, justifyContent: 'center', alignItems: 'center', padding: 16 }}>
       <StatusBar backgroundColor={backgroundColor} barStyle={theme === 'light' ? 'dark-content' : 'light-content'} />
-      <TouchableOpacity style={styles.themeIcon} onPress={toggleTheme}>
-        <Icon name={theme === 'light' ? 'weather-night' : 'white-balance-sunny'} size={24} color={textColor} />
-      </TouchableOpacity>
       <View style={{ width: '100%', maxWidth: 400, backgroundColor, borderRadius: 8, padding: 24, borderWidth: 1, borderColor }}>
         <Text style={{ fontSize: 32, fontWeight: 'bold', textAlign: 'center', color: textColor, marginBottom: 32 }}>
           Sign Up
@@ -78,14 +69,5 @@ const Signup = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  themeIcon: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    padding: 10
-  }
-});
 
 export default Signup;

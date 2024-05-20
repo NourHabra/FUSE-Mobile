@@ -1,6 +1,5 @@
-// ThemeContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Appearance } from 'react-native';
 
 type Theme = 'light' | 'dark';
 type ThemeContextType = {
@@ -11,30 +10,26 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 type ThemeProviderProps = {
-  children: ReactNode;  // This specifies that children can be any valid React node
+  children: ReactNode;
 };
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>('light');
+  const systemTheme = Appearance.getColorScheme();
+  const initialTheme = systemTheme === 'light' || systemTheme === 'dark' ? systemTheme : 'light'; // Default to 'light' if 'no-preference'
+  
+  const [theme, setTheme] = useState<Theme>(initialTheme);
 
   useEffect(() => {
-    const loadTheme = async () => {
-      const storedTheme = await AsyncStorage.getItem('theme');
-      if (storedTheme) {
-        setTheme(storedTheme as Theme);
-      }
-    };
+    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
+      const newTheme = colorScheme === 'light' || colorScheme === 'dark' ? colorScheme : 'light'; // Default to 'light' if 'no-preference'
+      setTheme(newTheme);
+    });
 
-    loadTheme();
+    return () => subscription.remove();
   }, []);
 
-  const handleSetTheme = async (theme: Theme) => {
-    setTheme(theme);
-    await AsyncStorage.setItem('theme', theme);
-  };
-
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

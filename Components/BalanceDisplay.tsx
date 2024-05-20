@@ -1,46 +1,31 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { useTheme } from '../ThemeContext';
+import tw from 'twrnc';
 
 const BalanceDisplay = () => {
   const { theme } = useTheme();
 
+  const backgroundColor = theme === 'light' ? '#f0f8ff' : '#333';
+  const shadowColor = theme === 'light' ? '#000' : 'transparent'; // Hide shadow in dark mode
+  const labelColor = theme === 'light' ? '#888' : '#ccc';
+  const balanceColor = '#1E90FF';
+
   const containerStyle = [
-    styles.container,
-    { backgroundColor: theme === 'light' ? '#f0f8ff' : '#444', shadowColor: theme === 'light' ? '#000' : '#fff' },
+    tw`flex items-center justify-center my-5 mx-1.5 p-5 rounded-lg shadow-lg w-11/12`,
+    { backgroundColor, shadowColor },
   ];
-  const labelStyle = [styles.label, { color: theme === 'light' ? '#888' : '#ccc' }];
-  const balanceStyle = [styles.balance, { color: theme === 'light' ? '#1E90FF' : '#1E90FF' }];
+  const labelStyle = [tw`text-lg mb-2`, { color: labelColor }];
+  const balanceStyle = [tw`text-2xl font-bold`, { color: balanceColor }];
 
   return (
-    <View style={containerStyle}>
-      <Text style={labelStyle}>Current Balance</Text>
-      <Text style={balanceStyle}>$1,234.56</Text>
+    <View style={tw`flex-1 items-center justify-center`}>
+      <View style={containerStyle}>
+        <Text style={labelStyle}>Current Balance</Text>
+        <Text style={balanceStyle}>$1,234.56</Text>
+      </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    marginVertical: 20,
-    marginHorizontal: 5,
-    padding: 20,
-    borderRadius: 10,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-    width: "45%",
-  },
-  label: {
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  balance: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-});
 
 export default BalanceDisplay;

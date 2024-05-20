@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image } from 'react-native';
 import { useTheme } from '../ThemeContext'; // Adjust the import path to where your ThemeContext is defined
-import App from '../App';
 import * as Font from 'expo-font';
 
 const CreditCard = () => {
@@ -28,6 +27,7 @@ const CreditCard = () => {
 
   // Determine the source of the image based on the theme
   const imageSource = theme === 'dark' ? require('../assets/10.png') : require('../assets/09.png');
+  const textColor = theme === 'dark' ? '#000000' : '#FFFFFF'; // Set text color based on the theme
 
   return (
     <View style={styles.cardContainer}>
@@ -38,13 +38,13 @@ const CreditCard = () => {
       >
         <Image source={require('../assets/credit-card-chip.png')} style={styles.chip} />
         {fontsLoaded && (
-          <Text style={styles.cardNumber}>1234 5678 9012 3456</Text>
+          <Text style={[styles.cardNumber, { color: textColor }]}>1234 5678 9012 3456</Text>
         )}
         <View style={styles.flexRow}>
-          <Text style={styles.cardText}>Nour Habra</Text>
+          <Text style={[styles.cardText, { color: textColor }]}>Nour Habra</Text>
           <View style={styles.expirationText}>
-            <Text style={styles.smallLabel}>EXP</Text>
-            <Text style={styles.cardText}>12/25</Text>
+            <Text style={[styles.smallLabel, { color: textColor }]}>EXP</Text>
+            <Text style={[styles.cardText, { color: textColor }]}>12/25</Text>
           </View>
           <View></View>
         </View>
