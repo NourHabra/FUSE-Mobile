@@ -1,4 +1,3 @@
-// FUSE-EXPO/Components/BottomTab.tsx
 import React from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -25,7 +24,7 @@ const BottomTab: React.FC<BottomTabProps> = ({ navigation }) => {
 
   const getTabStyle = (screen: string) => {
     const isActive = route.name === screen;
-    return isActive ? { color: '#ADD8E6' } : tw`${iconColor}`;
+    return isActive ? { color: '#94B9C5' } : tw`${iconColor}`;
   };
 
   return (
@@ -54,4 +53,4 @@ const BottomTab: React.FC<BottomTabProps> = ({ navigation }) => {
   );
 };
 
-export default BottomTab;
+export default React.memo(BottomTab);

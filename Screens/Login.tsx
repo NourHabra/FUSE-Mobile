@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StatusBar, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { StatusBar, View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../AppNavigator';
@@ -19,6 +19,8 @@ const Login = () => {
   const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
   const borderColor = theme === 'light' ? '#CCCCCC' : '#444444';
   const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0';
+  const buttonColor = theme === 'light' ? '#181E20' : '#ADD8E6'; // Button color based on theme
+  const linkColor = theme === 'light' ? '#181E20' : '#ADD8E6'; // Link color based on theme
 
   // Function to handle login
   const handleLogin = () => {
@@ -61,7 +63,7 @@ const Login = () => {
         </View>
 
         <TouchableOpacity
-          style={{ backgroundColor: '#007AFF', padding: 16, borderRadius: 8, alignItems: 'center' }}
+          style={{ backgroundColor: buttonColor, padding: 16, borderRadius: 8, alignItems: 'center' }}
           onPress={handleLogin}
         >
           <Text style={{ color: '#FFFFFF', fontSize: 20, fontWeight: 'bold' }}>
@@ -71,8 +73,8 @@ const Login = () => {
 
         <Text style={{ marginTop: 24, textAlign: 'center', fontSize: 14, color: textColor }}>
           Don't have an account? 
-          <Text style={{ color: '#007AFF', fontWeight: 'bold' }} onPress={() => navigation.navigate('Signup')}>
-            Sign up
+          <Text style={{ color: linkColor, fontWeight: 'bold' }} onPress={() => navigation.navigate('Signup')}>
+            {' '}Sign up
           </Text>
         </Text>
       </View>

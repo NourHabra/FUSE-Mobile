@@ -10,13 +10,13 @@ interface ExpenseGraphProps {
 
 const ExpenseGraph: React.FC<ExpenseGraphProps> = ({ data }) => {
   const { theme } = useTheme();
-  const textColor = theme === 'light' ? 'text-gray-800' : 'text-gray-100';
+  const textColor = theme === 'light' ? '#181E20' : 'text-gray-100'; // Updated text color for light mode
 
   const chartConfig = {
-    backgroundGradientFrom: '#323232', // Set background to transparent
-    backgroundGradientTo: '#323232',   // Set background to transparent
-    color: (opacity = 1) => `rgba(173, 216, 230, ${opacity})`, // Set line color to lighter blue
-    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, // Set label color to white
+    backgroundGradientFrom: theme === 'light' ? '#f9f9f9' : '#323232', // Light mode background similar to white
+    backgroundGradientTo: theme === 'light' ? '#f9f9f9' : '#323232',   // Light mode background similar to white
+    color: (opacity = 1) => theme === 'light' ? `rgba(24, 30, 32, ${opacity})` : `rgba(173, 216, 230, ${opacity})`, // Updated color for light mode
+    labelColor: (opacity = 1) => theme === 'light' ? `rgba(24, 30, 32, ${opacity})` : `rgba(255, 255, 255, ${opacity})`, // Updated label color for light mode
     strokeWidth: 2,
     barPercentage: 0.5,
     useShadowColorFromDataset: false,
@@ -26,7 +26,7 @@ const ExpenseGraph: React.FC<ExpenseGraphProps> = ({ data }) => {
     propsForDots: {
       r: "3",
       strokeWidth: "2",
-      stroke: "#ADD8E6" // Set dot color to lighter blue
+      stroke: theme === 'light' ? '#181E20' : '#94B9C5' // Updated color for light mode
     },
     fillShadowGradient: 'transparent', // Set the gradient under the line to transparent
     fillShadowGradientOpacity: 0 // Ensure the gradient under the line is fully transparent
@@ -37,13 +37,13 @@ const ExpenseGraph: React.FC<ExpenseGraphProps> = ({ data }) => {
     ...data,
     datasets: data.datasets.map(dataset => ({
       ...dataset,
-      color: (opacity = 1) => `rgba(173, 216, 230, ${opacity})` // Set dataset line color to lighter blue
+      color: (opacity = 1) => theme === 'light' ? `rgba(24, 30, 32, ${opacity})` : `rgba(173, 216, 230, ${opacity})` // Updated color for light mode
     }))
   };
 
   return (
     <View style={tw`p-4`}>
-      <Text style={tw`${textColor} text-lg font-bold mb-2`}>Expense Trends</Text>
+      <Text style={[tw`text-lg font-bold mb-2`, { color: textColor }]}>Expense Trends</Text>
       <LineChart
         data={updatedData}
         width={Dimensions.get('window').width - 62} // from react-native

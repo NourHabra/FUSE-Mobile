@@ -3,9 +3,9 @@ import { View, Text, Alert, ScrollView, Platform, StatusBar, TouchableOpacity } 
 import NfcManager, { NfcTech, NfcEvents, TagEvent } from 'react-native-nfc-manager';
 import QRCodeStyled from 'react-native-qrcode-styled';
 import { RNCamera, BarCodeReadEvent } from 'react-native-camera';
-import BottomTab from '../Components/BottomTab'; // Import BottomTab
-import { useTheme } from '../ThemeContext'; // Import useTheme
-import tw from 'twrnc'; // Import twrnc
+import BottomTab from '../Components/BottomTab';
+import { useTheme } from '../ThemeContext';
+import tw from 'twrnc';
 
 const MakeTransaction: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [mode, setMode] = useState<'send' | 'request' | null>(null);
@@ -16,15 +16,13 @@ const MakeTransaction: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [nfcEnabled, setNfcEnabled] = useState<boolean>(false);
   const [tagDetected, setTagDetected] = useState<boolean>(false);
   const [tagDetails, setTagDetails] = useState<string>('');
-  const { theme } = useTheme(); // Use the theme
+  const { theme } = useTheme();
 
   useEffect(() => {
     async function initNfc() {
       const supported = await NfcManager.isSupported();
       setNfcSupported(supported);
-      if (!supported) {
-        return;
-      }
+      if (!supported) return;
 
       await NfcManager.start();
       const enabled = await NfcManager.isEnabled();
@@ -45,7 +43,7 @@ const MakeTransaction: React.FC<{ navigation: any }> = ({ navigation }) => {
     NfcManager.setEventListener(NfcEvents.DiscoverTag, (tag: TagEvent) => {
       console.log('NFC Tag Detected:', tag);
       setTagDetected(true);
-      setTagDetails(JSON.stringify(tag, null, 2)); // Store tag details in state
+      setTagDetails(JSON.stringify(tag, null, 2));
       if (Platform.OS === 'ios') {
         NfcManager.setAlertMessageIOS('NFC tag detected!');
       }
@@ -68,103 +66,97 @@ const MakeTransaction: React.FC<{ navigation: any }> = ({ navigation }) => {
     setupTagDetection();
   };
 
-  const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
-  const textColor = theme === 'light' ? 'text-gray-800' : 'text-gray-100';
-  const statusBarStyle = theme === 'light' ? 'dark-content' : 'light-content';
-  const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
-  const buttonBackgroundColor = theme === 'light' ? 'bg-[#ADD8E6]' : 'bg-[#ADD8E6]'; // Updated color
+  const themeStyles = {
+    backgroundColor: theme === 'light' ? '#FFFFFF' : '#303030',
+    textColor: theme === 'light' ? 'text-black' : 'text-gray-100',
+    statusBarStyle: theme === 'light' ? 'dark-content' as 'dark-content' : 'light-content' as 'light-content',
+    cardBackgroundColor: theme === 'light' ? '#F0F0F0' : '#424242',
+    buttonBackgroundColor: theme === 'light' ? 'bg-[#181E20]' : 'bg-[#94B9C5]', // Updated button color for light mode
+    buttonTextColor: theme === 'light' ? 'text-white' : 'text-black', // Updated button text color for light mode
+  };
 
   const CustomButton = ({ title, onPress }: { title: string, onPress: () => void }) => (
     <TouchableOpacity
-      style={tw`w-full py-3 my-2 rounded ${buttonBackgroundColor} items-center`}
+      style={tw`w-full py-3 my-2 rounded ${themeStyles.buttonBackgroundColor} items-center`}
       onPress={onPress}
     >
-      <Text style={tw`text-white text-lg`}>{title}</Text>
+      <Text style={tw`${themeStyles.buttonTextColor} text-lg font-bold`}>{title}</Text>
     </TouchableOpacity>
   );
 
   return (
-    <View style={[tw`flex-1`, { backgroundColor }]}>
-      <StatusBar barStyle={statusBarStyle} backgroundColor={backgroundColor} />
+    <View style={[tw`flex-1`, { backgroundColor: themeStyles.backgroundColor }]}>
+      <StatusBar barStyle={themeStyles.statusBarStyle} backgroundColor={themeStyles.backgroundColor} />
       <ScrollView contentContainerStyle={tw`flex-grow justify-center items-center p-5`}>
-        <Text style={tw`text-2xl font-bold mb-5 ${textColor}`}>Make a Transaction</Text>
-        {!mode && (
+        {!mode ? (
           <View style={tw`w-full mt-5`}>
             <CustomButton title="Send Payment" onPress={() => setMode('send')} />
             <CustomButton title="Request Payment" onPress={() => setMode('request')} />
           </View>
-        )}
-        {mode === 'request' && !requestMethod && (
-          <View style={tw`w-full mt-5`}>
-            <CustomButton title="Request via QR Code" onPress={() => setRequestMethod('qr')} />
-            <CustomButton title="Request via NFC" onPress={() => setRequestMethod('nfc')} />
-          </View>
-        )}
-        {mode === 'request' && requestMethod === 'qr' && (
-          <View style={tw`items-center`}>
-            <Text style={tw`text-xl font-semibold mb-2 ${textColor}`}>Request Payment via QR Code</Text>
-            <QRCodeStyled
-              data={'1234567890abcdefghijklmnopqrstuvwxyz'}
-              style={{ backgroundColor: 'white' }}
-              padding={20}
-              pieceSize={8}
-              pieceCornerType='rounded'
-              pieceBorderRadius={3}
-              isPiecesGlued={true}
-            />
-          </View>
-        )}
-        {mode === 'request' && requestMethod === 'nfc' && (
-          <View style={tw`items-center`}>
-            <Text style={tw`text-xl font-semibold mb-2 ${textColor}`}>Request Payment via NFC</Text>
-            {nfcSupported && nfcEnabled && (
-              <View style={tw`mt-5 items-center`}>
-                <Text style={tw`text-lg mb-2 ${textColor}`}>
-                  {tagDetected ? 'NFC Tag Detected' : 'Waiting for NFC Tag...'}
-                </Text>
-                {tagDetected && (
-                  <View style={[tw`w-full p-2 rounded mb-5`, { backgroundColor: cardBackgroundColor }]}>
-                    <Text style={tw`text-xl font-semibold mb-2 ${textColor}`}>Tag Details:</Text>
-                    <Text style={tw`text-lg ${textColor}`}>{tagDetails}</Text>
-                  </View>
-                )}
-                <CustomButton title="Check NFC Again" onPress={handleCheckAgain} />
-              </View>
-            )}
-          </View>
-        )}
-        {mode === 'send' && (
-          <View style={tw`items-center`}>
-            <Text style={tw`text-xl font-semibold mb-2 ${textColor}`}>Send Payment</Text>
-            {scan ? (
-              <RNCamera
-                style={tw`flex-1 justify-end items-center h-100 w-full`}
-                onBarCodeRead={handleBarCodeRead}
-                captureAudio={false}
-              >
-                <Text style={tw`bg-white mb-2 text-center p-2 text-lg`}>Scanning for QR Codes...</Text>
-              </RNCamera>
-            ) : (
+        ) : (
+          <>
+            {mode === 'request' && !requestMethod ? (
               <View style={tw`w-full mt-5`}>
-                <CustomButton title="Start QR Scanning" onPress={() => setScan(true)} />
-                <Text style={tw`mt-5 text-lg ${textColor}`}>Scanned Result: {result}</Text>
+                <CustomButton title="Request via QR Code" onPress={() => setRequestMethod('qr')} />
+                <CustomButton title="Request via NFC" onPress={() => setRequestMethod('nfc')} />
               </View>
-            )}
-            {nfcSupported && nfcEnabled && (
-              <View style={tw`mt-5 items-center`}>
-                <Text style={tw`text-lg mb-2 ${textColor}`}>
-                  {tagDetected ? 'NFC Tag Detected' : 'No NFC Tag Detected'}
-                </Text>
-                {tagDetected && (
-                  <View style={[tw`w-full p-2 rounded mb-5`, { backgroundColor: cardBackgroundColor }]}>
-                    <Text style={tw`text-xl font-semibold mb-2 ${textColor}`}>Tag Details:</Text>
-                    <Text style={tw`text-lg ${textColor}`}>{tagDetails}</Text>
+            ) : (
+              <>
+                {mode === 'request' && requestMethod === 'qr' ? (
+                  <View style={tw`items-center`}>
+                    <Text style={tw`text-xl font-semibold mb-2 ${themeStyles.textColor}`}>Request Payment via QR Code</Text>
+                    <QRCodeStyled
+                      data={'1234567890abcdefghijklmnopqrstuvwxyz'}
+                      style={{ backgroundColor: 'white' }}
+                      padding={20}
+                      pieceSize={8}
+                      pieceCornerType='rounded'
+                      pieceBorderRadius={3}
+                      isPiecesGlued={true}
+                    />
                   </View>
-                )}
-                <CustomButton title="Check NFC Again" onPress={handleCheckAgain} />
-              </View>
+                ) : null}
+                {mode === 'request' && requestMethod === 'nfc' ? (
+                  <View style={tw`items-center`}>
+                    <Text style={tw`text-xl font-semibold mb-2 ${themeStyles.textColor}`}>Request Payment via NFC</Text>
+                    {nfcSupported && nfcEnabled ? (
+                      <View style={tw`mt-5 items-center`}>
+                        <Text style={tw`text-lg mb-2 ${themeStyles.textColor}`}>
+                          {tagDetected ? 'NFC Tag Detected' : 'Waiting for NFC Tag...'}
+                        </Text>
+                        {tagDetected ? (
+                          <View style={[tw`w-full p-2 rounded mb-5`, { backgroundColor: themeStyles.cardBackgroundColor }]}>
+                            <Text style={tw`text-xl font-semibold mb-2 ${themeStyles.textColor}`}>Tag Details:</Text>
+                            <Text style={tw`text-lg ${themeStyles.textColor}`}>{tagDetails}</Text>
+                          </View>
+                        ) : null}
+                        <CustomButton title="Check NFC Again" onPress={handleCheckAgain} />
+                      </View>
+                    ) : null}
+                  </View>
+                ) : null}
+                {mode === 'send' ? (
+                  <View style={tw`items-center`}>
+                    <Text style={tw`text-xl font-semibold mb-2 ${themeStyles.textColor}`}>Send Payment</Text>
+                    {scan ? (
+                      <RNCamera
+                        style={tw`flex-1 justify-end items-center h-100 w-full`}
+                        onBarCodeRead={handleBarCodeRead}
+                        captureAudio={false}
+                      >
+                        <Text style={tw`bg-white mb-2 text-center p-2 text-lg`}>Scanning for QR Codes...</Text>
+                      </RNCamera>
+                    ) : (
+                      <View style={tw`w-full mt-5`}>
+                        <CustomButton title="Start QR Scanning" onPress={() => setScan(true)} />
+                        <Text style={tw`mt-5 text-lg ${themeStyles.textColor}`}>Scanned Result: {result}</Text>
+                      </View>
+                    )}
+                  </View>
+                ) : null}
+              </>
             )}
-          </View>
+          </>
         )}
       </ScrollView>
       <BottomTab navigation={navigation} />

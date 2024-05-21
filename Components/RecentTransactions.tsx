@@ -12,10 +12,10 @@ const transactions = [
 const RecentTransactions = () => {
   const { theme } = useTheme(); // Use the theme context
 
-  const backgroundColor = theme === 'light' ? '#f0f8ff' : '#333';
+  const backgroundColor = theme === 'light' ? '#f9f9f9' : '#323232'; // Light mode background similar to white
   const shadowColor = theme === 'light' ? '#000' : 'transparent'; // Hide shadow in dark mode
   const textColor = theme === 'light' ? '#888' : '#ccc';
-  const amountColor = '#ADD8E6'; // Updated color
+  const amountColor = theme === 'light' ? '#181E20' : '#94B9C5'; // Updated color for light mode
 
   const containerStyle = [
     tw`my-5 p-5 rounded-lg shadow-lg w-full`,

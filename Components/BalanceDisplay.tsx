@@ -6,10 +6,10 @@ import tw from 'twrnc';
 const BalanceDisplay = () => {
   const { theme } = useTheme();
 
-  const backgroundColor = theme === 'light' ? '#f0f8ff' : '#333';
+  const backgroundColor = theme === 'light' ? '#f9f9f9' : '#323232'; // Light mode background similar to white
   const shadowColor = theme === 'light' ? '#000' : 'transparent'; // Hide shadow in dark mode
   const labelColor = theme === 'light' ? '#888' : '#ccc';
-  const balanceColor = '#ADD8E6'; // Updated color
+  const balanceColor = theme === 'light' ? '#181E20' : '#94B9C5'; // Updated color for light mode
 
   const containerStyle = [
     tw`flex items-center justify-center my-5 mx-1.5 p-5 rounded-lg shadow-lg w-11/12`,
