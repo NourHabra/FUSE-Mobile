@@ -10,7 +10,6 @@ const dummyExpenses = [
   { id: '2', category: 'Transport', amount: 20 },
   { id: '3', category: 'Entertainment', amount: 100 },
   { id: '4', category: 'Utilities', amount: 75 },
-  { id: '5', category: 'Health', amount: 30 },
 ];
 
 const expenseData = {
