@@ -24,7 +24,7 @@ const BottomTab: React.FC<BottomTabProps> = ({ navigation }) => {
 
   const getTabStyle = (screen: string) => {
     const isActive = route.name === screen;
-    return isActive ? { color: '#94B9C5' } : tw`${iconColor}`;
+    return isActive ? { color: theme === 'light' ? '#443AD8' : '#94B9C5' } : tw`${iconColor}`;
   };
 
   return (

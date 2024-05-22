@@ -18,6 +18,7 @@ const Signup = () => {
   const borderColor = theme === 'light' ? '#CCCCCC' : '#444444'; // Black for dark theme
   const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0'; // Adjusted for visibility
   const buttonColor = theme === 'light' ? '#181E20' : '#94B9C5'; // Button color based on theme
+  const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20'; // Button text color based on theme
   const linkColor = theme === 'light' ? '#181E20' : '#94B9C5'; // Link color based on theme
 
   return (
@@ -56,7 +57,7 @@ const Signup = () => {
         />
 
         <TouchableOpacity style={{ backgroundColor: buttonColor, padding: 16, borderRadius: 8, alignItems: 'center' }}>
-          <Text style={{ color: '#FFFFFF', fontSize: 20, fontWeight: 'bold' }}>
+          <Text style={{ color: buttonTextColor, fontSize: 20, fontWeight: 'bold' }}>
             Sign Up
           </Text>
         </TouchableOpacity>

@@ -20,6 +20,7 @@ const Login = () => {
   const borderColor = theme === 'light' ? '#CCCCCC' : '#444444';
   const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0';
   const buttonColor = theme === 'light' ? '#181E20' : '#ADD8E6'; // Button color based on theme
+  const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20'; // Button text color based on theme
   const linkColor = theme === 'light' ? '#181E20' : '#ADD8E6'; // Link color based on theme
 
   // Function to handle login
@@ -66,7 +67,7 @@ const Login = () => {
           style={{ backgroundColor: buttonColor, padding: 16, borderRadius: 8, alignItems: 'center' }}
           onPress={handleLogin}
         >
-          <Text style={{ color: '#FFFFFF', fontSize: 20, fontWeight: 'bold' }}>
+          <Text style={{ color: buttonTextColor, fontSize: 20, fontWeight: 'bold' }}>
             Login
           </Text>
         </TouchableOpacity>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { useTheme } from '../ThemeContext'; // Import the theme context
+import { useTheme } from '../ThemeContext';
 import tw from 'twrnc';
 
 const transactions = [
@@ -10,32 +10,24 @@ const transactions = [
 ];
 
 const RecentTransactions = () => {
-  const { theme } = useTheme(); // Use the theme context
+  const { theme } = useTheme();
 
-  const backgroundColor = theme === 'light' ? '#f9f9f9' : '#323232'; // Light mode background similar to white
-  const shadowColor = theme === 'light' ? '#000' : 'transparent'; // Hide shadow in dark mode
-  const textColor = theme === 'light' ? '#888' : '#ccc';
-  const amountColor = theme === 'light' ? '#181E20' : '#94B9C5'; // Updated color for light mode
+  // Set the colors based on the theme
+  const textColor = '#888';
+  const amountColor = theme === 'light' ? '#181E20' : '#94B9C5';
 
-  const containerStyle = [
-    tw`my-5 p-5 rounded-lg shadow-lg w-full`,
-    { backgroundColor, shadowColor },
-  ];
-  const titleStyle = [tw`text-lg font-bold mb-2`, { color: textColor }];
-  const descriptionStyle = [tw`text-base`, { color: textColor }];
-  const amountStyle = [tw`text-base`, { color: amountColor }];
+  const titleStyle = [tw`text-2xl font-bold mb-4`, { color: textColor }];
+  const descriptionStyle = [tw`text-lg`, { color: textColor }];
+  const amountStyle = [tw`text-lg font-bold`, { color: amountColor }];
 
   return (
     <View style={tw`flex-1 items-center justify-center w-full`}>
-      <View style={containerStyle}>
-        <Text style={titleStyle}>Recent Transactions</Text>
-        {transactions.map(transaction => (
-          <View key={transaction.id} style={tw`flex-row justify-between py-2 border-b border-gray-300`}>
-            <Text style={descriptionStyle}>{transaction.description}</Text>
-            <Text style={amountStyle}>{transaction.amount}</Text>
-          </View>
-        ))}
-      </View>
+      {transactions.map(transaction => (
+        <View key={transaction.id} style={tw`flex-row justify-between py-2 border-b border-gray-300 w-11/12`}>
+          <Text style={descriptionStyle}>{transaction.description}</Text>
+          <Text style={amountStyle}>{transaction.amount}</Text>
+        </View>
+      ))}
     </View>
   );
 };

@@ -10,7 +10,7 @@ interface ExpenseGraphProps {
 
 const ExpenseGraph: React.FC<ExpenseGraphProps> = ({ data }) => {
   const { theme } = useTheme();
-  const textColor = theme === 'light' ? '#181E20' : 'text-gray-100'; // Updated text color for light mode
+  const textColor = theme === 'light' ? '#181E20' : '#94B9C5'; // Updated text color for light and dark mode
 
   const chartConfig = {
     backgroundGradientFrom: theme === 'light' ? '#f9f9f9' : '#323232', // Light mode background similar to white
