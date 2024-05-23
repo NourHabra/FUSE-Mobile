@@ -5,8 +5,7 @@ import BottomTab from '../Components/BottomTab';
 import { useTheme } from '../ThemeContext';
 import CreditCard from '../Components/CreditCard';
 import BalanceDisplay from '../Components/BalanceDisplay';
-import RecentTransactions from '../Components/RecentTransactions';
-// import PromotionalBanner from '../Components/PromotionalBanner';
+import Beneficiaries from '../Components/Beneficiaries'; // Import the new component
 
 const Home = ({ navigation }: { navigation: any }) => {
   const { theme } = useTheme();
@@ -46,8 +45,7 @@ const Home = ({ navigation }: { navigation: any }) => {
           <View style={tw`w-full flex-row justify-between`}>
             <BalanceDisplay />
           </View>
-          {/* <PromotionalBanner /> */}
-          <RecentTransactions />
+          <Beneficiaries />
         </ScrollView>
       </View>
       <BottomTab navigation={navigation} />

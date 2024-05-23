@@ -9,8 +9,10 @@ import RecentTransactions from '../Components/RecentTransactions';
 import { useTheme } from '../ThemeContext';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../AppNavigator'; // Adjust the path as needed
 
-const MakeTransaction: React.FC<{ navigation: any }> = ({ navigation }) => {
+const MakeTransaction: React.FC = () => {
   const [mode, setMode] = useState<'send' | 'request' | null>(null);
   const [requestMethod, setRequestMethod] = useState<'qr' | 'nfc' | null>(null);
   const [scan, setScan] = useState<boolean>(false);
@@ -25,6 +27,7 @@ const MakeTransaction: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [manualTransferModalVisible, setManualTransferModalVisible] = useState<boolean>(false);
   const [accountNumber, setAccountNumber] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     async function initNfc() {
@@ -132,8 +135,8 @@ const MakeTransaction: React.FC<{ navigation: any }> = ({ navigation }) => {
           <RecentTransactions />
         </View>
         <View style={tw`mt-4 items-center`}>
-          <TouchableOpacity onPress={() => {}}>
-            <Text style={[tw`text-lg font-bold`, { color: '#94B9C5' }]}>Show More</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('TransactionHistory')}>
+            <Text style={[tw`text-lg font-bold`, { color: theme === 'light' ? '#181E20' : '#94B9C5' }]}>Show More</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -165,7 +168,12 @@ const MakeTransaction: React.FC<{ navigation: any }> = ({ navigation }) => {
                   onBarCodeRead={handleBarCodeRead}
                   captureAudio={false}
                 >
-                  <Text style={tw`bg-white mb-2 text-center p-2 text-lg`}>Scanning for QR Codes...</Text>
+                  <TouchableOpacity
+                    style={[tw`absolute bottom-0 left-0 right-0 p-4`, { backgroundColor: buttonBackgroundColor }]}
+                    onPress={() => setScan(false)}
+                  >
+                    <Text style={[tw`text-center text-xl font-bold`, { color: theme === 'light' ? '#FFFFFF' : '#000000' }]}>Cancel</Text>
+                  </TouchableOpacity>
                 </RNCamera>
               </View>
             ) : (
