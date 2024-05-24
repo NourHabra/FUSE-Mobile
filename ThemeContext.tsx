@@ -4,7 +4,8 @@ import { Appearance } from 'react-native';
 type Theme = 'light' | 'dark';
 type ThemeContextType = {
   theme: Theme;
-  setTheme: (theme: Theme) => void;
+  setTheme: (theme: Theme, override?: boolean) => void;
+  isThemeOverridden: boolean;
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -18,18 +19,26 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const initialTheme = systemTheme === 'light' || systemTheme === 'dark' ? systemTheme : 'light'; // Default to 'light' if 'no-preference'
   
   const [theme, setTheme] = useState<Theme>(initialTheme);
+  const [isThemeOverridden, setIsThemeOverridden] = useState<boolean>(false);
 
   useEffect(() => {
-    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
-      const newTheme = colorScheme === 'light' || colorScheme === 'dark' ? colorScheme : 'light'; // Default to 'light' if 'no-preference'
-      setTheme(newTheme);
-    });
+    if (!isThemeOverridden) {
+      const subscription = Appearance.addChangeListener(({ colorScheme }) => {
+        const newTheme = colorScheme === 'light' || colorScheme === 'dark' ? colorScheme : 'light'; // Default to 'light' if 'no-preference'
+        setTheme(newTheme);
+      });
 
-    return () => subscription.remove();
-  }, []);
+      return () => subscription.remove();
+    }
+  }, [isThemeOverridden]);
+
+  const handleSetTheme = (newTheme: Theme, override: boolean = false) => {
+    setTheme(newTheme);
+    setIsThemeOverridden(override);
+  };
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme, isThemeOverridden }}>
       {children}
     </ThemeContext.Provider>
   );
