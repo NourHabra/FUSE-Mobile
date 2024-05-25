@@ -9,10 +9,11 @@ const BalanceDisplay = () => {
   // Set the color based on the theme
   const balanceColor = theme === 'light' ? '#181E20' : '#94B9C5';
 
-  const balanceStyle = [tw`text-6xl font-bold mt-10`, { color: balanceColor }];
+  const balanceStyle = [tw`text-4xl font-bold mt-2`, { color: balanceColor }];
 
   return (
-    <View style={tw`flex-1 items-center justify-center`}>
+    <View style={tw`flex-1 justify-center my-5`}>
+      <Text style={[tw`text-3xl`, { color: balanceColor }]}>Your Balance</Text>
       <Text style={balanceStyle}>$1,234.56</Text>
     </View>
   );
