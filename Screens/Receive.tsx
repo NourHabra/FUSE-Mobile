@@ -41,7 +41,7 @@ const Receive: React.FC = () => {
 
     const AccountDetail = ({ title, content }: { title: string, content: string }) => (
         <View style={tw`pb-4 pl-4`}>
-            <Text style={[tw`text-base`, { color: textColor }]}>{title}</Text>
+            <Text style={[tw`text-sm`, { color: textColor }]}>{title}</Text>
             <Text style={[tw`font-bold text-2xl tracking-wide`, { color: textColor }]}>{content}</Text>
         </View>
     );
