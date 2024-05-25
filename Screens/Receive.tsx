@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Alert, ScrollView, Platform, StatusBar, TouchableOpacity, Modal, TextInput } from 'react-native';
-import NfcManager, { NfcTech, NfcEvents, TagEvent } from 'react-native-nfc-manager';
+import React, { useState } from 'react';
+import { View, Text, StatusBar, TouchableOpacity, Modal } from 'react-native';
 import QRCodeStyled from 'react-native-qrcode-styled';
 import BottomTab from '../Components/BottomTab';
 import { useTheme } from '../ThemeContext';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../AppNavigator'; // Adjust the path as needed
+import { RootStackParamList } from '../AppNavigator';
 
 const Receive: React.FC = () => {
     const { theme } = useTheme();
