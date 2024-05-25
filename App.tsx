@@ -3,10 +3,15 @@ import React from 'react';
 import { ThemeProvider } from './ThemeContext';
 import AppNavigator from './AppNavigator';
 
-function App() {
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+const App = () => {
   return (
     <ThemeProvider>
-      <AppNavigator />
+    {/* <ThemeProvider theme={theme}> */}
+      <SafeAreaProvider>
+        <AppNavigator />
+      </SafeAreaProvider>
     </ThemeProvider>
   );
 }
