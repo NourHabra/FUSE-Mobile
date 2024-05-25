@@ -10,6 +10,7 @@ import MakeTransaction from './Screens/MakeTransaction'; // Import MakeTransacti
 import Profile from './Screens/profile';
 import MyCard from './Screens/MyCards';
 import TransactionHistory from './Screens/TransactionHistory'; // Import TransactionHistory
+import Receive from './Screens/Receive';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -46,11 +47,11 @@ const AppNavigator = () => {
           component={Home}
         />
         <Stack.Screen
-          name="MyExpenses" // Add the MyExpenses screen to the navigator
+          name="MyExpenses"
           component={MyExpenses}
         />
         <Stack.Screen
-          name="MakeTransaction" // Add the MakeTransaction screen to the navigator
+          name="MakeTransaction"
           component={MakeTransaction}
         />
         <Stack.Screen
@@ -62,8 +63,12 @@ const AppNavigator = () => {
           component={MyCard}
         />
         <Stack.Screen
-          name="TransactionHistory" // Add the TransactionHistory screen to the navigator
+          name="TransactionHistory"
           component={TransactionHistory}
+        />
+        <Stack.Screen
+          name="Receive"
+          component={Receive}
         />
       </Stack.Navigator>
     </NavigationContainer>

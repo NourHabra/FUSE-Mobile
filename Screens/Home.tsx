@@ -55,9 +55,9 @@ const Home = ({ navigation }: { navigation: any }) => {
               <Icon name="send" size={40} color={iconColorClass} style={tw`pb-2`} />
               <Text style={tw`${textColorClass} text-2xl font-bold`}>Send</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate("MakeTransaction")} style={tw`w-1/2 justify-center items-center bg-gray-400	mx-1 py-5 rounded-3xl`}>
+            <TouchableOpacity onPress={() => navigation.navigate("Receive")} style={tw`w-1/2 justify-center items-center bg-gray-400	mx-1 py-5 rounded-3xl`}>
               <Icon name="inbox" size={40} color={iconColorClass} style={tw`pb-2`} />
-              <Text style={tw`${textColorClass} text-2xl font-bold`}>Recieve</Text>
+              <Text style={tw`${textColorClass} text-2xl font-bold`}>Receive</Text>
             </TouchableOpacity>
           </View>
           <Beneficiaries />
