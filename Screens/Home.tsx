@@ -7,6 +7,7 @@ import CreditCard from '../Components/CreditCard';
 import BalanceDisplay from '../Components/BalanceDisplay';
 import Beneficiaries from '../Components/Beneficiaries'; // Import the new component
 import Icon from 'react-native-vector-icons/Feather';
+import AccountCard from '../Components/AccountCard';
 
 
 const Home = ({ navigation }: { navigation: any }) => {
@@ -41,14 +42,15 @@ const Home = ({ navigation }: { navigation: any }) => {
   return (
     <View style={[tw`flex-1`, { backgroundColor }]}>
       <StatusBar barStyle={statusBarStyle} backgroundColor={backgroundColor} />
-      <View style={tw`flex-1 p-4`}>
-        <Text style={tw`${textColorClass} text-2xl font-bold mb-4`}>Welcome, John!</Text>
+      <View style={tw`flex-1 p-2`}>
+        <Text style={tw`${textColorClass} text-2xl font-bold ml-4 mt-5`}>Welcome, John!</Text>
         <ScrollView contentContainerStyle={tw`flex-grow items-center justify-center p-5`}>
-          <CreditCard />
-          <View style={tw`w-full flex-row justify-between`}>
+          {/* <CreditCard /> */}
+          <AccountCard />
+          {/* <View style={tw`w-full flex-row justify-between`}>
             <BalanceDisplay />
-          </View>
-          <View style={tw`w-full flex-row justify-center py-5`}>
+          </View> */}
+          <View style={tw`w-full flex-row justify-center py-5 mt-5`}>
             <TouchableOpacity onPress={() => navigation.navigate("MakeTransaction")} style={tw`w-1/2 justify-center items-center bg-gray-400	mx-1 py-5 rounded-3xl`}>
               <Icon name="send" size={40} color={iconColorClass} style={tw`pb-2`} />
               <Text style={tw`${textColorClass} text-2xl font-bold`}>Send</Text>
