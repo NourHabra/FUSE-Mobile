@@ -10,13 +10,13 @@ import { RootStackParamList } from '../AppNavigator';
 
 const Receive: React.FC = () => {
     const { theme } = useTheme();
-    const [manualTransferModalVisible, setManualTransferModalVisible] = useState<boolean>(false);
+    const [accountDetailsModalVisible, setAccountDetailsModalVisible] = useState<boolean>(false);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
     const textColor = theme === 'light' ? '#333333' : '#DDDDDD';
     const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
-    const buttonBackgroundColor = theme === 'light' ? '#181E20' : '#94B9C5';
+    const buttonBackgroundColor = theme === 'light' ? '#94B9C5' : '#94B9C5';
     const buttonTextColor = theme === 'light' ? 'text-white' : 'text-black';
 
     const CustomButton = ({ title, onPress, iconName }: { title: string, onPress: () => void, iconName: string }) => (
@@ -50,19 +50,21 @@ const Receive: React.FC = () => {
         <View style={[tw`flex-1 justify-between`, { backgroundColor }]}>
             <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
             <View style={tw`m-4`}>
-                <Text style={[tw`text-3xl font-bold mb-2 mt-5`, { color: theme === 'light' ? '#000000' : '#FFFFFF' }]}>Recieve</Text>
+                <Text style={[tw`text-2xl font-bold mb-2 mt-5`, { color: theme === 'light' ? '#000000' : '#FFFFFF' }]}>Recieve</Text>
             </View>
             <View style={tw`p-5`}>
                 <View style={tw`mt-4 items-center`}>
-                    <QRCodeStyled
-                        data={'1234567890abcdefghijklmnopqrstuvwxyz'}
-                        style={{ backgroundColor: 'white' }}
-                        padding={20}
-                        pieceSize={8}
-                        pieceCornerType='rounded'
-                        pieceBorderRadius={3}
-                        isPiecesGlued={true}
-                    />
+                    <View style={tw`bg-white rounded-full`}>
+                        <QRCodeStyled
+                            data={'1234567890abcdefghijklmnopqrstuvwxyz'}
+                            style={[tw`rounded-2xl`, { backgroundColor: 'white' }]}
+                            padding={20}
+                            pieceSize={8}
+                            pieceCornerType='rounded'
+                            pieceBorderRadius={3}
+                            isPiecesGlued={true}
+                        />
+                    </View>
                 </View>
                 <Text style={[tw`text-base mt-10`, { color: textColor }]}>
                     This is your personal QR Code, you can use it to recieve transfers from others by simply showing it to the sender's scanner.
@@ -72,9 +74,9 @@ const Receive: React.FC = () => {
                 </Text>
                 <TouchableOpacity
                     style={{ backgroundColor: buttonBackgroundColor, padding: 16, borderRadius: 8, alignItems: 'center' }}
-                    onPress={() => setManualTransferModalVisible(true)}
+                    onPress={() => setAccountDetailsModalVisible(true)}
                 >
-                    <Text style={{ color: buttonTextColor, fontSize: 20, fontWeight: 'bold' }}>
+                    <Text style={[tw`text-base font-bold`, { color: buttonTextColor }]}>
                         Show Account Details
                     </Text>
                 </TouchableOpacity>
@@ -84,9 +86,9 @@ const Receive: React.FC = () => {
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={manualTransferModalVisible}
+                visible={accountDetailsModalVisible}
                 onRequestClose={() => {
-                    setManualTransferModalVisible(!manualTransferModalVisible);
+                    setAccountDetailsModalVisible(!accountDetailsModalVisible);
                 }}
             >
                 <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-50 h-full`}>
@@ -97,7 +99,7 @@ const Receive: React.FC = () => {
                             </Text>
                             <TouchableOpacity
                                 style={tw`p-2`}
-                                onPress={() => setManualTransferModalVisible(false)}
+                                onPress={() => setAccountDetailsModalVisible(false)}
                             >
                                 <Icon name="x" size={28} color={textColor} />
                             </TouchableOpacity>
@@ -109,7 +111,16 @@ const Receive: React.FC = () => {
                             <AccountDetail title='Currency' content='Syrian Pound (SYP)' />
                             <AccountDetail title='IBAN' content='282608010SY0000000000' />
                         </View>
-                        <ModalButton title="Share" onPress={() => console.log("Share Account Details")} iconName="share" />
+                        <TouchableOpacity
+                            style={[tw`flex-row items-center justify-center py-3 mt-2 rounded-lg mx-1 px-4`, { backgroundColor: buttonBackgroundColor }]}
+                            onPress={
+                                // Generate PDF/JPG and share code here
+                                () => setAccountDetailsModalVisible(false)
+                            }
+                        >
+                            <Icon name={"share"} size={20} color={theme === 'light' ? '#FFFFFF' : '#000000'} />
+                            <Text style={[tw`text-base font-bold ml-2`, { color: theme === 'light' ? '#FFFFFF' : '#000000' }]}>Share</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </Modal>
