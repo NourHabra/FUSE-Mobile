@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StatusBar, TouchableOpacity, Modal } from 'react-native';
 import QRCodeStyled from 'react-native-qrcode-styled';
 import BottomTab from '../Components/BottomTab';
@@ -7,17 +7,42 @@ import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../AppNavigator';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
+import { Asset } from 'expo-asset';
+import * as FileSystem from 'expo-file-system';
 
 const Receive: React.FC = () => {
     const { theme } = useTheme();
     const [accountDetailsModalVisible, setAccountDetailsModalVisible] = useState<boolean>(false);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    const [logoBase64, setLogoBase64] = useState<string>('');
+
+    useEffect(() => {
+        const loadLogo = async () => {
+            const logoAsset = Asset.fromModule(require('../assets/FuseLogo.png'));
+            await logoAsset.downloadAsync();
+            const base64 = await FileSystem.readAsStringAsync(logoAsset.localUri || logoAsset.uri, {
+                encoding: FileSystem.EncodingType.Base64,
+            });
+            setLogoBase64(`data:image/png;base64,${base64}`);
+        };
+
+        loadLogo();
+    }, []);
 
     const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
     const textColor = theme === 'light' ? '#333333' : '#DDDDDD';
     const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
     const buttonBackgroundColor = theme === 'light' ? '#94B9C5' : '#94B9C5';
     const buttonTextColor = theme === 'light' ? 'text-white' : 'text-black';
+
+    const accountDetails = {
+        accountHolder: 'John Doe',
+        accountNumber: '1234 5678 9876 5432',
+        currency: 'Syrian Pound (SYP)',
+        iban: '282608010SY0000000000'
+    };
 
     const CustomButton = ({ title, onPress, iconName }: { title: string, onPress: () => void, iconName: string }) => (
         <TouchableOpacity
@@ -46,11 +71,44 @@ const Receive: React.FC = () => {
         </View>
     );
 
+    const generatePDF = async () => {
+        if (!logoBase64) {
+            console.error('Logo base64 data is not loaded yet');
+            return;
+        }
+
+        const htmlContent = `
+            <html>
+            <body>
+                <div style="padding: 20px; position: relative;">
+                    <img src="${logoBase64}" style="position: absolute; top: 20px; left: 20px; width: 100px; height: auto;" />
+                    <div style="margin-top: 140px;">
+                        <h1>Account Details</h1>
+                        <p><strong>Account Holder:</strong> ${accountDetails.accountHolder}</p>
+                        <p><strong>Account Number:</strong> ${accountDetails.accountNumber}</p>
+                        <p><strong>Currency:</strong> ${accountDetails.currency}</p>
+                        <p><strong>IBAN:</strong> ${accountDetails.iban}</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+
+        const { uri } = await Print.printToFileAsync({ html: htmlContent });
+        const fileName = `AccountDetails_${accountDetails.accountHolder.replace(/\s+/g, '_')}.pdf`;
+        const newUri = `${FileSystem.documentDirectory}${fileName}`;
+        await FileSystem.moveAsync({
+            from: uri,
+            to: newUri,
+        });
+        await Sharing.shareAsync(newUri);
+    };
+
     return (
         <View style={[tw`flex-1 justify-between`, { backgroundColor }]}>
             <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
             <View style={tw`m-4`}>
-                <Text style={[tw`text-2xl font-bold mb-2 mt-5`, { color: theme === 'light' ? '#000000' : '#FFFFFF' }]}>Recieve</Text>
+                <Text style={[tw`text-2xl font-bold mb-2 mt-5`, { color: theme === 'light' ? '#000000' : '#FFFFFF' }]}>Receive</Text>
             </View>
             <View style={tw`p-5`}>
                 <View style={tw`mt-4 items-center`}>
@@ -67,7 +125,7 @@ const Receive: React.FC = () => {
                     </View>
                 </View>
                 <Text style={[tw`text-base mt-10`, { color: textColor }]}>
-                    This is your personal QR Code, you can use it to recieve transfers from others by simply showing it to the sender's scanner.
+                    This is your personal QR Code, you can use it to receive transfers from others by simply showing it to the sender's scanner.
                 </Text>
                 <Text style={[tw`text-base mt-10 mb-2`, { color: textColor }]}>
                     or you can share your account details instead
@@ -106,21 +164,12 @@ const Receive: React.FC = () => {
                         </View>
                         {/* Account Details Text */}
                         <View style={tw`my-4`}>
-                            <AccountDetail title='Account Holder' content='John Doe' />
-                            <AccountDetail title='Account Number' content='1234 5678 9876 5432' />
-                            <AccountDetail title='Currency' content='Syrian Pound (SYP)' />
-                            <AccountDetail title='IBAN' content='282608010SY0000000000' />
+                            <AccountDetail title='Account Holder' content={accountDetails.accountHolder} />
+                            <AccountDetail title='Account Number' content={accountDetails.accountNumber} />
+                            <AccountDetail title='Currency' content={accountDetails.currency} />
+                            <AccountDetail title='IBAN' content={accountDetails.iban} />
                         </View>
-                        <TouchableOpacity
-                            style={[tw`flex-row items-center justify-center py-3 mt-2 rounded-lg mx-1 px-4`, { backgroundColor: buttonBackgroundColor }]}
-                            onPress={
-                                // Generate PDF/JPG and share code here
-                                () => setAccountDetailsModalVisible(false)
-                            }
-                        >
-                            <Icon name={"share"} size={20} color={theme === 'light' ? '#FFFFFF' : '#000000'} />
-                            <Text style={[tw`text-base font-bold ml-2`, { color: theme === 'light' ? '#FFFFFF' : '#000000' }]}>Share</Text>
-                        </TouchableOpacity>
+                        <ModalButton title="Share" onPress={generatePDF} iconName="share" />
                     </View>
                 </View>
             </Modal>

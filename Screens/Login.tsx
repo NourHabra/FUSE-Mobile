@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { StatusBar, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StatusBar, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../AppNavigator';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useTheme } from '../ThemeContext'; // Import useTheme
+import { useTheme } from '../ThemeContext';
+import * as LocalAuthentication from 'expo-local-authentication';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Type the navigation prop
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
@@ -12,19 +14,49 @@ type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'
 const Login = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const { theme } = useTheme(); // Use theme from context
+  const { theme } = useTheme();
+  const [isBiometricSupported, setIsBiometricSupported] = useState(false);
+  const [useBiometrics, setUseBiometrics] = useState(false);
 
   // Conditional styling based on theme
   const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
   const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
   const borderColor = theme === 'light' ? '#CCCCCC' : '#444444';
   const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0';
-  const buttonColor = theme === 'light' ? '#181E20' : '#ADD8E6'; // Button color based on theme
-  const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20'; // Button text color based on theme
-  const linkColor = theme === 'light' ? '#181E20' : '#ADD8E6'; // Link color based on theme
+  const buttonColor = theme === 'light' ? '#181E20' : '#ADD8E6';
+  const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20';
+  const linkColor = theme === 'light' ? '#181E20' : '#ADD8E6';
 
-  // Function to handle login
-  const handleLogin = () => {
+  useEffect(() => {
+    (async () => {
+      const compatible = await LocalAuthentication.hasHardwareAsync();
+      setIsBiometricSupported(compatible);
+
+      const savedBiometrics = await LocalAuthentication.isEnrolledAsync();
+      if (savedBiometrics) {
+        const useBiometrics = await AsyncStorage.getItem('useBiometrics');
+        setUseBiometrics(useBiometrics === 'true');
+      }
+    })();
+  }, []);
+
+  const handleBiometricAuth = async () => {
+    const savedBiometrics = await LocalAuthentication.isEnrolledAsync();
+    if (!savedBiometrics) return Alert.alert('Biometric record not found', 'Please login with your password');
+
+    const { success } = await LocalAuthentication.authenticateAsync({
+      promptMessage: 'Login with Biometrics',
+      fallbackLabel: 'Enter Password',
+    });
+
+    if (success) {
+      handleLogin();
+    } else {
+      Alert.alert('Authentication failed', 'Please try again');
+    }
+  };
+
+  const handleLogin = async () => {
     // Assuming the login credentials are correct and login is successful
     navigation.reset({
       index: 0,
@@ -71,6 +103,17 @@ const Login = () => {
             Login
           </Text>
         </TouchableOpacity>
+
+        {isBiometricSupported && useBiometrics && (
+          <TouchableOpacity
+            style={{ marginTop: 16, padding: 16, borderRadius: 8, alignItems: 'center', borderColor, borderWidth: 1 }}
+            onPress={handleBiometricAuth}
+          >
+            <Text style={{ color: textColor, fontSize: 16 }}>
+              Login with Biometrics
+            </Text>
+          </TouchableOpacity>
+        )}
 
         <Text style={{ marginTop: 24, textAlign: 'center', fontSize: 14, color: textColor }}>
           Don't have an account? 

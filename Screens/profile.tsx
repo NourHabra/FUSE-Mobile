@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, StatusBar, Modal, TextInput, Switch } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, ScrollView, Image, TouchableOpacity, StatusBar, Modal, TextInput, Switch, Alert } from 'react-native';
 import { useTheme } from '../ThemeContext';
 import BottomTab from '../Components/BottomTab';
 import { useNavigation } from '@react-navigation/native';
@@ -7,6 +7,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../AppNavigator';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Profile'>;
 
@@ -20,9 +21,39 @@ const Profile = () => {
   const [newPinModalVisible, setNewPinModalVisible] = useState(false);
   const [oldPin, setOldPin] = useState('');
   const [newPin, setNewPin] = useState('');
+  const [useBiometrics, setUseBiometrics] = useState(false);
 
   const oldPinRefs = useRef<(TextInput | null)[]>([]);
   const newPinRefs = useRef<(TextInput | null)[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const useBiometrics = await AsyncStorage.getItem('useBiometrics');
+      setUseBiometrics(useBiometrics === 'true');
+    })();
+  }, []);
+
+  const handleBiometricToggle = async (value: boolean) => {
+    Alert.alert(
+      'Enable Biometric Login',
+      `Are you sure you want to ${value ? 'enable' : 'disable'} biometric login?`,
+      [
+        {
+          text: 'No',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            setUseBiometrics(value);
+            await AsyncStorage.setItem('useBiometrics', value.toString());
+          },
+        },
+      ],
+      { cancelable: false }
+    );
+  };
 
   const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
   const textColor = theme === 'light' ? 'text-black' : 'text-white';
@@ -73,6 +104,13 @@ const Profile = () => {
               <Switch
                 value={theme === 'dark'}
                 onValueChange={(value) => setTheme(value ? 'dark' : 'light')}
+              />
+            </View>
+            <View style={tw`py-2 flex-row justify-between items-center`}>
+              <Text style={tw`${textColor} text-lg`}>Biometric Login</Text>
+              <Switch
+                value={useBiometrics}
+                onValueChange={handleBiometricToggle}
               />
             </View>
           </View>
