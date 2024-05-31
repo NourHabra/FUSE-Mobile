@@ -11,6 +11,8 @@ import Profile from './Screens/profile';
 import MyCard from './Screens/MyCards';
 import TransactionHistory from './Screens/TransactionHistory'; // Import TransactionHistory
 import Receive from './Screens/Receive';
+import Pay from './Screens/Pay';
+import Send from './Screens/Send';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -69,6 +71,14 @@ const AppNavigator = () => {
         <Stack.Screen
           name="Receive"
           component={Receive}
+        />
+        <Stack.Screen
+          name="Send"
+          component={Send}
+        />
+        <Stack.Screen
+          name="Pay"
+          component={Pay}
         />
       </Stack.Navigator>
     </NavigationContainer>
