@@ -6,7 +6,6 @@ import Login from './Screens/Login';
 import Signup from './Screens/Signup';
 import Home from './Screens/Home';
 import MyExpenses from './Screens/MyExpenses'; // Import MyExpenses
-import MakeTransaction from './Screens/MakeTransaction'; // Import MakeTransaction
 import Profile from './Screens/profile';
 import MyCard from './Screens/MyCards';
 import TransactionHistory from './Screens/TransactionHistory'; // Import TransactionHistory
@@ -23,6 +22,9 @@ export type RootStackParamList = {
   Profile: undefined;
   MyCard: undefined;
   TransactionHistory: undefined; // Add TransactionHistory to the navigation stack
+  Receive: undefined; // Add Receive to the navigation stack
+  Pay: undefined; // Add Pay to the navigation stack
+  Send: undefined; // Add Send to the navigation stack
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -51,10 +53,6 @@ const AppNavigator = () => {
         <Stack.Screen
           name="MyExpenses"
           component={MyExpenses}
-        />
-        <Stack.Screen
-          name="MakeTransaction"
-          component={MakeTransaction}
         />
         <Stack.Screen
           name="Profile"

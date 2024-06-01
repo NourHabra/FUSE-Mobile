@@ -41,9 +41,9 @@ const BottomTab: React.FC<BottomTabProps> = ({ navigation }) => {
         <Ionicons name="home-outline" size={28} style={getTabStyle('Home')} />
         <Text style={tw`mt-1 ${textColor} text-xs font-semibold`}>Home</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={tw`items-center justify-center p-2`} onPress={() => handlePress('MakeTransaction')}>
-        <Ionicons name="swap-horizontal-outline" size={28} style={getTabStyle('MakeTransaction')} />
-        <Text style={tw`mt-1 ${textColor} text-xs font-semibold`}>Transfer</Text>
+      <TouchableOpacity style={tw`items-center justify-center p-2`} onPress={() => handlePress('TransactionHistory')}>
+        <Ionicons name="swap-horizontal-outline" size={28} style={getTabStyle('TransactionHistory')} />
+        <Text style={tw`mt-1 ${textColor} text-xs font-semibold`}>History</Text>
       </TouchableOpacity>
       <TouchableOpacity style={tw`items-center justify-center p-2`} onPress={() => handlePress('Profile')}>
         <Ionicons name="person-outline" size={28} style={getTabStyle('Profile')} />
