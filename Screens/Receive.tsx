@@ -119,8 +119,8 @@ const Receive: React.FC = () => {
             style={[tw`flex-row items-center justify-center py-3 rounded-lg mx-1 px-4`, { backgroundColor: buttonBackgroundColor }]}
             onPress={onPress}
         >
-            <Icon name={iconName} size={28} color={theme === 'light' ? '#FFFFFF' : '#000000'} />
-            <Text style={[tw`text-xl font-bold ml-2`, { color: theme === 'light' ? '#FFFFFF' : '#000000' }]}>{title}</Text>
+            <Icon name={iconName} size={28} color={theme === 'light' ? '#000000' : '#000000'} />
+            <Text style={[tw`text-xl font-bold ml-2`, { color: theme === 'light' ? '#000000' : '#000000' }]}>{title}</Text>
         </TouchableOpacity>
     );
 
@@ -219,8 +219,8 @@ const Receive: React.FC = () => {
                     setAccountDetailsModalVisible(!accountDetailsModalVisible);
                 }}
             >
-                <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-50`}>
-                    <View style={[tw`w-11/12 p-5 rounded-xl`, { backgroundColor: cardBackgroundColor, maxHeight: '50%' }]}>
+                <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-75`}>
+                    <View style={[tw`w-11/12 p-5 rounded-xl`, { backgroundColor: cardBackgroundColor }]}>
                         <View style={tw`flex-row justify-between items-center w-full`}>
                             <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>
                                 Account Details
