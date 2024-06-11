@@ -168,8 +168,11 @@ const Receive: React.FC = () => {
         <View style={[tw`flex-1`, { backgroundColor }]}>
             <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
             <View style={tw`flex-1 p-2`}>
-                <View style={tw`mt-4 mr-4 ml-4`}>
-                    <Text style={[tw`text-2xl font-bold mt-4`, { color: theme === 'light' ? '#000000' : '#FFFFFF' }]}>Receive</Text>
+                <View style={tw`flex-row align-center mt-4 mx-4 py-2`}>
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={tw`mr-2`}>
+                        <Icon name="arrow-left" size={28} color={theme === 'light' ? '#000000' : '#FFFFFF'} />
+                    </TouchableOpacity>
+                    <Text style={[tw`text-2xl font-bold`, { color: theme === 'light' ? '#000000' : '#FFFFFF' }]}>Receive</Text>
                 </View>
                 <View style={tw`p-5`}>
                     <View style={tw`mt-2 items-center`}>
