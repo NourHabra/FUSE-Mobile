@@ -31,7 +31,7 @@ const BottomTab: React.FC<BottomTabProps> = ({ navigation }) => {
     <View style={[tw`flex-row justify-around items-center h-16 w-11/12 rounded-2xl self-center mb-6 shadow-md`, { backgroundColor, shadowColor, shadowOpacity: 0.15, shadowRadius: 8 }]}>
       <TouchableOpacity style={tw`items-center justify-center p-2`} onPress={() => handlePress('MyCard')}>
         <Ionicons name="card-outline" size={28} style={getTabStyle('MyCard')} />
-        <Text style={tw`mt-1 ${textColor} text-xs font-semibold`}>My Card</Text>
+        <Text style={tw`mt-1 ${textColor} text-xs font-semibold`}>My Cards</Text>
       </TouchableOpacity>
       <TouchableOpacity style={tw`items-center justify-center p-2`} onPress={() => handlePress('MyExpenses')}>
         <Ionicons name="wallet-outline" size={28} style={getTabStyle('MyExpenses')} />
