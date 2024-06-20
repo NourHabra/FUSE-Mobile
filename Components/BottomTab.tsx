@@ -17,38 +17,35 @@ const BottomTab: React.FC<BottomTabProps> = ({ navigation }) => {
     navigation.navigate(screen);
   };
 
-  const backgroundColor = theme === 'light' ? '#F0F0F0' : '#404040';
-  const textColor = theme === 'light' ? 'text-gray-800' : 'text-gray-300';
-  const iconColor = theme === 'light' ? 'text-gray-800' : 'text-gray-300';
-  const shadowColor = theme === 'light' ? '#000' : 'transparent';
+  const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
+  const activeColor = theme === 'light' ? '#443AD8' : '#94B9C5';
+  const inactiveColor = theme === 'light' ? '#888888' : '#AAAAAA';
 
   const getTabStyle = (screen: string) => {
     const isActive = route.name === screen;
-    return isActive ? { color: theme === 'light' ? '#443AD8' : '#94B9C5' } : tw`${iconColor}`;
+    return isActive ? activeColor : inactiveColor;
   };
 
+  const tabs = [
+    { name: 'MyCard', icon: 'card-outline', label: 'My Card' },
+    { name: 'MyExpenses', icon: 'wallet-outline', label: 'Expenses' },
+    { name: 'Home', icon: 'home-outline', label: 'Home' },
+    { name: 'TransactionHistory', icon: 'swap-horizontal-outline', label: 'History' },
+    { name: 'Profile', icon: 'person-outline', label: 'Profile' },
+  ];
+
   return (
-    <View style={[tw`flex-row justify-around items-center h-16 w-11/12 rounded-2xl self-center mb-6 shadow-md`, { backgroundColor, shadowColor, shadowOpacity: 0.15, shadowRadius: 8 }]}>
-      <TouchableOpacity style={tw`items-center justify-center p-2`} onPress={() => handlePress('MyCard')}>
-        <Ionicons name="card-outline" size={28} style={getTabStyle('MyCard')} />
-        <Text style={tw`mt-1 ${textColor} text-xs font-semibold`}>My Cards</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={tw`items-center justify-center p-2`} onPress={() => handlePress('MyExpenses')}>
-        <Ionicons name="wallet-outline" size={28} style={getTabStyle('MyExpenses')} />
-        <Text style={tw`mt-1 ${textColor} text-xs font-semibold`}>Expenses</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={tw`items-center justify-center p-2`} onPress={() => handlePress('Home')}>
-        <Ionicons name="home-outline" size={28} style={getTabStyle('Home')} />
-        <Text style={tw`mt-1 ${textColor} text-xs font-semibold`}>Home</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={tw`items-center justify-center p-2`} onPress={() => handlePress('TransactionHistory')}>
-        <Ionicons name="swap-horizontal-outline" size={28} style={getTabStyle('TransactionHistory')} />
-        <Text style={tw`mt-1 ${textColor} text-xs font-semibold`}>History</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={tw`items-center justify-center p-2`} onPress={() => handlePress('Profile')}>
-        <Ionicons name="person-outline" size={28} style={getTabStyle('Profile')} />
-        <Text style={tw`mt-1 ${textColor} text-xs font-semibold`}>Profile</Text>
-      </TouchableOpacity>
+    <View style={[tw`flex-row justify-around items-center h-16 w-full rounded-t-2xl shadow-md`, { backgroundColor }]}>
+      {tabs.map((tab) => (
+        <TouchableOpacity
+          key={tab.name}
+          style={tw`flex-1 items-center justify-center p-2`}
+          onPress={() => handlePress(tab.name)}
+        >
+          <Ionicons name={tab.icon} size={28} color={getTabStyle(tab.name)} />
+          <Text style={[tw`mt-1 text-xs font-semibold`, { color: getTabStyle(tab.name) }]}>{tab.label}</Text>
+        </TouchableOpacity>
+      ))}
     </View>
   );
 };
