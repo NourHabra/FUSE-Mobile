@@ -27,15 +27,15 @@ const BottomTab: React.FC<BottomTabProps> = ({ navigation }) => {
   };
 
   const tabs = [
-    { name: 'MyCard', icon: 'card-outline', label: 'My Card' },
-    { name: 'MyExpenses', icon: 'wallet-outline', label: 'Expenses' },
     { name: 'Home', icon: 'home-outline', label: 'Home' },
+    { name: 'MyCard', icon: 'card-outline', label: 'My Cards' },
+    { name: 'MyExpenses', icon: 'wallet-outline', label: 'Expenses' },
     { name: 'TransactionHistory', icon: 'swap-horizontal-outline', label: 'History' },
     { name: 'Profile', icon: 'person-outline', label: 'Profile' },
   ];
 
   return (
-    <View style={[tw`flex-row justify-around items-center h-16 w-full rounded-t-2xl shadow-md`, { backgroundColor }]}>
+    <View style={[tw`flex-row justify-around items-center h-16 w-full shadow-md`, { backgroundColor }]}>
       {tabs.map((tab) => (
         <TouchableOpacity
           key={tab.name}

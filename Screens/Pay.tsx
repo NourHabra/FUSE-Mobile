@@ -333,9 +333,14 @@ const Pay: React.FC = () => {
                                 {/* <CreditCard /> */}
                                 <TouchableOpacity onPress={() => selectCard()}>
                                     <CreditCard />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => selectCard()}>
                                     <CreditCard />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => selectCard()}>
                                     <CreditCard />
-                                    <CreditCard />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => selectCard()}>
                                     <CreditCard />
                                 </TouchableOpacity>
                             </ScrollView>

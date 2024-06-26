@@ -45,8 +45,8 @@ const Home = ({ navigation }: { navigation: any }) => {
     { id: '3', type: 'Business', balance: '$20,789.00' },
   ];
 
-  const cardWidth = Dimensions.get('window').width * 0.7;
-  const cardSpacing = 20; // Adjust this value to control spacing between cards
+  const cardWidth = Dimensions.get('window').width * 0.85;
+  const cardSpacing = 10; // Adjust this value to control spacing between cards
 
   const handleScroll = (event: any) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / (cardWidth + cardSpacing));
