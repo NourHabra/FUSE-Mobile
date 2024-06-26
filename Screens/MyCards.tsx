@@ -59,7 +59,7 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
     </View>
   );
   return (
-    <View style={[tw`flex-1`, { backgroundColor }]}>
+    <View style={[tw`flex-col h-full justify-between`, { backgroundColor }]}>
       <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
       <View style={tw`flex-row justify-between items-center mt-4 mx-4 py-2`}>
         <View style={tw`flex-row items-center`}>
@@ -90,7 +90,6 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
             <CreditCard />
           </TouchableOpacity>
         </ScrollView>
-        <BottomTab navigation={navigation} />
       </View>
       <Modal
         animationType="slide"
@@ -203,10 +202,10 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             }
-
           </View>
         </View>
       </Modal>
+      <BottomTab navigation={navigation} />
     </View>
 
 
