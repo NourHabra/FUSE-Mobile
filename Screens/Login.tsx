@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StatusBar, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { StatusBar, View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../AppNavigator';
@@ -7,9 +7,13 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useTheme } from '../ThemeContext';
 import * as LocalAuthentication from 'expo-local-authentication';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { generateAesKey, encryptAesKey, encryptData, decryptData } from '../crypto-utils';
+import axios from 'axios';
 
 // Type the navigation prop
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
+
+const baseUrl = 'https://fuse-backend-x7mr.onrender.com'; // Replace with your actual base URL
 
 const Login = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
@@ -17,6 +21,11 @@ const Login = () => {
   const { theme } = useTheme();
   const [isBiometricSupported, setIsBiometricSupported] = useState(false);
   const [useBiometrics, setUseBiometrics] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [step, setStep] = useState(1);
+  const [aesKey, setAesKey] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Conditional styling based on theme
   const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
@@ -50,18 +59,55 @@ const Login = () => {
     });
 
     if (success) {
-      handleLogin();
+      // handleLogin();
     } else {
       Alert.alert('Authentication failed', 'Please try again');
     }
   };
 
-  const handleLogin = async () => {
-    // Assuming the login credentials are correct and login is successful
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Home' }],
-    });
+  const handleLoginStep1 = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post(`${baseUrl}/key/publicKey`, { email });
+      const { publicKey } = response.data;
+      console.log(publicKey);
+
+
+      const aesKey = generateAesKey();
+      setAesKey(aesKey);
+
+      const encryptedAesKey = encryptAesKey(publicKey, aesKey);
+
+      const response2 = await axios.post(`${baseUrl}/key/setAESkey`, { email, encryptedAesKey });
+      if (response2.status === 200) {
+        console.log("Moving to step 2");
+        setStep(2);
+      }
+      setStep(2);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to initiate login process');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLoginStep2 = async () => {
+    setLoading(true);
+    try {
+      const payload = encryptData({ email, password }, aesKey);
+      const response = await axios.post(`${baseUrl}/auth/login`, { email, payload });
+      const decryptedPayload = decryptData(response.data.payload, aesKey);
+      console.log(decryptedPayload.jwt);
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
+    } catch (error) {
+      Alert.alert('Error', 'Failed to login');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -72,37 +118,64 @@ const Login = () => {
           Sign In
         </Text>
 
-        <TextInput
-          style={{ backgroundColor: '#F0F0F0', borderColor, padding: 16, borderRadius: 8, marginBottom: 20, fontSize: 18, color: textColor }}
-          placeholder="Email"
-          keyboardType="email-address"
-          textContentType="emailAddress"
-          autoComplete="email"
-          placeholderTextColor={placeholderColor}
-        />
-
-        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#F0F0F0', borderColor, borderRadius: 8, marginBottom: 32 }}>
-          <TextInput
-            style={{ flex: 1, padding: 16, fontSize: 18, color: textColor }}
-            placeholder="Password"
-            secureTextEntry={!passwordVisible}
-            textContentType="password"
-            autoComplete="password"
-            placeholderTextColor={placeholderColor}
-          />
-          <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)} style={{ padding: 8 }}>
-            <Icon name={passwordVisible ? 'eye-off' : 'eye'} size={24} color={placeholderColor} />
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity
-          style={{ backgroundColor: buttonColor, padding: 16, borderRadius: 8, alignItems: 'center' }}
-          onPress={handleLogin}
-        >
-          <Text style={{ color: buttonTextColor, fontSize: 20, fontWeight: 'bold' }}>
-            Login
-          </Text>
-        </TouchableOpacity>
+        {step === 1 ? (
+          <>
+            <TextInput
+              style={{ backgroundColor: '#F0F0F0', borderColor, padding: 16, borderRadius: 8, marginBottom: 20, fontSize: 18, color: textColor }}
+              placeholder="Email"
+              keyboardType="email-address"
+              textContentType="emailAddress"
+              autoComplete="email"
+              placeholderTextColor={placeholderColor}
+              value={email}
+              onChangeText={setEmail}
+            />
+            <TouchableOpacity
+              style={{ backgroundColor: buttonColor, padding: 16, borderRadius: 8, alignItems: 'center' }}
+              onPress={handleLoginStep1}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={buttonTextColor} />
+              ) : (
+                <Text style={{ color: buttonTextColor, fontSize: 20, fontWeight: 'bold' }}>
+                  Next
+                </Text>
+              )}
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#F0F0F0', borderColor, borderRadius: 8, marginBottom: 32 }}>
+              <TextInput
+                style={{ flex: 1, padding: 16, fontSize: 18, color: textColor }}
+                placeholder="Password"
+                secureTextEntry={!passwordVisible}
+                textContentType="password"
+                autoComplete="password"
+                placeholderTextColor={placeholderColor}
+                value={password}
+                onChangeText={setPassword}
+              />
+              <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)} style={{ padding: 8 }}>
+                <Icon name={passwordVisible ? 'eye-off' : 'eye'} size={24} color={placeholderColor} />
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity
+              style={{ backgroundColor: buttonColor, padding: 16, borderRadius: 8, alignItems: 'center' }}
+              onPress={handleLoginStep2}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={buttonTextColor} />
+              ) : (
+                <Text style={{ color: buttonTextColor, fontSize: 20, fontWeight: 'bold' }}>
+                  Login
+                </Text>
+              )}
+            </TouchableOpacity>
+          </>
+        )}
 
         {isBiometricSupported && useBiometrics && (
           <TouchableOpacity
@@ -116,7 +189,7 @@ const Login = () => {
         )}
 
         <Text style={{ marginTop: 24, textAlign: 'center', fontSize: 14, color: textColor }}>
-          Don't have an account? 
+          Don't have an account?
           <Text style={{ color: linkColor, fontWeight: 'bold' }} onPress={() => navigation.navigate('Signup')}>
             {' '}Sign up
           </Text>
