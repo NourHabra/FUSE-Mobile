@@ -5,12 +5,17 @@ import BottomTab from '../Components/BottomTab';
 import { useTheme } from '../ThemeContext';
 import Icon from 'react-native-vector-icons/Feather';
 import AccountCard from '../Components/AccountCard';
-// import Beneficiaries from '../Components/Beneficiaries'; // Uncomment if needed
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
+import { useSelector } from 'react-redux';
+import { RootState } from '../Redux/store';
 
 const Home = ({ navigation }: { navigation: any }) => {
   const { theme } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isMerchant, setIsMerchant] = useState(true);
+
+  const role = useSelector((state: RootState) => state.auth.role);
+  const user = useSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
@@ -57,7 +62,7 @@ const Home = ({ navigation }: { navigation: any }) => {
     <View style={[tw`flex-1`, { backgroundColor }]}>
       <StatusBar barStyle={statusBarStyle} backgroundColor={backgroundColor} />
       <View style={tw`flex-1 p-2`}>
-        <Text style={tw`${textColorClass} text-2xl font-bold mb-2 ml-4 mt-5`}>Welcome, John!</Text>
+        <Text style={tw`${textColorClass} text-2xl font-bold mb-2 ml-4 mt-5`}>Welcome, {user?.name}</Text>
         <ScrollView contentContainerStyle={tw`flex-grow items-center justify-start`}>
           <View style={tw`w-full items-center`}>
             <FlatList
@@ -105,6 +110,14 @@ const Home = ({ navigation }: { navigation: any }) => {
                 <Text style={[tw`text-lg font-semibold`, { color: iconColorClass }]}>Receive</Text>
               </TouchableOpacity>
             </View>
+            {isMerchant &&
+              <View style={tw`w-full flex-row justify-evenly mt-4`}>
+                <TouchableOpacity onPress={() => navigation.navigate("IssueBill")} style={tw`w-2/3 justify-center items-center bg-purple-500 py-3 rounded-lg shadow-md`}>
+                  <Icon name="edit" size={32} color={iconColorClass} style={tw`pb-2`} />
+                  <Text style={[tw`text-lg font-semibold`, { color: iconColorClass }]}>Issue Bill</Text>
+                </TouchableOpacity>
+              </View>
+            }
           </View>
           {/* <Beneficiaries /> */}
         </ScrollView>

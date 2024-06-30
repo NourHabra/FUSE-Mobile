@@ -12,7 +12,7 @@ import axios from 'axios';
 import TextInput from "../Components/TextInput";
 import tw from 'twrnc';
 import { useDispatch } from 'react-redux';
-import { setJwt } from '../Redux/slices/authSlice';
+import { setAuthData } from '../Redux/slices/authSlice';
 
 // Type the navigation prop
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
@@ -102,10 +102,18 @@ const Login = () => {
       const payload = encryptData({ email, password }, aesKey);
       const response = await axios.post(`${baseUrl}/auth/login`, { email, payload });
       const decryptedPayload = decryptData(response.data.payload, aesKey);
-      console.log(decryptedPayload.jwt);
+      console.log(decryptedPayload.user);
 
-      // Dispatch the JWT to the Redux store
-      dispatch(setJwt(decryptedPayload.jwt));
+      dispatch(setAuthData({
+        jwt: decryptedPayload.jwt,
+        role: decryptedPayload.role,
+        user: {
+          id: decryptedPayload.user.id,
+          name: decryptedPayload.user.name,
+          email: decryptedPayload.user.email,
+        }
+      }));
+
 
       navigation.reset({
         index: 0,
