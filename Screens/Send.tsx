@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard } from 'react-native';
 import {
-    TextInput as DefaultTextInput,
     Platform,
     TextInputProps,
     Image,
 } from "react-native";
+import TextInput from "../Components/TextInput";
 import BottomTab from '../Components/BottomTab';
 import { useTheme } from '../ThemeContext';
 import tw from 'twrnc';
@@ -20,36 +20,6 @@ import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
 
 
-const TextInput = ({
-    placeholderTextColor,
-    ...props
-}: TextInputProps) => {
-    const [isFocused, setIsFocused] = useState(false);
-
-    const handleFocus = () => {
-        setIsFocused(true);
-    };
-
-    const handleEndEditing = () => {
-        setIsFocused(false);
-    };
-
-    return (
-        <DefaultTextInput
-            {...props}
-            onFocus={handleFocus}
-            onEndEditing={handleEndEditing}
-            style={[
-                tw`bg-neutral-100 dark:bg-neutral-900 border border-black/20 dark:border-white/20 rounded-md h-12 px-4 text-neutral-950 dark:text-neutral-50`,
-                isFocused && Platform.OS !== "web" ? tw`border-blue-500` : {},
-                props.style,
-            ]}
-            placeholderTextColor={
-                placeholderTextColor || tw.color("text-neutral-500")
-            }
-        />
-    );
-};
 
 const Send: React.FC = () => {
     const { theme } = useTheme();
