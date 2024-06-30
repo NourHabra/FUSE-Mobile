@@ -12,12 +12,11 @@ import axios from 'axios';
 import TextInput from "../Components/TextInput";
 import tw from 'twrnc';
 import { useDispatch } from 'react-redux';
-import { setAuthData } from '../Redux/slices/authSlice';
+import { setAuthData, setAesKey } from '../Redux/slices/authSlice';
+import baseUrl from "../baseURL"
 
 // Type the navigation prop
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
-
-const baseUrl = 'https://fuse-backend-x7mr.onrender.com'; // Replace with your actual base URL
 
 const Login = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
@@ -29,7 +28,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [step, setStep] = useState(1);
-  const [aesKey, setAesKey] = useState('');
+  const [aesKey, setLocalAesKey] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Conditional styling based on theme
@@ -75,11 +74,13 @@ const Login = () => {
     try {
       const response = await axios.post(`${baseUrl}/key/publicKey`, { email });
       const { publicKey } = response.data;
-      console.log(publicKey);
 
 
       const aesKey = generateAesKey();
-      setAesKey(aesKey);
+      dispatch(setAesKey({
+        aesKey: aesKey,
+      }));
+      setLocalAesKey(aesKey);
 
       const encryptedAesKey = encryptAesKey(publicKey, aesKey);
 

@@ -8,12 +8,14 @@ interface User {
 
 interface AuthState {
   jwt: string | null;
+  aesKey: string | null;
   role: string | null;
   user: User | null;
 }
 
 const initialState: AuthState = {
   jwt: null,
+  aesKey: null,
   role: null,
   user: null,
 };
@@ -27,6 +29,9 @@ const authSlice = createSlice({
       state.role = action.payload.role;
       state.user = action.payload.user;
     },
+    setAesKey: (state, action: PayloadAction<{ aesKey: string;}>) => {
+      state.aesKey = action.payload.aesKey;
+    },
     clearAuthData: (state) => {
       state.jwt = null;
       state.role = null;
@@ -35,6 +40,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setAuthData, clearAuthData } = authSlice.actions;
+export const { setAuthData, setAesKey, clearAuthData } = authSlice.actions;
 
 export default authSlice.reducer;

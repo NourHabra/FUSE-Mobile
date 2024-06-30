@@ -8,12 +8,21 @@ import AccountCard from '../Components/AccountCard';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import { RootState } from '../Redux/store';
+import axios from 'axios';
+import baseUrl from "../baseURL"
+import { decryptData } from '../crypto-utils';
+
 
 const Home = ({ navigation }: { navigation: any }) => {
   const { theme } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMerchant, setIsMerchant] = useState(true);
 
+  const [cards, setCards] = useState([]);
+
+
+  const jwt = useSelector((state: RootState) => state.auth.jwt);
+  const aesKey = useSelector((state: RootState) => state.auth.aesKey);
   const role = useSelector((state: RootState) => state.auth.role);
   const user = useSelector((state: RootState) => state.auth.user);
 
@@ -25,6 +34,21 @@ const Home = ({ navigation }: { navigation: any }) => {
 
     return () => backHandler.remove();
   }, [navigation]);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.post(`${baseUrl}/account/user`, { jwt });
+        const decryptedPayload = decryptData(response.data.payload, aesKey);
+        // console.log('Accounts:', decryptedPayload);
+        setCards(decryptedPayload);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleBackButtonPress = () => {
     const navigationState = navigation.getState();
@@ -44,11 +68,11 @@ const Home = ({ navigation }: { navigation: any }) => {
   const statusBarStyle = theme === 'light' ? 'dark-content' : 'light-content';
 
   // Sample data for cards
-  const cards = [
-    { id: '1', type: 'Checking', balance: '$10,546.70' },
-    { id: '2', type: 'Savings', balance: '$5,123.45' },
-    { id: '3', type: 'Business', balance: '$20,789.00' },
-  ];
+  // const cards = [
+  //   { id: '1', type: 'Checking', balance: '$10,546.70' },
+  //   { id: '2', type: 'Savings', balance: '$5,123.45' },
+  //   { id: '3', type: 'Business', balance: '$20,789.00' },
+  // ];
 
   const cardWidth = Dimensions.get('window').width * 0.85;
   const cardSpacing = 10; // Adjust this value to control spacing between cards
