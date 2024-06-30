@@ -102,7 +102,6 @@ const Login = () => {
       const payload = encryptData({ email, password }, aesKey);
       const response = await axios.post(`${baseUrl}/auth/login`, { email, payload });
       const decryptedPayload = decryptData(response.data.payload, aesKey);
-      console.log(decryptedPayload.user);
 
       dispatch(setAuthData({
         jwt: decryptedPayload.jwt,

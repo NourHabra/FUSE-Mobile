@@ -3,7 +3,7 @@
 const forge = require("node-forge");
 
 const generateAesKey = () => {
-	console.log("Generating AES key...");
+	// console.log("Generating AES key...");
 	const aesSalt = forge.random.getBytesSync(16);
 	const keyPassPhrase = forge.random.getBytesSync(16);
 	const aesKey = forge.pkcs5.pbkdf2(
@@ -12,18 +12,10 @@ const generateAesKey = () => {
 		1000, // use according to your requirement
 		32 // use according to your requirement
 	);
-	console.log("AES key generated successfully", aesKey);
-	console.log("AES Key length:", aesKey.length);
+	// console.log("AES key generated successfully", aesKey);
+	// console.log("AES Key length:", aesKey.length);
 	return aesKey;
 };
-
-// const generateAesKey = () => {
-// 	console.log("Generating AES key...");
-// 	const aesKey = forge.random.getBytesSync(32); // 32 bytes = 256 bits
-// 	console.log("AES key generated successfully", aesKey);
-// 	console.log("AES Key length:", aesKey.length);
-// 	return aesKey;
-// };
 
 // Encrypt AES Key using RSA public key
 // React and React native
@@ -40,21 +32,6 @@ const encryptAesKey = (receivedpublicKeyPem, aesKey) => {
 	}
 };
 
-// const encryptAesKey = (receivedpublicKeyPem, aesKey) => {
-// 	try {
-// 		console.log("Encrypting AES key...");
-// 		const publicKey = forge.pki.publicKeyFromPem(receivedpublicKeyPem);
-// 		const encryptedAesKey = publicKey.encrypt(aesKey, "RSA-OAEP", {
-// 			md: forge.md.sha256.create(), // Use SHA-256 for OAEP padding
-// 		});
-// 		console.log("AES key encrypted successfully");
-// 		return forge.util.encode64(encryptedAesKey);
-// 	} catch (error) {
-// 		console.error("Encryption error:", error);
-// 		throw error;
-// 	}
-// };
-
 // Encrypt data using AES-GCM with the shared AES key
 const encryptData = (data, aesKey) => {
 	try {
@@ -68,7 +45,7 @@ const encryptData = (data, aesKey) => {
 		cipher.finish();
 		const encrypted = cipher.output.getBytes();
 		const authTag = cipher.mode.tag.getBytes();
-		console.log("data encrypted successfully");
+		// console.log("data encrypted successfully");
 		return forge.util.encode64(
 			forge.util
 				.createBuffer(iv)
