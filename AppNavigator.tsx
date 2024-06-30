@@ -12,6 +12,8 @@ import TransactionHistory from './Screens/TransactionHistory'; // Import Transac
 import Receive from './Screens/Receive';
 import Pay from './Screens/Pay';
 import Send from './Screens/Send';
+import IssueBill from './Screens/IssueBill';
+import Splashscreen from './Screens/Splashscreen';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -38,6 +40,10 @@ const AppNavigator = () => {
           ...TransitionPresets.SlideFromRightIOS, // Apply the transition preset
         }}
       >
+        <Stack.Screen
+          name="Splashscreen"
+          component={Splashscreen}
+        />
         <Stack.Screen
           name="Login"
           component={Login}
@@ -77,6 +83,10 @@ const AppNavigator = () => {
         <Stack.Screen
           name="Pay"
           component={Pay}
+        />
+        <Stack.Screen
+          name="IssueBill"
+          component={IssueBill}
         />
       </Stack.Navigator>
     </NavigationContainer>
