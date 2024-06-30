@@ -11,8 +11,8 @@ import { generateAesKey, encryptAesKey, encryptData, decryptData } from '../cryp
 import axios from 'axios';
 import TextInput from "../Components/TextInput";
 import tw from 'twrnc';
-
-
+import { useDispatch } from 'react-redux';
+import { setJwt } from '../Redux/slices/authSlice';
 
 // Type the navigation prop
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
@@ -21,6 +21,7 @@ const baseUrl = 'https://fuse-backend-x7mr.onrender.com'; // Replace with your a
 
 const Login = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const dispatch = useDispatch();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const { theme } = useTheme();
   const [isBiometricSupported, setIsBiometricSupported] = useState(false);
@@ -102,6 +103,9 @@ const Login = () => {
       const response = await axios.post(`${baseUrl}/auth/login`, { email, payload });
       const decryptedPayload = decryptData(response.data.payload, aesKey);
       console.log(decryptedPayload.jwt);
+
+      // Dispatch the JWT to the Redux store
+      dispatch(setJwt(decryptedPayload.jwt));
 
       navigation.reset({
         index: 0,
