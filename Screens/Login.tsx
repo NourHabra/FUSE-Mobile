@@ -124,6 +124,7 @@ const Login = () => {
 
         {step === 1 ? (
           <>
+            <Text style={[tw`text-sm pl-2 mb-1`, { color: textColor }]}>Email</Text>
             <TextInput
               style={[tw`flex-row mb-4`]}
               onChangeText={(text) => setEmail(text)}
@@ -147,7 +148,8 @@ const Login = () => {
             </TouchableOpacity>
           </>
         ) : (
-          <>
+          <View>
+            <Text style={[tw`text-sm pl-2 mb-1`, { color: textColor }]}>Password</Text>
             <View style={[tw`flex-row mb-4 items-center`]}>
               <TextInput
                 style={[tw`flex-row w-grow`]}
@@ -175,7 +177,7 @@ const Login = () => {
                 </Text>
               )}
             </TouchableOpacity>
-          </>
+          </View>
         )}
 
         {isBiometricSupported && useBiometrics && (
