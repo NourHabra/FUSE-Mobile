@@ -85,7 +85,7 @@ const Login = () => {
 
       const response2 = await axios.post(`${baseUrl}/key/setAESkey`, { email, encryptedAesKey });
       if (response2.status === 200) {
-        console.log("Moving to step 2");
+        // console.log("Moving to step 2");
         setStep(2);
       }
       setStep(2);

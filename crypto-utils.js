@@ -21,7 +21,7 @@ const generateAesKey = () => {
 // React and React native
 const encryptAesKey = (receivedpublicKeyPem, aesKey) => {
 	try {
-		console.log("Encrypting AES key...");
+		// console.log("Encrypting AES key...");
 		const publicKey = forge.pki.publicKeyFromPem(receivedpublicKeyPem);
 		const encryptedAesKey = publicKey.encrypt(aesKey, "RSA-OAEP");
 		return forge.util.encode64(encryptedAesKey);
