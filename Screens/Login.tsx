@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StatusBar, View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { StatusBar, View, Text, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../AppNavigator';
@@ -9,6 +9,10 @@ import * as LocalAuthentication from 'expo-local-authentication';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateAesKey, encryptAesKey, encryptData, decryptData } from '../crypto-utils';
 import axios from 'axios';
+import TextInput from "../Components/TextInput";
+import tw from 'twrnc';
+
+
 
 // Type the navigation prop
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
@@ -115,20 +119,18 @@ const Login = () => {
       <StatusBar backgroundColor={backgroundColor} barStyle={theme === 'light' ? 'dark-content' : 'light-content'} />
       <View style={{ width: '100%', maxWidth: 400, backgroundColor, borderRadius: 8, padding: 24, borderWidth: 1, borderColor }}>
         <Text style={{ fontSize: 32, fontWeight: 'bold', textAlign: 'center', color: textColor, marginBottom: 32 }}>
-          Sign In
+          Login
         </Text>
 
         {step === 1 ? (
           <>
             <TextInput
-              style={{ backgroundColor: '#F0F0F0', borderColor, padding: 16, borderRadius: 8, marginBottom: 20, fontSize: 18, color: textColor }}
+              style={[tw`flex-row mb-4`]}
+              onChangeText={(text) => setEmail(text)}
               placeholder="Email"
               keyboardType="email-address"
               textContentType="emailAddress"
               autoComplete="email"
-              placeholderTextColor={placeholderColor}
-              value={email}
-              onChangeText={setEmail}
             />
             <TouchableOpacity
               style={{ backgroundColor: buttonColor, padding: 16, borderRadius: 8, alignItems: 'center' }}
@@ -146,16 +148,15 @@ const Login = () => {
           </>
         ) : (
           <>
-            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#F0F0F0', borderColor, borderRadius: 8, marginBottom: 32 }}>
+            <View style={[tw`flex-row mb-4 items-center`]}>
               <TextInput
-                style={{ flex: 1, padding: 16, fontSize: 18, color: textColor }}
-                placeholder="Password"
+                style={[tw`flex-row w-grow`]}
+                value={password}
+                onChangeText={setPassword}
                 secureTextEntry={!passwordVisible}
                 textContentType="password"
                 autoComplete="password"
-                placeholderTextColor={placeholderColor}
-                value={password}
-                onChangeText={setPassword}
+                placeholder='Password'
               />
               <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)} style={{ padding: 8 }}>
                 <Icon name={passwordVisible ? 'eye-off' : 'eye'} size={24} color={placeholderColor} />
