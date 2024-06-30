@@ -263,8 +263,8 @@ const Send: React.FC = () => {
                         </View>
                         {/* Favourites */}
                         <View style={tw`pt-2`}>
-                            <TouchableOpacity onPress={() => { setShowFavourites(!showFavourites); Keyboard.dismiss(); }} style={tw`flex-row items-center justify-between `}>
-                                <View style={tw`flex-row items-center pb-2`}>
+                            <TouchableOpacity onPress={() => { setShowFavourites(!showFavourites); Keyboard.dismiss(); }} style={tw`flex-row items-center justify-between pb-2`}>
+                                <View style={tw`flex-row items-center`}>
                                     {!showFavourites && <Text style={[tw`text-base`, { color: textColor }]}>Show </Text>}
                                     {showFavourites && <Text style={[tw`text-base`, { color: textColor }]}>Hide </Text>}
                                     <Text style={[tw`text-base`, { color: textColor }]}>Favourites</Text>
