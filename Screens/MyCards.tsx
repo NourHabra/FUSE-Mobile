@@ -268,7 +268,8 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
                         jwt,
                         payload: encryptData({
                           cardName: newCardName,
-                          balance: parseFloat(newCardBalance), PIN: enteredPIN,
+                          balance: parseFloat(newCardBalance),
+                          PIN: enteredPIN,
                           rPIN: confirmedPIN,
                         }, aesKey)
                       });

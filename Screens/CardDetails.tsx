@@ -529,7 +529,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                 <Icon name="x" size={28} color={textColor} />
                             </TouchableOpacity>
                         </View>}
-                        {!loading && !topupSuccess &&
+                        {!loading && !withdrawSuccess &&
                             <View style={tw`w-full h-grow flex-col justify-between`}>
                                 <View style={tw`w-full flex-col items-center justify-center`}>
                                     <View style={tw`w-full`}>
@@ -573,7 +573,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                                 const decryptedPayload = decryptData(response.data.payload, aesKey);
                                                 console.log(decryptedPayload);
                                                 if (response.status == 200) {
-                                                    setTopupSuccess(true);
+                                                    setWithdrawSuccess(true);
                                                 } else {
                                                     Alert.alert('Error', 'Something went wrong', [{ text: 'OK' }], { cancelable: false });
                                                 }
@@ -598,7 +598,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                             </View>
                         }
 
-                        {!loading && topupSuccess &&
+                        {!loading && withdrawSuccess &&
                             <View style={tw`w-full h-grow flex-col justify-between`}>
                                 <View style={tw`w-full flex-col items-center justify-center mt-8`}>
                                     <Icon name={"check"} size={100} color={textColor} />
