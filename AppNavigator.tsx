@@ -14,6 +14,7 @@ import Pay from './Screens/Pay';
 import Send from './Screens/Send';
 import IssueBill from './Screens/IssueBill';
 import Splashscreen from './Screens/Splashscreen';
+import CardDetails from './Screens/CardDetails';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -49,12 +50,16 @@ const AppNavigator = () => {
           component={Login}
         />
         <Stack.Screen
-          name="Signup"
-          component={Signup}
-        />
-        <Stack.Screen
           name="Home"
           component={Home}
+        />
+        <Stack.Screen
+          name="CardDetails"
+          component={CardDetails}
+        />
+        <Stack.Screen
+          name="Signup"
+          component={Signup}
         />
         <Stack.Screen
           name="MyExpenses"

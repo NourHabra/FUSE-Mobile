@@ -13,7 +13,7 @@ import TextInput from "../Components/TextInput";
 import tw from 'twrnc';
 import { useDispatch } from 'react-redux';
 import { setAuthData, setAesKey } from '../Redux/slices/authSlice';
-import baseUrl from "../baseURL"
+import baseUrl from '../baseUrl';
 
 // Type the navigation prop
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;

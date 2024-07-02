@@ -9,7 +9,7 @@ import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import { RootState } from '../Redux/store';
 import axios from 'axios';
-import baseUrl from "../baseURL"
+import baseUrl from "../baseUrl"
 import { decryptData } from '../crypto-utils';
 
 
@@ -40,7 +40,20 @@ const Home = ({ navigation }: { navigation: any }) => {
       try {
         const response = await axios.post(`${baseUrl}/account/user`, { jwt });
         const decryptedPayload = decryptData(response.data.payload, aesKey);
+        decryptedPayload.sort((a, b) => {
+          // First, compare the type property
+          if (a.type === "Checking" && b.type === "Savings") {
+            return -1; // a comes before b
+          } else if (a.type === "Savings" && b.type === "Checking") {
+            return 1; // b comes before a
+          }
+          // If the type property is the same, compare the id property
+          else {
+            return a.id - b.id;
+          }
+        });
         // console.log('Accounts:', decryptedPayload);
+
         setCards(decryptedPayload);
       } catch (error) {
         console.error('Error fetching user data:', error);
