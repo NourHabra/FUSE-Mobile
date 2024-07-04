@@ -63,18 +63,28 @@ const Login = () => {
     });
 
     if (success) {
-      // handleLogin();
+      try {
+        const savedEmail = await AsyncStorage.getItem('userEmail');
+        const savedPassword = await AsyncStorage.getItem('userPassword');
+
+        if (savedEmail && savedPassword) {
+          await handleLoginWithSavedCredentials(savedEmail, savedPassword);
+        } else {
+          Alert.alert('Error', 'No saved credentials found');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Failed to login with biometrics');
+      }
     } else {
       Alert.alert('Authentication failed', 'Please try again');
     }
   };
 
-  const handleLoginStep1 = async () => {
+  const handleLoginWithSavedCredentials = async (email: string, password: string) => {
     setLoading(true);
     try {
       const response = await axios.post(`${baseUrl}/key/publicKey`, { email });
       const { publicKey } = response.data;
-
 
       const aesKey = generateAesKey();
       dispatch(setAesKey({
@@ -86,10 +96,51 @@ const Login = () => {
 
       const response2 = await axios.post(`${baseUrl}/key/setAESkey`, { email, encryptedAesKey });
       if (response2.status === 200) {
-        // console.log("Moving to step 2");
+        const payload = encryptData({ email, password }, aesKey);
+        const response3 = await axios.post(`${baseUrl}/auth/login`, { email, payload });
+        const decryptedPayload = decryptData(response3.data.payload, aesKey);
+
+        dispatch(setAuthData({
+          jwt: decryptedPayload.jwt,
+          role: decryptedPayload.user.role,
+          user: {
+            id: decryptedPayload.user.id,
+            name: decryptedPayload.user.name,
+            email: decryptedPayload.user.email,
+            checkingNumber: decryptedPayload.userAccounts.id,
+          }
+        }));
+
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
+        });
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to login with saved credentials');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLoginStep1 = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post(`${baseUrl}/key/publicKey`, { email });
+      const { publicKey } = response.data;
+
+      const aesKey = generateAesKey();
+      dispatch(setAesKey({
+        aesKey: aesKey,
+      }));
+      setLocalAesKey(aesKey);
+
+      const encryptedAesKey = encryptAesKey(publicKey, aesKey);
+
+      const response2 = await axios.post(`${baseUrl}/key/setAESkey`, { email, encryptedAesKey });
+      if (response2.status === 200) {
         setStep(2);
       }
-      setStep(2);
     } catch (error) {
       Alert.alert('Error', 'Failed to initiate login process');
     } finally {
@@ -104,7 +155,6 @@ const Login = () => {
       const response = await axios.post(`${baseUrl}/auth/login`, { email, payload });
       const decryptedPayload = decryptData(response.data.payload, aesKey);
 
-
       dispatch(setAuthData({
         jwt: decryptedPayload.jwt,
         role: decryptedPayload.role,
@@ -116,6 +166,9 @@ const Login = () => {
         }
       }));
 
+      // Save email and password to AsyncStorage
+      await AsyncStorage.setItem('userEmail', email);
+      await AsyncStorage.setItem('userPassword', password);
 
       navigation.reset({
         index: 0,
