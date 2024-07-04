@@ -100,6 +100,7 @@ const Login = () => {
         const response3 = await axios.post(`${baseUrl}/auth/login`, { email, payload });
         const decryptedPayload = decryptData(response3.data.payload, aesKey);
 
+
         dispatch(setAuthData({
           jwt: decryptedPayload.jwt,
           role: decryptedPayload.user.role,
@@ -157,7 +158,7 @@ const Login = () => {
 
       dispatch(setAuthData({
         jwt: decryptedPayload.jwt,
-        role: decryptedPayload.role,
+        role: decryptedPayload.user.role,
         user: {
           id: decryptedPayload.user.id,
           name: decryptedPayload.user.name,
