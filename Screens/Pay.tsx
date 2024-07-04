@@ -468,7 +468,12 @@ const Pay: React.FC = () => {
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         style={[tw`flex-row justify-center items-center p-4`]}
-                                        onPress={() => navigation.goBack()}
+                                        onPress={() => {
+                                            navigation.reset({
+                                                index: 0,
+                                                routes: [{ name: 'Home' }],
+                                            });
+                                        }}
                                     >
                                         <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
                                             Back to Home

@@ -12,6 +12,8 @@ import * as Sharing from 'expo-sharing';
 import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
 import NfcManager, { NfcTech, NfcEvents, TagEvent } from 'react-native-nfc-manager';
+import { useSelector } from 'react-redux';
+import { RootState } from '../Redux/store';
 
 const Receive: React.FC = () => {
     const { theme } = useTheme();
@@ -22,6 +24,10 @@ const Receive: React.FC = () => {
     const [nfcSupported, setNfcSupported] = useState<boolean>(false);
     const [nfcEnabled, setNfcEnabled] = useState<boolean>(false);
     const [tagDetails, setTagDetails] = useState<string>('');
+
+    const user = useSelector((state: any) => state.auth.user);
+    const role = useSelector((state: any) => state.auth.role);
+
 
     useEffect(() => {
         const loadLogo = async () => {
@@ -178,7 +184,7 @@ const Receive: React.FC = () => {
                     <View style={tw`mt-2 items-center`}>
                         <View style={tw`bg-white rounded-full`}>
                             <QRCodeStyled
-                                data={'1234567890abcdefghijklmnopqrstuvwxyz'}
+                                data={user.checkingNumber.toString()}
                                 style={[tw`rounded-2xl`, { backgroundColor: 'white' }]}
                                 padding={20}
                                 pieceSize={8}
@@ -237,9 +243,9 @@ const Receive: React.FC = () => {
                         </View>
                         {/* Account Details Text */}
                         <View style={tw`my-4`}>
-                            <AccountDetail title='Account Holder' content={accountDetails.accountHolder} />
-                            <AccountDetail title='Account Number' content={accountDetails.accountNumber} />
-                            <AccountDetail title='Currency' content={accountDetails.currency} />
+                            <AccountDetail title='Account Holder' content={user.name} />
+                            <AccountDetail title='Account Number' content={user.checkingNumber} />
+                            <AccountDetail title='Currency' content={role} />
                             <AccountDetail title='IBAN' content={accountDetails.iban} />
                         </View>
                         <ModalButton title="Share" onPress={generatePDF} iconName="share" />
