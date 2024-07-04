@@ -28,6 +28,9 @@ export type RootStackParamList = {
   Receive: undefined; // Add Receive to the navigation stack
   Pay: undefined; // Add Pay to the navigation stack
   Send: undefined; // Add Send to the navigation stack
+  IssueBill: undefined; // Add IssueBill to the navigation stack
+  Splashscreen: undefined;
+  CardDetails: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();

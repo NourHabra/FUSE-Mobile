@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, ImageBackground, Image } from 'react-native';
 import { useTheme } from '../ThemeContext'; // Adjust the import path to where your ThemeContext is defined
 import tw from 'twrnc';
 
-
 const CreditCard = ({ id, name, balance, cvv, expiry }: { id: string, name: string, balance: number, cvv: number, expiry: string }) => {
   return (
     <View style={tw`h-48 w-full bg-white rounded-xl my-1 py-2 px-4 flex-col justify-between`}>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard, ScrollView } from 'react-native';
+import { View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard, ScrollView, Alert } from 'react-native';
 import {
     TextInput as DefaultTextInput,
     Platform,
@@ -19,6 +19,11 @@ import * as Sharing from 'expo-sharing';
 import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
 import CreditCard from '../Components/CreditCard';
+import { useSelector } from 'react-redux';
+import { RootState } from '../Redux/store';
+import { decryptData, encryptData } from '../crypto-utils';
+import axios from 'axios';
+import baseUrl from '../baseUrl';
 
 
 const TextInput = ({
@@ -52,6 +57,9 @@ const TextInput = ({
     );
 };
 
+
+
+
 const Pay: React.FC = () => {
     const { theme } = useTheme();
     const [accountDetailsModalVisible, setAccountDetailsModalVisible] = useState<boolean>(false);
@@ -59,18 +67,19 @@ const Pay: React.FC = () => {
     const [accNumberErrorMsg, setAccNumberErrorMsg] = useState<string>("Ayyy");
     const [logoBase64, setLogoBase64] = useState<string>('');
 
+    const jwt: string = useSelector((state: any) => state.auth.jwt);
+    const aesKey: string = useSelector((state: any) => state.auth.aesKey);
+
+    const [cards, setCards] = useState<object[]>([]);
     const [message, setMessage] = useState<string>("");
-    const [bill, setBill] = useState<object>({
-        merchant: "John Doe",
-        number: "1234 1234 1234 1234",
-        address: "United States",
-        category: "Food/Groceries",
-        amount: "$1,200.60"
-    });
     const [billNumber, setBillNumber] = useState<string>("");
-    const [accountFound, setAccountFound] = useState<boolean>(true);
+    const [bill, setBill] = useState<objectl>({});
     const [loading, setLoading] = useState<boolean>(false);
     const [billFound, setBillFound] = useState<boolean>(true);
+    const [selectedCard, setSelectedCard] = useState<object>({});
+    const [paidBill, setPaidBill] = useState<object>();
+
+    const [accountFound, setAccountFound] = useState<boolean>(true);
     const [showBillDetails, setShowBillDetails] = useState<boolean>(false);
     const [billNotFound, setBillNotFound] = useState<boolean>(false);
     const [billConfirmed, setBillConfirmed] = useState<boolean>(false);
@@ -102,6 +111,20 @@ const Pay: React.FC = () => {
         loadLogo();
     }, []);
 
+    useEffect(() => {
+        const fetchCards = async () => {
+            try {
+                const response = await axios.post(`${baseUrl}/card/user`, { jwt });
+                const decryptedPayload = decryptData(response.data.payload, aesKey);
+                setCards(decryptedPayload);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        };
+
+        fetchCards();
+    }, []);
+
     const CustomButton = ({ title, onPress, iconName }: { title: string, onPress: () => void, iconName: string }) => (
         <TouchableOpacity
             style={[tw`flex-row items-center justify-center w-1/2 py-3 my-2 rounded-full mx-1`, { backgroundColor: buttonBackgroundColor }]}
@@ -128,9 +151,30 @@ const Pay: React.FC = () => {
                 placeholder={placeholder}
                 keyboardType="number-pad"
                 maxLength={30}
+                value={billNumber}
             />
         </View>
     );
+
+    const searchForBill = async (billNumber: string) => {
+        setLoading(true);
+        try {
+            const response = await axios.post(`${baseUrl}/bill/${billNumber}`, { jwt });
+            const decryptedPayload = decryptData(response.data.payload, aesKey);
+            console.log(decryptedPayload);
+            setBill(decryptedPayload);
+
+            setShowBillDetails(true);
+            setShowCta(false);
+            setShowSearchbar(false);
+            setLoading(false);
+        } catch (error: any) {
+            Alert.alert('Error', error.response.data.message);
+            console.error('Error fetching data', error);
+            setLoading(false);
+        }
+    };
+
 
     const initializeFields = () => {
         setAccountFound(false);
@@ -148,16 +192,12 @@ const Pay: React.FC = () => {
     };
 
     const handleBarCodeRead = (e: BarCodeReadEvent) => {
-        setBillNumber(e.data);
-        setMessage(e.data);
+        // setBillNumber(e.data);
+        // setMessage(e.data);
+        // setAccountDetailsModalVisible(false);
+        // confirmBill
+        searchForBill(e.data);
         setAccountDetailsModalVisible(false);
-        confirmBill
-    };
-
-    const searchForBill = () => {
-        setShowBillDetails(true);
-        setShowCta(false);
-        setShowSearchbar(false);
     };
 
     const confirmBill = () => {
@@ -165,22 +205,45 @@ const Pay: React.FC = () => {
         setShowBillDetails(false);
         setShowCta(false);
         setShowSearchbar(false);
-        setShowFinalDetails(false);
         setShowSelectCard(true);
+        setShowFinalDetails(false);
     };
 
-    const selectCard = () => {
+    const selectCard = (card: object) => {
+        console.log(card);
+        setSelectedCard(card);
         setShowSelectCard(false);
         setShowFinalDetails(true);
     };
 
-    const confirmTransaction = () => {
-        setShowTransactionStatus(true);
-        setShowBillDetails(false);
-        setShowCta(false);
-        setShowSearchbar(false);
-        setShowFinalDetails(false);
-        setTransactionStatus("success");
+    const payBill = async (bill: object, card: object) => {
+        setLoading(true);
+        try {
+            const response = await axios.post(`${baseUrl}/bill/pay/${bill.id}`, {
+                jwt,
+                payload: encryptData({
+                    cardId: card.id,
+                    cvv: card.cvv,
+                    month: (new Date(card.expiryDate).getMonth() + 1).toString(),
+                    year: (new Date(card.expiryDate).getFullYear()).toString(),
+                }, aesKey),
+            });
+            const decryptedPayload = decryptData(response.data.payload, aesKey);
+            console.log(decryptedPayload);
+            setBill(decryptedPayload);
+
+            setShowTransactionStatus(true);
+            setShowBillDetails(false);
+            setShowCta(false);
+            setShowSearchbar(false);
+            setShowFinalDetails(false);
+            setTransactionStatus("success");
+            setLoading(false);
+        } catch (error: any) {
+            Alert.alert('Error', error.response.data.message);
+            console.error('Error fetching data', error);
+            setLoading(false);
+        }
     };
 
     const cancelTransaction = () => {
@@ -194,21 +257,22 @@ const Pay: React.FC = () => {
         }
 
         const htmlContent = `
-            <html>
-            <body>
-                <div style="padding: 20px; position: relative;">
-                    <img src="${logoBase64}" style="position: absolute; top: 20px; left: 20px; width: 100px; height: auto;" />
-                    <div style="margin-top: 140px;">
-                        <h1>Account Details</h1>
-                        <p><strong>Sender:</strong> ${"Sender Name"}</p>
-                        <p><strong>Account Number:</strong> ${bill?.billNumber}</p>
-                        <p><strong>Currency:</strong> ${bill?.currency}</p>
-                        <p><strong>Amount:</strong> ${bill?.amount}</p>
-                    </div>
-                </div>
-            </body>
-            </html>
-        `;
+                <html>
+                    <body>
+                        <div style="padding: 20px; position: relative;">
+                            <img src="${logoBase64}" style="position: absolute; top: 20px; left: 20px; width: 100px; height: auto;" />
+                            <div style="margin-top: 140px;">
+                                <h1>Transaction Details</h1>
+                                <h1>PAYMENT</h1>
+                                <p><strong>Sender:</strong> ${"Sender Name"}</p>
+                                <p><strong>Bill Number:</strong> ${paidBill?.id}</p>
+                                <p><strong>Amount:</strong> ${paidBill?.amount}</p>
+                                <p><strong>Amount:</strong> ${paidBill?.amount}</p>
+                            </div>
+                        </div>
+                    </body>
+                </html>
+                `;
 
         const { uri } = await Print.printToFileAsync({ html: htmlContent });
         const fileName = `Transaction_${bill?.billNumber.replace(/\s+/g, '_')}.pdf`;
@@ -255,8 +319,7 @@ const Pay: React.FC = () => {
                                     ]}
                                     onPress={() => {
                                         Keyboard.dismiss();
-                                        setMessage(billNumber);
-                                        searchForBill();
+                                        searchForBill(billNumber);
                                     }}
                                 >
                                     <Icon
@@ -298,16 +361,16 @@ const Pay: React.FC = () => {
                             <View style={tw`w-full flex-row justify-center pb-4`}>
                                 <View style={[tw`w-full border h-0`, { borderColor: textColor }]} />
                             </View>
-                            <AccountDetail title='Bill Number' content={bill.number} />
+                            <AccountDetail title='Bill Number' content={bill.id} />
                             <AccountDetail title='Category' content={bill.category} />
-                            <AccountDetail title='Merchant' content={bill.merchant} />
-                            <AccountDetail title='Address' content={bill.address} />
+                            <AccountDetail title='Merchant' content={bill.merchantAccount.user.name} />
+                            <AccountDetail title='Description' content={bill.details} />
                             <AccountDetail title='Amount' content={bill.amount} />
                             <TouchableOpacity
                                 style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonBackgroundColor, padding: 16, borderRadius: 8 }]}
                                 onPress={() => confirmBill()}
                             >
-                                <Icon name={"check"} size={20} color={theme === 'light' ? '#FFFFFF' : '#000000'} />
+                                <Icon name={"check"} size={20} color={buttonTextColor} />
                                 <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                                     Confirm
                                 </Text>
@@ -330,22 +393,15 @@ const Pay: React.FC = () => {
                             </View>
                             <AccountDetail title='Amount to pay' content={bill.amount} />
                             <ScrollView style={tw`w-full h-8/12`} contentContainerStyle={tw`w-full flex-col items-center`}>
-                                {/* <CreditCard /> */}
-                                <TouchableOpacity onPress={() => selectCard()}>
-                                    <CreditCard />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => selectCard()}>
-                                    <CreditCard />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => selectCard()}>
-                                    <CreditCard />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => selectCard()}>
-                                    <CreditCard />
-                                </TouchableOpacity>
+                                {cards.map((card, index) => (
+                                    <TouchableOpacity key={index} onPress={() => {
+                                        console.log(card.id);
+                                        selectCard(card)
+                                    }}>
+                                        <CreditCard id={card.id} name={card.cardName} balance={card.balance} cvv={card.cvv} expiry={card.expiryDate} />
+                                    </TouchableOpacity>
+                                ))}
                             </ScrollView>
-                            {/* <View style={tw`flex-col justify-center w-full h-8/12`}>
-                            </View> */}
                             <TouchableOpacity
                                 style={[tw`flex-row justify-center items-center p-4`]}
                                 onPress={() => cancelTransaction()}
@@ -362,18 +418,18 @@ const Pay: React.FC = () => {
                             <View style={tw`w-full flex-row justify-center pb-4`}>
                                 <View style={[tw`w-full border h-0`, { borderColor: textColor }]} />
                             </View>
-                            <AccountDetail title='Bill Number' content={bill.number} />
+                            <AccountDetail title='Bill Number' content={bill.id} />
                             <AccountDetail title='Category' content={bill.category} />
-                            <AccountDetail title='Merchant' content={bill.merchant} />
-                            <AccountDetail title='Address' content={bill.address} />
+                            {/* <AccountDetail title='Merchant' content={bill.merchantAccount.user.name} /> */}
+                            <AccountDetail title='Description' content={bill.details} />
                             <AccountDetail title='Amount' content={bill.amount} />
-                            <AccountDetail title='Card' content={"**** 8475"} />
+                            <AccountDetail title='Card' content={selectedCard.id} />
                             <View style={tw`w-full flex-row justify-center pb-4`}>
                                 <View style={[tw`w-full border h-0`, { borderColor: textColor }]} />
                             </View>
                             <TouchableOpacity
                                 style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonBackgroundColor, padding: 16, borderRadius: 8 }]}
-                                onPress={() => confirmTransaction()}
+                                onPress={() => payBill(bill, selectedCard)}
                             >
                                 <Icon name={"credit-card"} size={20} color={theme === 'light' ? '#FFFFFF' : '#000000'} />
                                 <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
@@ -422,7 +478,7 @@ const Pay: React.FC = () => {
                             }
                             {transactionStatus != "success" &&
                                 <View style={tw`flex-col items-center pt-16`}>
-                                    <Icon name={"cross"} size={120} color={textColor} />
+                                    <Icon name={"x"} size={120} color={textColor} />
                                     <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>
                                         Failure
                                     </Text>
