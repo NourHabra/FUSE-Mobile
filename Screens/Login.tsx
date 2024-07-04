@@ -113,6 +113,7 @@ const Login = () => {
           id: decryptedPayload.user.id,
           name: decryptedPayload.user.name,
           email: decryptedPayload.user.email,
+          checkingNumber: decryptedPayload.userAccounts.id,
         }
       }));
 
@@ -146,6 +147,7 @@ const Login = () => {
               keyboardType="email-address"
               textContentType="emailAddress"
               autoComplete="email"
+              autoCapitalize='none'
             />
             <TouchableOpacity
               style={{ backgroundColor: buttonColor, padding: 16, borderRadius: 8, alignItems: 'center' }}
@@ -173,6 +175,7 @@ const Login = () => {
                 textContentType="password"
                 autoComplete="password"
                 placeholder='Password'
+                autoCapitalize='none'
               />
               <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)} style={{ padding: 8 }}>
                 <Icon name={passwordVisible ? 'eye-off' : 'eye'} size={24} color={placeholderColor} />

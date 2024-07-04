@@ -4,6 +4,7 @@ interface User {
   id: string;
   name: string;
   email: string;
+  checkingNumber: string;
 }
 
 interface AuthState {
