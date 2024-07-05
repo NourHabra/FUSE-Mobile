@@ -73,9 +73,14 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
 
     const handleNfcWrite = async () => {
         try {
+            const cardToWrite = {
+                id: card.id,
+                expiryDate: card.expiryDate,
+                cvv: card.cvv,
+            }
             setLoading(true);
             await NfcManager.requestTechnology(NfcTech.Ndef);
-            const bytes = Ndef.encodeMessage([Ndef.textRecord(JSON.stringify(card))]);
+            const bytes = Ndef.encodeMessage([Ndef.textRecord(JSON.stringify(cardToWrite))]);
             if (bytes) {
                 await NfcManager.ndefHandler.writeNdefMessage(bytes);
                 setNfcWriteSuccess(true);

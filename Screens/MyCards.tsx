@@ -12,6 +12,11 @@ import axios from 'axios';
 import baseUrl from '../baseUrl';
 import { decryptData, encryptData } from '../crypto-utils';
 
+import CartGlass1 from '../assets/Cart Glass 1.png';
+import CartGlass3 from '../assets/Cart Glass 3.png';
+import CartGlass7 from '../assets/Cart Glass 7.png';
+import CartGlass8 from '../assets/Cart Glass 8.png';
+
 const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { theme } = useTheme();
   const jwt = useSelector((state: RootState) => state.auth.jwt);
@@ -85,8 +90,8 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
     </View>
   );
 
-  const lightBackground = require('../assets/92.png');
-  const darkBackground = require('../assets/73.png');
+  const lightBackgrounds = [CartGlass1, CartGlass3, CartGlass7, CartGlass8];
+  const darkBackgrounds = [CartGlass1, CartGlass3, CartGlass7, CartGlass8];
 
   return (
     <View style={[tw`flex-col h-full justify-between`, { backgroundColor }]}>
@@ -114,14 +119,27 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
           />
         }
       >
-        {cards.map((card, index) => (
-          <TouchableOpacity key={index} onPress={() => {
-            const cardNumber = card.id;
-            navigation.navigate('CardDetails', { cardNumber })
-          }}>
-            <CreditCard id={card.id} name={card.cardName} balance={card.balance} cvv={card.cvv} expiry={card.expiryDate} backgroundImage={theme === 'light' ? lightBackground : darkBackground} />
-          </TouchableOpacity>
-        ))}
+        {cards.map((card, index) => {
+          const backgroundImage = theme === 'light' 
+            ? lightBackgrounds[Math.floor(Math.random() * lightBackgrounds.length)] 
+            : darkBackgrounds[Math.floor(Math.random() * darkBackgrounds.length)];
+
+          return (
+            <TouchableOpacity key={index} onPress={() => {
+              const cardNumber = card.id;
+              navigation.navigate('CardDetails', { cardNumber });
+            }}>
+              <CreditCard 
+                id={card.id} 
+                name={card.cardName} 
+                balance={card.balance} 
+                cvv={card.cvv} 
+                expiry={card.expiryDate} 
+                backgroundImage={backgroundImage} 
+              />
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
       <Modal
         animationType="slide"
@@ -227,7 +245,7 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
                   </View>
                 </View>
                 <TouchableOpacity
-                  style={[tw`flex-row justify-center items-center border-2 w-full mt-4`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                  style={[tw`flex-row justify-center items-center border-2 w-full mt-4`, { borderColor                  : textColor, padding: 16, borderRadius: 8 }]}
                   onPress={() => {
                     if (enteredPIN.length != 4) {
                       Alert.alert('Invalid PIN', 'Please enter a valid 4-digit PIN', [{ text: 'OK' }], { cancelable: false });

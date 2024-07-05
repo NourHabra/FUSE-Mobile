@@ -4,8 +4,8 @@ import tw from 'twrnc';
 
 const CreditCard = ({ id, name, balance, cvv, expiry, backgroundImage }: { id: string, name: string, balance: number, cvv: number, expiry: string, backgroundImage: any }) => {
   return (
-    <ImageBackground source={backgroundImage} style={tw`h-56 rounded-3xl my-2 py-4 px-6 flex-col justify-between`} imageStyle={tw`rounded-xl`}>
-      <Text style={tw`text-base text-white`}>{name}</Text>
+    <ImageBackground source={backgroundImage} style={tw`h-60 rounded-3xl my-2 py-4 px-6 flex-col justify-between`} imageStyle={tw`rounded-xl`}>
+      <Text style={tw`ml-8 mt-1 text-base text-white font-bold uppercase`}>{name.toUpperCase()}</Text>
       <View style={tw`mt-4`}>
         <Text style={tw`text-2xl tracking-widest w-full text-center font-bold text-white`}>{id.replace(/(.{4})/g, '$1  ').trim()}</Text>
       </View>
