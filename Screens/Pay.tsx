@@ -25,6 +25,11 @@ import { decryptData, encryptData } from '../crypto-utils';
 import axios from 'axios';
 import baseUrl from '../baseUrl';
 
+import CartGlass1 from '../assets/Cart Glass 1.png';
+import CartGlass3 from '../assets/Cart Glass 3.png';
+import CartGlass7 from '../assets/Cart Glass 7.png';
+import CartGlass8 from '../assets/Cart Glass 8.png';
+
 
 const TextInput = ({
     placeholderTextColor,
@@ -97,6 +102,9 @@ const Pay: React.FC = () => {
     const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
     const buttonBackgroundColor = theme === 'light' ? '#94B9C5' : '#94B9C5';
     const buttonTextColor = theme === 'light' ? 'text-white' : 'text-black';
+
+    const lightBackgrounds = [CartGlass1, CartGlass3, CartGlass7, CartGlass8];
+    const darkBackgrounds = [CartGlass1, CartGlass3, CartGlass7, CartGlass8];
 
     useEffect(() => {
         const loadLogo = async () => {
@@ -393,14 +401,20 @@ const Pay: React.FC = () => {
                             </View>
                             <AccountDetail title='Amount to pay' content={bill.amount} />
                             <ScrollView style={tw`w-full h-8/12`} contentContainerStyle={tw`w-full flex-col items-center`}>
-                                {cards.map((card, index) => (
-                                    <TouchableOpacity key={index} onPress={() => {
-                                        console.log(card.id);
-                                        selectCard(card)
-                                    }}>
-                                        <CreditCard id={card.id} name={card.cardName} balance={card.balance} cvv={card.cvv} expiry={card.expiryDate} />
-                                    </TouchableOpacity>
-                                ))}
+                                {cards.map((card, index) => {
+                                    const backgroundImage = theme === 'light'
+                                        ? lightBackgrounds[Math.floor(Math.random() * lightBackgrounds.length)]
+                                        : darkBackgrounds[Math.floor(Math.random() * darkBackgrounds.length)];
+
+                                    return (
+                                        <TouchableOpacity key={index} onPress={() => {
+                                            console.log(card.id);
+                                            selectCard(card)
+                                        }}>
+                                            <CreditCard backgroundImage={backgroundImage} id={card.id} name={card.cardName} balance={card.balance} cvv={card.cvv} expiry={card.expiryDate} />
+                                        </TouchableOpacity>
+                                    )
+                                })}
                             </ScrollView>
                             <TouchableOpacity
                                 style={[tw`flex-row justify-center items-center p-4`]}

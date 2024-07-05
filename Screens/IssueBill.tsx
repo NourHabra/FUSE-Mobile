@@ -232,7 +232,21 @@ const IssueBill: React.FC = () => {
         await Sharing.shareAsync(newUri);
     };
 
-    const reloadBill = () => { };
+    const reloadBill = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.post(`${baseUrl}/bill/${bill.id}`, { jwt });
+            const decryptedPayload = decryptData(response.data.payload, aesKey);
+            console.log(decryptedPayload);
+            setBill(decryptedPayload);
+
+            setLoading(false);
+        } catch (error: any) {
+            Alert.alert('Error', error.response.data.message);
+            console.error('Error fetching data', error);
+            setLoading(false);
+        }
+    };
     return (
         <View style={[tw`flex-1 justify-between`, { backgroundColor }]}>
             <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
@@ -319,7 +333,7 @@ const IssueBill: React.FC = () => {
             >
                 <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-90 h-full`}>
                     {/* <View style={[tw`w-11/12 p-5 rounded-xl h-7/8 flex-col items-center justify-between`, { backgroundColor: cardBackgroundColor }]}> */}
-                    <View style={[tw`w-full p-5 h-full flex-col items-center justify-between`, { backgroundColor: cardBackgroundColor }]}>
+                    <View style={[tw`w-full p-5 h-full flex-col items-center justify-start`, { backgroundColor: cardBackgroundColor }]}>
                         <View style={tw`flex-row justify-between items-center w-full mb-4`}>
                             <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>
                                 Bill Issued Successfully
@@ -331,7 +345,12 @@ const IssueBill: React.FC = () => {
                                 <Icon name="x" size={28} color={textColor} />
                             </TouchableOpacity>
                         </View>
-                        <View style={tw`w-full h-grow flex-col justify-between`}>
+                        {loading &&
+                            <View>
+                                <ActivityIndicator size="large" color={textColor} />
+                            </View>
+                        }
+                        {!loading && <View style={tw`w-full h-grow flex-col justify-between`}>
                             {Object.keys(bill).length > 0 &&
                                 <View style={tw`w-full`}>
                                     <AccountDetail title='Bill Number' content={bill.id} />
@@ -340,7 +359,7 @@ const IssueBill: React.FC = () => {
                                     <AccountDetail title='Description' content={bill.details} />
                                     <View style={tw`flex-row justify-between items-center w-full pr-4`}>
                                         <AccountDetail title='Status' content={bill.status} />
-                                        <TouchableOpacity onPress={reloadBill()}>
+                                        <TouchableOpacity onPress={() => reloadBill()}>
                                             <Icon name="rotate-ccw" size={25} color={textColor} />
                                         </TouchableOpacity>
                                     </View>
@@ -386,7 +405,7 @@ const IssueBill: React.FC = () => {
                                     </Text>
                                 </TouchableOpacity>
                             </View>
-                        </View>
+                        </View>}
                     </View>
                 </View>
             </Modal>
