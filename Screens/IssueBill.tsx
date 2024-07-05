@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard } from 'react-native';
+import { View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard, Alert } from 'react-native';
 import {
     TextInput as DefaultTextInput,
     Platform,
@@ -22,7 +22,7 @@ import axios from 'axios';
 import baseUrl from '../baseUrl';
 import { decryptData, encryptData } from '../crypto-utils';
 import QRCodeStyled from 'react-native-qrcode-styled';
-
+import NfcManager, { NfcTech, NfcEvents, TagEvent } from 'react-native-nfc-manager';
 
 
 const TextInput = ({
@@ -68,7 +68,16 @@ const IssueBill: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [finalDetailsModalVisible, setFinalDetailsModalVisible] = useState<boolean>(false);
 
+    const [nfcSupported, setNfcSupported] = useState<boolean>(false);
+    const [nfcEnabled, setNfcEnabled] = useState<boolean>(false);
+    const [tagDetails, setTagDetails] = useState<object>({});
+    const [nfcTagModalVisible, setNfcTagModalVisible] = useState<boolean>(false);
+    const [paidWithCardSuccessfully, setPaidWithCardSuccessfully] = useState<boolean>(false);
+    const [paidWithCardFailure, setPaidWithCardFailure] = useState<boolean>(false);
+
+
     const [bill, setBill] = useState<object>({});
+    const [billNumber, setBillNumber] = useState<number>();
 
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
@@ -77,6 +86,16 @@ const IssueBill: React.FC = () => {
     const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
     const buttonBackgroundColor = theme === 'light' ? '#94B9C5' : '#94B9C5';
     const buttonTextColor = theme === 'light' ? 'text-white' : 'text-black';
+
+    const ModalButton = ({ title, onPress, iconName }: { title: string, onPress: () => void, iconName: string }) => (
+        <TouchableOpacity
+            style={[tw`flex-row items-center justify-center py-3 rounded-lg mx-1 px-4`, { backgroundColor: buttonBackgroundColor }]}
+            onPress={onPress}
+        >
+            <Icon name={iconName} size={28} color={theme === 'light' ? '#000000' : '#000000'} />
+            <Text style={[tw`text-xl font-bold ml-2`, { color: theme === 'light' ? '#000000' : '#000000' }]}>{title}</Text>
+        </TouchableOpacity>
+    );
 
     useEffect(() => {
         const loadLogo = async () => {
@@ -90,6 +109,88 @@ const IssueBill: React.FC = () => {
 
         loadLogo();
     }, []);
+
+    useEffect(() => {
+        async function initNfc() {
+            const supported = await NfcManager.isSupported();
+            setNfcSupported(supported);
+            if (!supported) return;
+
+            await NfcManager.start();
+            const enabled = await NfcManager.isEnabled();
+            setNfcEnabled(enabled);
+
+            // setupTagDetection();
+        }
+
+        initNfc();
+
+        return () => {
+            NfcManager.setEventListener(NfcEvents.DiscoverTag, null);
+            NfcManager.unregisterTagEvent().catch(() => 0);
+        };
+    }, []);
+
+    const setupTagDetection = async () => {
+        NfcManager.setEventListener(NfcEvents.DiscoverTag, (tag: TagEvent) => {
+            const payload = extractPayload(tag);
+            setTagDetails(JSON.parse(payload));
+            payBillWithCard(JSON.parse(payload));
+            setNfcTagModalVisible(true);
+            if (Platform.OS === 'ios') {
+                NfcManager.setAlertMessageIOS('NFC tag detected!');
+            }
+            NfcManager.unregisterTagEvent().catch(() => 0);
+        });
+
+        await NfcManager.registerTagEvent();
+    };
+
+    const extractPayload = (tag: TagEvent): string => {
+        if (tag.ndefMessage && tag.ndefMessage.length > 0) {
+            const ndefRecord = tag.ndefMessage[0];
+            if (ndefRecord.payload && ndefRecord.payload.length > 0) {
+                // Assuming the payload is a text record
+                const text = ndefRecord.payload.slice(3).map((byte: number) => String.fromCharCode(byte)).join('');
+                return text;
+            }
+        }
+        return 'No payload found';
+    };
+
+    const handleCheckAgain = async () => {
+        setTagDetails({});
+        // setNfcTagModalVisible(false);
+        await NfcManager.unregisterTagEvent();
+        setupTagDetection();
+    };
+
+    const payBillWithCard = async (card: object) => {
+        setLoading(true);
+        try {
+            const response = await axios.post(`${baseUrl}/bill/pay/${bill.id}`, {
+                jwt,
+                payload: encryptData({
+                    cardId: card.id,
+                    cvv: card.cvv,
+                    month: (new Date(card.expiryDate).getMonth() + 1).toString(),
+                    year: (new Date(card.expiryDate).getFullYear()).toString(),
+                }, aesKey),
+            });
+            const decryptedPayload = decryptData(response.data.payload, aesKey);
+            console.log("Paid By Card");
+            console.log(decryptedPayload.payedBill[0]);
+            setBill(decryptedPayload.payedBill[0]);
+
+            setLoading(false);
+            setPaidWithCardSuccessfully(true);
+        } catch (error: any) {
+            // console.error('Error fetching data', error);
+            setLoading(false);
+            setPaidWithCardFailure(true);
+            setPaidWithCardSuccessfully(false);
+        }
+    };
 
     const AccountDetail = ({ title, content }: { title: string, content: string }) => (
         <View style={tw`pb-4 pl-4`}>
@@ -122,7 +223,7 @@ const IssueBill: React.FC = () => {
         `;
 
         const { uri } = await Print.printToFileAsync({ html: htmlContent });
-        const fileName = `Transaction_${bill?.accountNumber.replace(/\s+/g, '_')}.pdf`;
+        const fileName = `Transaction_${bill?.id.replace(/\s+/g, '_')}.pdf`;
         const newUri = `${FileSystem.documentDirectory}${fileName}`;
         await FileSystem.moveAsync({
             from: uri,
@@ -130,6 +231,8 @@ const IssueBill: React.FC = () => {
         });
         await Sharing.shareAsync(newUri);
     };
+
+    const reloadBill = () => { };
     return (
         <View style={[tw`flex-1 justify-between`, { backgroundColor }]}>
             <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
@@ -189,7 +292,9 @@ const IssueBill: React.FC = () => {
                                     const decryptedPayload = decryptData(response.data.payload, aesKey);
                                     console.log(decryptedPayload);
                                     setBill(decryptedPayload.bill);
+                                    setBillNumber(decryptedPayload.bill.id);
                                     setFinalDetailsModalVisible(true);
+                                    // setupTagDetection();
                                 } catch (error) {
                                     console.error('Error fetching user data:', error);
                                 }
@@ -213,7 +318,8 @@ const IssueBill: React.FC = () => {
                 }}
             >
                 <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-90 h-full`}>
-                    <View style={[tw`w-11/12 p-5 rounded-xl h-7/8 flex-col items-center justify-between`, { backgroundColor: cardBackgroundColor }]}>
+                    {/* <View style={[tw`w-11/12 p-5 rounded-xl h-7/8 flex-col items-center justify-between`, { backgroundColor: cardBackgroundColor }]}> */}
+                    <View style={[tw`w-full p-5 h-full flex-col items-center justify-between`, { backgroundColor: cardBackgroundColor }]}>
                         <View style={tw`flex-row justify-between items-center w-full mb-4`}>
                             <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>
                                 Bill Issued Successfully
@@ -238,8 +344,8 @@ const IssueBill: React.FC = () => {
                                             <Icon name="rotate-ccw" size={25} color={textColor} />
                                         </TouchableOpacity>
                                     </View>
-                                    <View style={tw`items-center`}>
-                                        <View style={tw`bg-white rounded-full`}>
+                                    {bill.status !== "Paid" &&
+                                        <View style={tw`items-center`}>
                                             <QRCodeStyled
                                                 data={bill.id.toString()}
                                                 style={[tw`rounded-2xl`, { backgroundColor: 'white' }]}
@@ -249,9 +355,21 @@ const IssueBill: React.FC = () => {
                                                 pieceBorderRadius={3}
                                                 isPiecesGlued={true}
                                             />
-                                        </View>
-                                    </View>
+                                        </View>}
                                 </View>}
+                            {bill.status !== "Paid" && <View>
+                                <TouchableOpacity
+                                    style={[tw`flex-row justify-center items-center border-2 w-full`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                    onPress={async () => {
+                                        setNfcTagModalVisible(true);
+                                        setupTagDetection();
+                                    }}
+                                >
+                                    <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                                        Pay with Card
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>}
                             <View>
                                 <TouchableOpacity
                                     style={[tw`flex-row justify-center items-center border-2 w-full`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
@@ -268,6 +386,88 @@ const IssueBill: React.FC = () => {
                                     </Text>
                                 </TouchableOpacity>
                             </View>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={nfcTagModalVisible}
+                onRequestClose={() => {
+                    setNfcTagModalVisible(!nfcTagModalVisible);
+                }}
+            >
+                <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-50`}>
+                    <View style={[tw`w-10/12 p-5 rounded-xl`, { backgroundColor: cardBackgroundColor, maxHeight: '50%' }]}>
+                        <View style={tw`flex-row justify-between items-center w-full`}>
+                            <Text style={[tw`text-xl font-bold`, { color: textColor }]}>
+                                Pay with Card
+                            </Text>
+                            <TouchableOpacity
+                                style={tw`p-2`}
+                                onPress={() => setNfcTagModalVisible(false)}
+                            >
+                                <Icon name="x" size={24} color={textColor} />
+                            </TouchableOpacity>
+                        </View>
+                        <View>
+                            {loading &&
+                                <ActivityIndicator size="large" color={textColor} />
+                            }
+                            {!loading && !paidWithCardFailure && !paidWithCardSuccessfully && <View style={tw`w-full flex-col items-center py-8`}>
+                                <Icon name={"wifi"} size={100} color={textColor} />
+                                <Text style={[tw`text-xl font-bold`, { color: textColor }]}>Tap the card to pay</Text>
+                            </View>}
+                            {!loading && paidWithCardSuccessfully && <View style={tw`w-full flex-col items-center`}>
+                                <Icon name={"check"} size={100} color={textColor} />
+                                <Text style={[tw`text-xl font-bold`, { color: textColor }]}>Bill Paid Successfully</Text>
+                                <TouchableOpacity
+                                    style={[tw`flex-row justify-center items-center p-4`]}
+                                    onPress={() => {
+                                        navigation.reset({
+                                            index: 0,
+                                            routes: [{ name: 'Home' }],
+                                        });
+                                    }}
+                                >
+                                    <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
+                                        Back to Home
+                                    </Text>
+                                </TouchableOpacity>
+                                {/* <ModalButton title="Check Again" onPress={handleCheckAgain} iconName="refresh-cw" /> */}
+                            </View>}
+                            {!loading && paidWithCardFailure && <View style={tw`w-full flex-col items-center`}>
+                                <Icon name={"x"} size={100} color={textColor} />
+                                <Text style={[tw`text-xl font-bold`, { color: textColor }]}>Error Paying Bill</Text>
+                                <TouchableOpacity
+                                    style={[tw`flex-row justify-center items-center border-2 w-full mt-8`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                    onPress={() => {
+                                        handleCheckAgain();
+                                        setLoading(false);
+                                        setPaidWithCardFailure(false);
+                                        setPaidWithCardSuccessfully(false);
+                                    }}
+                                >
+                                    <Icon name="rotate-ccw" size={15} color={textColor} />
+                                    <Text style={[tw`text-sm font-bold ml-1`, { color: textColor }]}>
+                                        Try Again
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[tw`flex-row justify-center items-center p-4`]}
+                                    onPress={() => {
+                                        navigation.reset({
+                                            index: 0,
+                                            routes: [{ name: 'Home' }],
+                                        });
+                                    }}
+                                >
+                                    <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
+                                        Back to Home
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>}
                         </View>
                     </View>
                 </View>
