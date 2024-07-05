@@ -18,7 +18,7 @@ const BottomTab: React.FC<BottomTabProps> = ({ navigation }) => {
   };
 
   const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
-  const activeColor = theme === 'light' ? '#443AD8' : '#94B9C5';
+  const activeColor = theme === 'light' ? '#028174' : '#94B9C5';
   const inactiveColor = theme === 'light' ? '#888888' : '#AAAAAA';
 
   const getTabStyle = (screen: string) => {

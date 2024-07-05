@@ -39,7 +39,7 @@ const TransactionHistory: React.FC<{ navigation: any }> = ({ navigation }) => {
   const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
   const buttonBackgroundColor = theme === 'light' ? '#181E20' : '#94B9C5';
   const backButtonColor = theme === 'light' ? '#181E20' : '#94B9C5';
-  const selectedButtonColor = theme === 'light' ? '#443AD8' : '#94B9C5'; // Blue color for light mode
+  const selectedButtonColor = theme === 'light' ? '#028174' : '#94B9C5'; // Blue color for light mode
 
   const titleStyle = [tw`text-2xl font-bold ml-2`, { color: textColor }];
   const filterButtonStyle = [tw`p-2 rounded-lg mx-1`, { backgroundColor: buttonBackgroundColor }];

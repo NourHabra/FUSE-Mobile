@@ -1,8 +1,11 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, ImageBackground } from 'react-native';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/Feather';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+
+// Import the background image
+import BackgroundImage from '../assets/Group 48095400.png';
 
 interface AccountCardProps {
   type: string;
@@ -11,7 +14,11 @@ interface AccountCardProps {
 
 const AccountCard: React.FC<AccountCardProps> = ({ type, balance }) => {
   return (
-    <View style={[tw`flex-col p-4 rounded-3xl font-bold w-full h-45 justify-between bg-gray-600`]} >
+    <ImageBackground
+      source={BackgroundImage}
+      style={[tw`flex-col p-4 rounded-3xl font-bold h-45 justify-between`]}
+      imageStyle={tw`rounded-3xl`}
+    >
       <View style={tw`flex-row w-full`}>
         <Text style={tw`text-white text-lg`}>{type}</Text>
       </View>
@@ -25,7 +32,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ type, balance }) => {
           <Icon name="arrow-right-circle" size={20} color="white" />
         </TouchableOpacity>
       </View>
-    </View>
+    </ImageBackground>
   );
 };
 

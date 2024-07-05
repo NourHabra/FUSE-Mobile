@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StatusBar, View, Text, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { StatusBar, View, Text, TouchableOpacity, Alert, ActivityIndicator, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../AppNavigator';
@@ -14,6 +14,10 @@ import tw from 'twrnc';
 import { useDispatch } from 'react-redux';
 import { setAuthData, setAesKey } from '../Redux/slices/authSlice';
 import baseUrl from '../baseUrl';
+
+// Import the logos
+import FuseLogo from '../assets/FuseLogo.png';
+import WhiteLogo from '../assets/White-Logo-PNG.png';
 
 // Type the navigation prop
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
@@ -36,9 +40,9 @@ const Login = () => {
   const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
   const borderColor = theme === 'light' ? '#CCCCCC' : '#444444';
   const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0';
-  const buttonColor = theme === 'light' ? '#181E20' : '#ADD8E6';
+  const buttonColor = theme === 'light' ? '#028174' : '#92DE8B';
   const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20';
-  const linkColor = theme === 'light' ? '#181E20' : '#ADD8E6';
+  const linkColor = theme === 'light' ? '#028174' : '#92DE8B';
 
   useEffect(() => {
     (async () => {
@@ -99,7 +103,6 @@ const Login = () => {
         const payload = encryptData({ email, password }, aesKey);
         const response3 = await axios.post(`${baseUrl}/auth/login`, { email, payload });
         const decryptedPayload = decryptData(response3.data.payload, aesKey);
-
 
         dispatch(setAuthData({
           jwt: decryptedPayload.jwt,
@@ -185,10 +188,13 @@ const Login = () => {
   return (
     <View style={{ flex: 1, backgroundColor, justifyContent: 'center', alignItems: 'center', padding: 16 }}>
       <StatusBar backgroundColor={backgroundColor} barStyle={theme === 'light' ? 'dark-content' : 'light-content'} />
-      <View style={{ width: '100%', maxWidth: 400, backgroundColor, borderRadius: 8, padding: 24, borderWidth: 1, borderColor }}>
-        <Text style={{ fontSize: 32, fontWeight: 'bold', textAlign: 'center', color: textColor, marginBottom: 32 }}>
-          Login
-        </Text>
+      <View style={{ width: '100%', maxWidth: 400, padding: 24 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+          <Text style={{ fontSize: 32, fontWeight: 'bold', color: textColor }}>
+            Login
+          </Text>
+          <Image source={theme === 'light' ? FuseLogo : WhiteLogo} style={{ width: 50, height: 50 }} />
+        </View>
 
         {step === 1 ? (
           <>
@@ -250,17 +256,6 @@ const Login = () => {
           </View>
         )}
 
-        {isBiometricSupported && useBiometrics && (
-          <TouchableOpacity
-            style={{ marginTop: 16, padding: 16, borderRadius: 8, alignItems: 'center', borderColor, borderWidth: 1 }}
-            onPress={handleBiometricAuth}
-          >
-            <Text style={{ color: textColor, fontSize: 16 }}>
-              Login with Biometrics
-            </Text>
-          </TouchableOpacity>
-        )}
-
         <Text style={{ marginTop: 24, textAlign: 'center', fontSize: 14, color: textColor }}>
           Don't have an account?
           <Text style={{ color: linkColor, fontWeight: 'bold' }} onPress={() => navigation.navigate('Signup')}>
@@ -268,6 +263,18 @@ const Login = () => {
           </Text>
         </Text>
       </View>
+
+      {isBiometricSupported && useBiometrics && (
+  <TouchableOpacity
+    style={tw`absolute bottom-10 flex-row items-center`}
+    onPress={handleBiometricAuth}
+  >
+    <Icon name="account-lock-open" size={30} color={textColor} />
+    <Text style={[tw`text-sm ml-1`, { color: textColor }]}>
+      Login with Biometrics
+    </Text>
+  </TouchableOpacity>
+)}
     </View>
   );
 };

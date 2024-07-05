@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StatusBar, View, Text, TouchableOpacity, Alert, ActivityIndicator, TextInput as RNTextInput } from 'react-native';
+import { StatusBar, View, Text, TouchableOpacity, Alert, ActivityIndicator, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../AppNavigator';
@@ -14,6 +14,8 @@ import { generateAesKey, encryptAesKey, encryptData, decryptData } from '../cryp
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import FuseLogo from '../assets/FuseLogo.png';
+import WhiteLogo from '../assets/White-Logo-PNG.png'; // Import the white logo
 
 type SignupScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Signup'>;
 
@@ -74,9 +76,9 @@ const Signup = () => {
   const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
   const borderColor = theme === 'light' ? '#CCCCCC' : '#444444';
   const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0';
-  const buttonColor = theme === 'light' ? '#181E20' : '#ADD8E6';
+  const buttonColor = theme === 'light' ? '#028174' : '#92DE8B';
   const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20';
-  const linkColor = theme === 'light' ? '#181E20' : '#ADD8E6';
+  const linkColor = theme === 'light' ? '#028174' : '#92DE8B';
 
   const handleSignupStep1 = async () => {
     setLoading(true);
@@ -150,10 +152,13 @@ const Signup = () => {
   return (
     <View style={{ flex: 1, backgroundColor, justifyContent: 'center', alignItems: 'center', padding: 16 }}>
       <StatusBar backgroundColor={backgroundColor} barStyle={theme === 'light' ? 'dark-content' : 'light-content'} />
-      <View style={{ width: '100%', maxWidth: 400, backgroundColor, borderRadius: 8, padding: 24, borderWidth: 1, borderColor }}>
-        <Text style={{ fontSize: 32, fontWeight: 'bold', textAlign: 'center', color: textColor, marginBottom: 32 }}>
-          Sign Up
-        </Text>
+      <View style={{ width: '100%', maxWidth: 400, padding: 24 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+          <Text style={{ fontSize: 32, fontWeight: 'bold', color: textColor }}>
+            Sign Up
+          </Text>
+          <Image source={theme === 'light' ? FuseLogo : WhiteLogo} style={{ width: 50, height: 50 }} />
+        </View>
 
         {step === 1 ? (
           <>
@@ -165,6 +170,7 @@ const Signup = () => {
               keyboardType="email-address"
               textContentType="emailAddress"
               autoComplete="email"
+              autoCapitalize='none'
             />
             <TouchableOpacity
               style={{ backgroundColor: buttonColor, padding: 16, borderRadius: 8, alignItems: 'center' }}
@@ -282,7 +288,7 @@ const Signup = () => {
 
             {role === 'Customer' && (
               <>
-                <Text style={[tw`text-sm pl-2 mb-1`, { color: textColor }]}>Monthly Income</Text>
+                                <Text style={[tw`text-sm pl-2 mb-1`, { color: textColor }]}>Monthly Income</Text>
                 <TextInput
                   style={[tw`flex-row mb-4`]}
                   onChangeText={(text) => setMonthlyIncome(text)}
@@ -322,3 +328,4 @@ const Signup = () => {
 };
 
 export default Signup;
+
