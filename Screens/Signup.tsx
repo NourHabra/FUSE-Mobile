@@ -104,7 +104,11 @@ const Signup = () => {
     }
   };
 
-  const handleSignupStep2 = async () => {
+  const handleSignupStep2 = () => {
+    setStep(3);
+  };
+
+  const handleSignupStep3 = () => {
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return;
@@ -116,9 +120,13 @@ const Signup = () => {
       return;
     }
 
+    setStep(4);
+  };
+
+  const handleSignupStep4 = async () => {
     setLoading(true);
     try {
-      const payload = encryptData({ email, name, password, phone, birth: formattedbirth, monthlyIncome, role, workPermit, category }, aesKey);
+      const payload = encryptData({ email, name, password, phone, birth: formatDate(birth), monthlyIncome, role, workPermit, category }, aesKey);
       const response = await axios.post(`${baseUrl}/auth/register`, { email, payload });
       const decryptedPayload = decryptData(response.data.payload, aesKey);
 
@@ -186,7 +194,7 @@ const Signup = () => {
               )}
             </TouchableOpacity>
           </>
-        ) : (
+        ) : step === 2 ? (
           <>
             <Text style={[tw`text-sm pl-2 mb-1`, { color: textColor }]}>Name</Text>
             <TextInput
@@ -220,6 +228,22 @@ const Signup = () => {
               />
             )}
 
+            <TouchableOpacity
+              style={{ backgroundColor: buttonColor, padding: 16, borderRadius: 8, alignItems: 'center' }}
+              onPress={handleSignupStep2}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={buttonTextColor} />
+              ) : (
+                <Text style={{ color: buttonTextColor, fontSize: 20, fontWeight: 'bold' }}>
+                  Next
+                </Text>
+              )}
+            </TouchableOpacity>
+          </>
+        ) : step === 3 ? (
+          <>
             <Text style={[tw`text-sm pl-2 mb-1`, { color: textColor }]}>Password</Text>
             <View style={[tw`flex-row mb-4 items-center`]}>
               <TextInput
@@ -252,6 +276,22 @@ const Signup = () => {
               </TouchableOpacity>
             </View>
 
+            <TouchableOpacity
+              style={{ backgroundColor: buttonColor, padding: 16, borderRadius: 8, alignItems: 'center' }}
+              onPress={handleSignupStep3}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={buttonTextColor} />
+              ) : (
+                <Text style={{ color: buttonTextColor, fontSize: 20, fontWeight: 'bold' }}>
+                  Next
+                </Text>
+              )}
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
             <Text style={[tw`text-sm pl-2 mb-1`, { color: textColor }]}>Role</Text>
             <Picker
               selectedValue={role}
@@ -288,7 +328,7 @@ const Signup = () => {
 
             {role === 'Customer' && (
               <>
-                                <Text style={[tw`text-sm pl-2 mb-1`, { color: textColor }]}>Monthly Income</Text>
+                <Text style={[tw`text-sm pl-2 mb-1`, { color: textColor }]}>Monthly Income</Text>
                 <TextInput
                   style={[tw`flex-row mb-4`]}
                   onChangeText={(text) => setMonthlyIncome(text)}
@@ -302,7 +342,7 @@ const Signup = () => {
 
             <TouchableOpacity
               style={{ backgroundColor: buttonColor, padding: 16, borderRadius: 8, alignItems: 'center' }}
-              onPress={handleSignupStep2}
+              onPress={handleSignupStep4}
               disabled={loading}
             >
               {loading ? (
@@ -328,4 +368,3 @@ const Signup = () => {
 };
 
 export default Signup;
-

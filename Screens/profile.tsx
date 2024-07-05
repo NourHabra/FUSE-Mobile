@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, StatusBar, Modal, TextInput, Switch, Alert } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, StatusBar, Modal, TextInput, Switch, Alert, ActivityIndicator } from 'react-native';
 import { useTheme } from '../ThemeContext';
 import BottomTab from '../Components/BottomTab';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../AppNavigator';
 import tw from 'twrnc';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Profile'>;
@@ -22,6 +22,7 @@ const Profile = () => {
   const [oldPin, setOldPin] = useState('');
   const [newPin, setNewPin] = useState('');
   const [useBiometrics, setUseBiometrics] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const oldPinRefs = useRef<(TextInput | null)[]>([]);
   const newPinRefs = useRef<(TextInput | null)[]>([]);
@@ -56,10 +57,11 @@ const Profile = () => {
   };
 
   const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
-  const textColor = theme === 'light' ? 'text-black' : 'text-white';
-  const statusBarStyle = theme === 'light' ? 'dark-content' : 'light-content';
-  const buttonBackgroundColor = theme === 'light' ? '#181E20' : '#94B9C5';
+  const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
+  const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
+  const buttonColor = theme === 'light' ? '#028174' : '#92DE8B';
   const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20';
+  const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0';
 
   const handleLogout = () => {
     navigation.reset({
@@ -68,61 +70,73 @@ const Profile = () => {
     });
   };
 
+  const ProfileSection = ({ title, children }: { title: string, children: React.ReactNode }) => (
+    <View style={[tw`w-full mb-4 p-4 rounded-lg`, { backgroundColor: cardBackgroundColor }]}>
+      <Text style={[tw`text-xl font-bold mb-2`, { color: textColor }]}>{title}</Text>
+      {children}
+    </View>
+  );
+
+  const ProfileButton = ({ title, onPress }: { title: string, onPress: () => void }) => (
+    <TouchableOpacity style={tw`py-2`} onPress={onPress}>
+      <Text style={[tw`text-lg`, { color: textColor }]}>{title}</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={[tw`flex-1`, { backgroundColor }]}>
-      <StatusBar barStyle={statusBarStyle} backgroundColor={backgroundColor} />
+      <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
       <View style={tw`flex-1 p-4`}>
-        <Text style={tw`${textColor} text-2xl font-bold mb-4`}>Profile</Text>
+        <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>Profile</Text>
         <ScrollView contentContainerStyle={tw`flex-grow items-center p-3`}>
           <View style={tw`items-center mb-4`}>
             <Image
               source={{ uri: 'https://via.placeholder.com/150' }}
               style={tw`w-20 h-20 rounded-full mb-2`}
             />
-            <Text style={tw`text-2xl font-bold ${textColor}`}>John Doe</Text>
-            <Text style={tw`text-lg text-gray-500`}>johndoe@example.com</Text>
+            <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>John Doe</Text>
+            <Text style={[tw`text-lg`, { color: placeholderColor }]}>johndoe@example.com</Text>
           </View>
-          <View style={[tw`w-full mb-4 p-4 rounded-lg`, { elevation: 3, backgroundColor: theme === 'light' ? '#FFFFFF' : '#404040' }]}>
-            <Text style={tw`text-xl font-bold mb-2 ${textColor}`}>Account</Text>
-            <TouchableOpacity style={tw`py-2`} onPress={() => setPersonalInfoModalVisible(true)}>
-              <Text style={tw`${textColor} text-lg`}>Personal Information</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={tw`py-2`} onPress={() => setChangePasswordModalVisible(true)}>
-              <Text style={tw`${textColor} text-lg`}>Change Password</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={[tw`w-full mb-4 p-4 rounded-lg`, { elevation: 3, backgroundColor: theme === 'light' ? '#FFFFFF' : '#404040' }]}>
-            <Text style={tw`text-xl font-bold mb-2 ${textColor}`}>Settings</Text>
-            <TouchableOpacity style={tw`py-2`}>
-              <Text style={tw`${textColor} text-lg`}>Notifications</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={tw`py-2`} onPress={() => setOldPinModalVisible(true)}>
-              <Text style={tw`${textColor} text-lg`}>Privacy</Text>
-            </TouchableOpacity>
+          
+          <ProfileSection title="Account">
+            <ProfileButton title="Personal Information" onPress={() => setPersonalInfoModalVisible(true)} />
+            <ProfileButton title="Change Password" onPress={() => setChangePasswordModalVisible(true)} />
+          </ProfileSection>
+          
+          <ProfileSection title="Settings">
+            <ProfileButton title="Notifications" onPress={() => {/* Handle notifications */}} />
+            <ProfileButton title="Privacy" onPress={() => setOldPinModalVisible(true)} />
             <View style={tw`py-2 flex-row justify-between items-center`}>
-              <Text style={tw`${textColor} text-lg`}>Dark Theme</Text>
+              <Text style={[tw`text-lg`, { color: textColor }]}>Dark Theme</Text>
               <Switch
                 value={theme === 'dark'}
                 onValueChange={(value) => setTheme(value ? 'dark' : 'light')}
+                trackColor={{ false: placeholderColor, true: buttonColor }}
+                thumbColor={theme === 'dark' ? buttonTextColor : '#f4f3f4'}
               />
             </View>
             <View style={tw`py-2 flex-row justify-between items-center`}>
-              <Text style={tw`${textColor} text-lg`}>Biometric Login</Text>
+              <Text style={[tw`text-lg`, { color: textColor }]}>Biometric Login</Text>
               <Switch
                 value={useBiometrics}
                 onValueChange={handleBiometricToggle}
+                trackColor={{ false: placeholderColor, true: buttonColor }}
+                thumbColor={useBiometrics ? buttonTextColor : '#f4f3f4'}
               />
             </View>
-          </View>
-          <View style={tw`w-full mb-4 p-4`}>
-            <TouchableOpacity style={tw`bg-red-600 py-3 items-center rounded-lg`} onPress={handleLogout}>
-              <Text style={tw`text-white text-lg font-bold`}>Logout</Text>
-            </TouchableOpacity>
-          </View>
+          </ProfileSection>
+          
+          <TouchableOpacity 
+            style={[tw`w-full py-3 items-center rounded-lg`, { backgroundColor: '#FF3B30' }]} 
+            onPress={handleLogout}
+          >
+            <Text style={tw`text-white text-lg font-bold`}>Logout</Text>
+          </TouchableOpacity>
         </ScrollView>
       </View>
       <BottomTab navigation={navigation} />
 
+      {/* Modals */}
       {/* Personal Information Modal */}
       <Modal
         animationType="slide"
@@ -131,30 +145,30 @@ const Profile = () => {
         onRequestClose={() => setPersonalInfoModalVisible(false)}
       >
         <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-50`}>
-          <View style={[tw`w-11/12 p-5 rounded-lg`, { backgroundColor: theme === 'light' ? '#FFFFFF' : '#404040', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5 }]}>
+          <View style={[tw`w-11/12 p-5 rounded-lg`, { backgroundColor, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5 }]}>
             <TouchableOpacity
               style={tw`absolute top-2 right-2 p-2`}
               onPress={() => setPersonalInfoModalVisible(false)}
             >
-              <Icon name="close" size={28} color={theme === 'light' ? '#000000' : '#FFFFFF'} />
+              <Icon name="close" size={28} color={textColor} />
             </TouchableOpacity>
             <View style={tw`mb-4 mt-8`}>
               <View style={tw`flex-row justify-between items-center mb-4 p-2 border-b border-gray-300`}>
-                <Text style={[tw`text-lg`, { color: theme === 'light' ? '#000000' : '#FFFFFF' }]}>Name: John Doe</Text>
+                <Text style={[tw`text-lg`, { color: textColor }]}>Name: John Doe</Text>
                 <TouchableOpacity onPress={() => { /* Handle edit action */ }}>
-                  <Icon name="edit" size={24} color={theme === 'light' ? '#000000' : '#FFFFFF'} />
+                  <Icon name="pencil" size={24} color={buttonColor} />
                 </TouchableOpacity>
               </View>
               <View style={tw`flex-row justify-between items-center mb-4 p-2 border-b border-gray-300`}>
-                <Text style={[tw`text-lg`, { color: theme === 'light' ? '#000000' : '#FFFFFF' }]}>Email: johndoe@example.com</Text>
+                <Text style={[tw`text-lg`, { color: textColor }]}>Email: johndoe@example.com</Text>
                 <TouchableOpacity onPress={() => { /* Handle edit action */ }}>
-                  <Icon name="edit" size={24} color={theme === 'light' ? '#000000' : '#FFFFFF'} />
+                  <Icon name="pencil" size={24} color={buttonColor} />
                 </TouchableOpacity>
               </View>
               <View style={tw`flex-row justify-between items-center p-2 border-b border-gray-300`}>
-                <Text style={[tw`text-lg`, { color: theme === 'light' ? '#000000' : '#FFFFFF' }]}>Phone: (123) 456-7890</Text>
+                <Text style={[tw`text-lg`, { color: textColor }]}>Phone: (123) 456-7890</Text>
                 <TouchableOpacity onPress={() => { /* Handle edit action */ }}>
-                  <Icon name="edit" size={24} color={theme === 'light' ? '#000000' : '#FFFFFF'} />
+                  <Icon name="pencil" size={24} color={buttonColor} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -170,33 +184,33 @@ const Profile = () => {
         onRequestClose={() => setChangePasswordModalVisible(false)}
       >
         <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-50`}>
-          <View style={[tw`w-11/12 p-5 rounded-lg`, { backgroundColor: theme === 'light' ? '#FFFFFF' : '#404040', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5 }]}>
+          <View style={[tw`w-11/12 p-5 rounded-lg`, { backgroundColor, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5 }]}>
             <TouchableOpacity
               style={tw`absolute top-2 right-2 p-2`}
               onPress={() => setChangePasswordModalVisible(false)}
             >
-              <Icon name="close" size={28} color={theme === 'light' ? '#000000' : '#FFFFFF'} />
+              <Icon name="close" size={28} color={textColor} />
             </TouchableOpacity>
             <View style={tw`mb-4 mt-8`}>
               <TextInput
-                style={[tw`mb-4 p-2 rounded-lg`, { backgroundColor: theme === 'light' ? '#F0F0F0' : '#505050', color: theme === 'light' ? '#000000' : '#FFFFFF' }]}
+                style={[tw`mb-4 p-3 rounded-lg`, { backgroundColor: cardBackgroundColor, color: textColor }]}
                 placeholder="Current Password"
-                placeholderTextColor={theme === 'light' ? '#A0A0A0' : '#A0A0A0'}
+                placeholderTextColor={placeholderColor}
                 secureTextEntry
               />
               <TextInput
-                style={[tw`mb-4 p-2 rounded-lg`, { backgroundColor: theme === 'light' ? '#F0F0F0' : '#505050', color: theme === 'light' ? '#000000' : '#FFFFFF' }]}
+                style={[tw`mb-4 p-3 rounded-lg`, { backgroundColor: cardBackgroundColor, color: textColor }]}
                 placeholder="New Password"
-                placeholderTextColor={theme === 'light' ? '#A0A0A0' : '#A0A0A0'}
+                placeholderTextColor={placeholderColor}
                 secureTextEntry
               />
               <TextInput
-                style={[tw`mb-4 p-2 rounded-lg`, { backgroundColor: theme === 'light' ? '#F0F0F0' : '#505050', color: theme === 'light' ? '#000000' : '#FFFFFF' }]}
+                style={[tw`mb-4 p-3 rounded-lg`, { backgroundColor: cardBackgroundColor, color: textColor }]}
                 placeholder="Confirm New Password"
-                placeholderTextColor={theme === 'light' ? '#A0A0A0' : '#A0A0A0'}
+                placeholderTextColor={placeholderColor}
                 secureTextEntry
               />
-              <TouchableOpacity style={[tw`py-3 rounded-lg items-center`, { backgroundColor: buttonBackgroundColor }]} onPress={() => { /* Handle password change */ }}>
+              <TouchableOpacity style={[tw`py-3 rounded-lg items-center`, { backgroundColor: buttonColor }]} onPress={() => { /* Handle password change */ }}>
                 <Text style={[tw`text-lg font-bold`, { color: buttonTextColor }]}>Change Password</Text>
               </TouchableOpacity>
             </View>
@@ -212,20 +226,20 @@ const Profile = () => {
         onRequestClose={() => setOldPinModalVisible(false)}
       >
         <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-50`}>
-          <View style={[tw`w-11/12 p-5 rounded-lg`, { backgroundColor: theme === 'light' ? '#FFFFFF' : '#404040', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5 }]}>
+          <View style={[tw`w-11/12 p-5 rounded-lg`, { backgroundColor, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5 }]}>
             <TouchableOpacity
               style={tw`absolute top-2 right-2 p-2`}
               onPress={() => setOldPinModalVisible(false)}
             >
-              <Icon name="close" size={28} color={theme === 'light' ? '#000000' : '#FFFFFF'} />
+              <Icon name="close" size={28} color={textColor} />
             </TouchableOpacity>
             <View style={tw`mb-4 mt-8`}>
-              <Text style={[tw`text-lg font-bold mb-4`, { color: theme === 'light' ? '#000000' : '#FFFFFF' }]}>Enter Old PIN</Text>
+              <Text style={[tw`text-lg font-bold mb-4`, { color: textColor }]}>Enter Old PIN</Text>
               <View style={tw`flex-row justify-center mb-4`}>
                 {[0, 1, 2, 3].map((_, index) => (
                   <TextInput
                     key={index}
-                    style={[tw`w-12 h-12 mx-1 text-center text-lg rounded-lg`, { backgroundColor: theme === 'light' ? '#F0F0F0' : '#505050', color: theme === 'light' ? '#000000' : '#FFFFFF' }]}
+                    style={[tw`w-12 h-12 mx-1 text-center text-lg rounded-lg`, { backgroundColor: cardBackgroundColor, color: textColor }]}
                     maxLength={1}
                     keyboardType="numeric"
                     secureTextEntry
@@ -242,7 +256,7 @@ const Profile = () => {
                   />
                 ))}
               </View>
-              <TouchableOpacity style={[tw`py-3 rounded-lg items-center`, { backgroundColor: buttonBackgroundColor }]} onPress={() => {
+              <TouchableOpacity style={[tw`py-3 rounded-lg items-center`, { backgroundColor: buttonColor }]} onPress={() => {
                 setOldPinModalVisible(false);
                 setNewPinModalVisible(true);
               }}>
@@ -261,20 +275,20 @@ const Profile = () => {
         onRequestClose={() => setNewPinModalVisible(false)}
       >
         <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-50`}>
-          <View style={[tw`w-11/12 p-5 rounded-lg`, { backgroundColor: theme === 'light' ? '#FFFFFF' : '#404040', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5 }]}>
+          <View style={[tw`w-11/12 p-5 rounded-lg`, { backgroundColor, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5 }]}>
             <TouchableOpacity
               style={tw`absolute top-2 right-2 p-2`}
               onPress={() => setNewPinModalVisible(false)}
             >
-              <Icon name="close" size={28} color={theme === 'light' ? '#000000' : '#FFFFFF'} />
+              <Icon name="close" size={28} color={textColor} />
             </TouchableOpacity>
             <View style={tw`mb-4 mt-8`}>
-              <Text style={[tw`text-lg font-bold mb-4`, { color: theme === 'light' ? '#000000' : '#FFFFFF' }]}>Enter New PIN</Text>
+              <Text style={[tw`text-lg font-bold mb-4`, { color: textColor }]}>Enter New PIN</Text>
               <View style={tw`flex-row justify-center mb-4`}>
-                {[0, 1, 2, 3].map((_, index) => (
+                                {[0, 1, 2, 3].map((_, index) => (
                   <TextInput
                     key={index}
-                    style={[tw`w-12 h-12 mx-1 text-center text-lg rounded-lg`, { backgroundColor: theme === 'light' ? '#F0F0F0' : '#505050', color: theme === 'light' ? '#000000' : '#FFFFFF' }]}
+                    style={[tw`w-12 h-12 mx-1 text-center text-lg rounded-lg`, { backgroundColor: cardBackgroundColor, color: textColor }]}
                     maxLength={1}
                     keyboardType="numeric"
                     secureTextEntry
@@ -291,11 +305,23 @@ const Profile = () => {
                   />
                 ))}
               </View>
-              <TouchableOpacity style={[tw`py-3 rounded-lg items-center`, { backgroundColor: buttonBackgroundColor }]} onPress={() => {
-                setNewPinModalVisible(false);
-                // Handle PIN change logic here
-              }}>
-                <Text style={[tw`text-lg font-bold`, { color: buttonTextColor }]}>Change PIN</Text>
+              <TouchableOpacity 
+                style={[tw`py-3 rounded-lg items-center`, { backgroundColor: buttonColor }]} 
+                onPress={() => {
+                  setLoading(true);
+                  // Simulate PIN change process
+                  setTimeout(() => {
+                    setNewPinModalVisible(false);
+                    setLoading(false);
+                    Alert.alert('Success', 'PIN changed successfully');
+                  }, 2000);
+                }}
+              >
+                {loading ? (
+                  <ActivityIndicator color={buttonTextColor} />
+                ) : (
+                  <Text style={[tw`text-lg font-bold`, { color: buttonTextColor }]}>Change PIN</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
