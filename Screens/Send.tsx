@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard } from 'react-native';
+import { View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard, Alert } from 'react-native';
 import {
     Platform,
     TextInputProps,
@@ -18,6 +18,11 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
+import { useSelector } from 'react-redux';
+import { RootState } from '../Redux/store';
+import { decryptData, encryptData } from '../crypto-utils';
+import axios from 'axios';
+import baseUrl from '../baseUrl';
 
 
 
@@ -28,17 +33,40 @@ const Send: React.FC = () => {
     const [accNumberErrorMsg, setAccNumberErrorMsg] = useState<string>("Ayyy");
     const [logoBase64, setLogoBase64] = useState<string>('');
 
+    const jwt: string = useSelector((state: any) => state.auth.jwt);
+    const aesKey: string = useSelector((state: any) => state.auth.aesKey);
+    const user = useSelector((state: any) => state.auth.user);
+
+
     const [message, setMessage] = useState<string>("");
-    const [recipient, setRecipient] = useState<object>({
-        name: "John Doe",
-        accountNumber: "1234 1234 1234 1234",
-        country: "United States",
-        currency: "USD",
-    });
+    const [recipient, setRecipient] = useState<object>({});
+
+    const searchForAccount = async (accountNumber: string) => {
+        setLoading(true);
+        try {
+            const response = await axios.post(`${baseUrl}/account/user/${accountNumber}`, { jwt });
+            const decryptedPayload = decryptData(response.data.payload, aesKey);
+            console.log(decryptedPayload);
+            setRecipient(decryptedPayload);
+
+            setShowAccountDetails(true);
+            setAccountFound(true);
+            setShowCta(false);
+            setShowSearchbar(false);
+            setLoading(false);
+        } catch (error: any) {
+            setAccountNotFound(true);
+            setAccountFound(false);
+            // Alert.alert('Error', error.response.data.message);
+            console.error('Error fetching data', error);
+            setLoading(false);
+        }
+    };
+
     const [accountNumber, setAccountNumber] = useState<string>("");
     const [accountFound, setAccountFound] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
-    const [showAccountDetails, setShowAccountDetails] = useState<boolean>(true);
+    const [showAccountDetails, setShowAccountDetails] = useState<boolean>(false);
     const [accountNotFound, setAccountNotFound] = useState<boolean>(false);
     const [showFavourites, setShowFavourites] = useState<boolean>(false);
     const [accountConfirmed, setAccountConfirmed] = useState<boolean>(false);
@@ -47,6 +75,8 @@ const Send: React.FC = () => {
     const [showFinalDetails, setShowFinalDetails] = useState<boolean>(false);
     const [showTransactionStatus, setShowTransactionStatus] = useState<boolean>(false);
     const [transactionStatus, setTransactionStatus] = useState<string>("");
+    const [transaction, setTransaction] = useState<object>({});
+
     const [showCta, setShowCta] = useState<boolean>(true);
     const [showSearchbar, setShowSearchbar] = useState<boolean>(true);
 
@@ -136,12 +166,33 @@ const Send: React.FC = () => {
         setShowSearchbar(false);
     };
 
-    const confirmTransaction = () => {
-        setShowFinalDetails(false);
-        setShowTransactionStatus(true);
-        setShowCta(false);
-        setShowSearchbar(false);
-        setTransactionStatus("success");
+    const confirmTransaction = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.post(`${baseUrl}/transaction/transfer`, {
+                jwt,
+                payload: encryptData({
+                    type: "Transfer",
+                    destinationAccount: recipient.id,
+                    sourceAccount: user.checkingNumber,
+                    amount: Number.parseInt(amount),
+                }, aesKey)
+            });
+            const decryptedPayload = decryptData(response.data.payload, aesKey);
+            console.log(decryptedPayload);
+            setTransaction(decryptedPayload.transactions);
+
+            setLoading(false);
+            setShowFinalDetails(false);
+            setShowTransactionStatus(true);
+            setShowCta(false);
+            setShowSearchbar(false);
+            setTransactionStatus("success");
+        } catch (error: any) {
+            Alert.alert('Error', error.response.data.message);
+            console.error('Error fetching data', error);
+            setLoading(false);
+        }
     };
 
     const generatePDF = async () => {
@@ -156,11 +207,21 @@ const Send: React.FC = () => {
                 <div style="padding: 20px; position: relative;">
                     <img src="${logoBase64}" style="position: absolute; top: 20px; left: 20px; width: 100px; height: auto;" />
                     <div style="margin-top: 140px;">
-                        <h1>Account Details</h1>
-                        <p><strong>Sender:</strong> ${"Sender Name"}</p>
-                        <p><strong>Account Number:</strong> ${recipient?.accountNumber}</p>
-                        <p><strong>Currency:</strong> ${recipient?.currency}</p>
-                        <p><strong>Amount:</strong> ${amount}</p>
+                        <center><h1>Transaction Details</h1></center>
+                        <center><h2>TRANSFER</h2></center>
+                        <br>
+                        <p><strong>Date:</strong> ${transaction[2].createdAt}</p>
+                        <p><strong>Transaction Number:</strong> ${transaction[2].id}</p>
+                        <p><strong>Amount:</strong> ${transaction[2].amount}</p>
+                        <br>
+                        <p><strong>Sender Name:</strong> ${user.name}</p>
+                        <p><strong>Sender Account Number:</strong> ${user.checkingNumber}</p>
+                        <p><strong>Sender Account Type:</strong> ${"Checking"}</p>
+                        <br>
+                        <p><strong>Recipient Name:</strong> ${recipient.user.name}</p>
+                        <p><strong>Recipient Account Number:</strong> ${recipient.id}</p>
+                        <p><strong>Account Type:</strong> ${recipient?.type}</p>
+                        <br>
                     </div>
                 </div>
             </body>
@@ -168,7 +229,7 @@ const Send: React.FC = () => {
         `;
 
         const { uri } = await Print.printToFileAsync({ html: htmlContent });
-        const fileName = `Transaction_${recipient?.accountNumber.replace(/\s+/g, '_')}.pdf`;
+        const fileName = `Transaction_${transaction[2].id}.pdf`;
         const newUri = `${FileSystem.documentDirectory}${fileName}`;
         await FileSystem.moveAsync({
             from: uri,
@@ -198,17 +259,14 @@ const Send: React.FC = () => {
                                     <TextInput
                                         style={[tw`flex-row w-grow mr-1 border-2 bg-transparent`, { borderColor: textColor, color: textColor }]}
                                         onChangeText={(text) => {
-                                            const formattedText = text
-                                                .replace(/\s?/g, "")
-                                                .replace(/(.{4})/g, "$1 ")
-                                                .trim();
-                                            setAccountNumber(formattedText);
+                                            setAccountNumber(text);
                                         }}
                                         placeholder="XXXX XXXX XXXX XXXX"
                                         keyboardType="number-pad"
                                         maxLength={16}
                                         placeholderTextColor={textColor}
                                         onTouchStart={() => initializeFields()}
+                                        value={accountNumber}
                                     />
                                     <TouchableOpacity
                                         style={[
@@ -217,7 +275,7 @@ const Send: React.FC = () => {
                                         ]}
                                         onPress={() => {
                                             Keyboard.dismiss();
-                                            setMessage(accountNumber);
+                                            searchForAccount(accountNumber);
                                         }}
                                     >
                                         <Icon
@@ -268,10 +326,10 @@ const Send: React.FC = () => {
 
                         {/* Account details */}
                         {accountFound && showAccountDetails && <View>
-                            <AccountDetail title='Account Number' content={recipient.accountNumber} />
-                            <AccountDetail title='Account Holder Name' content={recipient.name} />
-                            <AccountDetail title='Country' content={recipient.country} />
-                            <AccountDetail title='Currency' content={recipient.currency} />
+                            <AccountDetail title='Account Number' content={recipient.id} />
+                            <AccountDetail title='Account Holder Name' content={recipient.user.name} />
+                            <AccountDetail title='Type' content={recipient.type} />
+                            <AccountDetail title='Account Status' content={recipient.status} />
                             <TouchableOpacity
                                 style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonBackgroundColor, padding: 16, borderRadius: 8 }]}
                                 onPress={() => confirmAccount()}
@@ -328,27 +386,16 @@ const Send: React.FC = () => {
                             </View>
                         }
 
-                        {/* Show functionality */}
-                        {message != "" && <View style={tw`flex-col items-center w-full`}>
-                            <Icon name={"search"} size={120} color={textColor} />
-                            <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>
-                                {message}
-                            </Text>
-                            <Text style={[tw`text-sm font-bold text-center w-2/3`, { color: textColor }]}>
-                                Searching for this account
-                            </Text>
-                        </View>}
-
                         {/* Final Transaction Details */}
-                        {showFinalDetails && <View style={tw`h-full justify-center w-full`}>
+                        {!loading && showFinalDetails && <View style={tw`h-full justify-center w-full`}>
                             <Text style={[tw`text-2xl font-bold mb-2`, { color: textColor }]}>Transaction Details</Text>
                             <View style={tw`w-full flex-row justify-center pb-4`}>
                                 <View style={[tw`w-full border h-0`, { borderColor: textColor }]} />
                             </View>
-                            <AccountDetail title='Account Number' content={recipient.accountNumber} />
-                            <AccountDetail title='Account Holder Name' content={recipient.name} />
-                            <AccountDetail title='Country' content={recipient.country} />
-                            <AccountDetail title='Currency' content={recipient.currency} />
+                            <AccountDetail title='Account Number' content={recipient.id} />
+                            <AccountDetail title='Account Holder Name' content={recipient.user.name} />
+                            <AccountDetail title='Type' content={recipient.type} />
+                            <AccountDetail title='Account Status' content={recipient.status} />
                             <AccountDetail title='Amount' content={amount} />
                             <View style={tw`w-full flex-row justify-center pb-4`}>
                                 <View style={[tw`w-full border h-0`, { borderColor: textColor }]} />
@@ -394,7 +441,12 @@ const Send: React.FC = () => {
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         style={[tw`flex-row justify-center items-center p-4`]}
-                                        onPress={() => navigation.goBack()}
+                                        onPress={() => {
+                                            navigation.reset({
+                                                index: 0,
+                                                routes: [{ name: 'Home' }],
+                                            });
+                                        }}
                                     >
                                         <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
                                             Back to Home
