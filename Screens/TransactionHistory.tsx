@@ -1,7 +1,7 @@
 // @FUSE-EXPO/Screens/TransactionHistory.tsx
 
-import React, { useState } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, StatusBar } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StatusBar, RefreshControl } from 'react-native';
 import { useTheme } from '../ThemeContext';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -18,12 +18,21 @@ const TransactionHistory: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { theme } = useTheme();
   const [search, setSearch] = useState<string>('');
   const [filter, setFilter] = useState<'all' | 'send' | 'request'>('all');
+  const [refreshing, setRefreshing] = useState(false);
 
   const filteredTransactions = transactions.filter(transaction => {
     const matchesSearch = transaction.amount.includes(search) || transaction.date.includes(search);
     const matchesFilter = filter === 'all' || transaction.type === filter;
     return matchesSearch && matchesFilter;
   });
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    // Simulate a network request
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
 
   const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
   const textColor = theme === 'light' ? '#333333' : '#DDDDDD';
@@ -77,6 +86,14 @@ const TransactionHistory: React.FC<{ navigation: any }> = ({ navigation }) => {
               <Text style={[tw`text-lg`, { color: textColor }]}>Date: {item.date}</Text>
             </View>
           )}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[theme === 'light' ? 'black' : 'white']}
+              tintColor={theme === 'light' ? 'black' : 'white'}
+            />
+          }
         />
       </View>
       <BottomTab navigation={navigation} />

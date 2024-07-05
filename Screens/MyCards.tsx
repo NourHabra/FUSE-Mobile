@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StatusBar, Modal, Keyboard, Platform, TextInputProps, ActivityIndicator, Alert, } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, StatusBar, Modal, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import TextInput from '../Components/TextInput';
 import tw from 'twrnc';
 import BottomTab from '../Components/BottomTab';
@@ -19,18 +19,29 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const [cards, setCards] = useState([]);
   const [card, setCard] = useState({});
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchCards = async () => {
+    try {
+      const response = await axios.post(`${baseUrl}/card/user`, { jwt });
+      const decryptedPayload = decryptData(response.data.payload, aesKey);
+      setCards(decryptedPayload);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchCards();
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    }
+    setRefreshing(false);
+  }, []);
 
   useEffect(() => {
-    const fetchCards = async () => {
-      try {
-        const response = await axios.post(`${baseUrl}/card/user`, { jwt });
-        const decryptedPayload = decryptData(response.data.payload, aesKey);
-        setCards(decryptedPayload);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-
     fetchCards();
   }, []);
 
@@ -47,10 +58,8 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [enterPIN, setEnterPIN] = useState<boolean>(false);
   const [confirmPIN, setConfirmPIN] = useState<boolean>(false);
 
-
   const [newCardName, setNewCardName] = useState<string>('');
   const [newCardBalance, setNewCardBalance] = useState<string>('');
-  const [newCardNumber, setNewCardNumber] = useState<string>('');
   const [newCardPIN, setNewCardPIN] = useState<string>('');
   const [enteredPIN, setEnteredPIN] = useState<string>('');
   const [confirmedPIN, setConfirmedPIN] = useState<string>('');
@@ -75,6 +84,10 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
       <Text style={[tw`font-bold text-2xl tracking-wide`, { color: textColor }]}>{content}</Text>
     </View>
   );
+
+  const lightBackground = require('../assets/92.png');
+  const darkBackground = require('../assets/73.png');
+
   return (
     <View style={[tw`flex-col h-full justify-between`, { backgroundColor }]}>
       <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
@@ -89,18 +102,27 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
           <Icon name="plus" size={28} color={theme === 'light' ? '#000000' : '#FFFFFF'} />
         </TouchableOpacity>
       </View>
-      <View style={tw``}>
-        <ScrollView style={tw`w-full h-12/15 p-2 mb-4`} contentContainerStyle={tw`w-full flex-col items-center`}>
-          {cards.map((card, index) => (
-            <TouchableOpacity key={index} onPress={() => {
-              const cardNumber = card.id;
-              navigation.navigate('CardDetails', { cardNumber })
-            }}>
-              <CreditCard id={card.id} name={card.cardName} balance={card.balance} cvv={card.cvv} expiry={card.expiryDate} />
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+      <ScrollView
+        style={tw`w-full h-12/15 p-2 mb-4`}
+        contentContainerStyle={tw`w-full flex-col items-center`}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[theme === 'light' ? 'black' : 'white']}
+            tintColor={theme === 'light' ? 'black' : 'white'}
+          />
+        }
+      >
+        {cards.map((card, index) => (
+          <TouchableOpacity key={index} onPress={() => {
+            const cardNumber = card.id;
+            navigation.navigate('CardDetails', { cardNumber })
+          }}>
+            <CreditCard id={card.id} name={card.cardName} balance={card.balance} cvv={card.cvv} expiry={card.expiryDate} backgroundImage={theme === 'light' ? lightBackground : darkBackground} />
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
       <Modal
         animationType="slide"
         transparent={true}
@@ -167,7 +189,6 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
                     setEnterPIN(true);
                   }}
                 >
-                  {/* <Icon name={"edit-2"} size={20} color={textColor} /> */}
                   <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
                     Next
                   </Text>
@@ -256,7 +277,6 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
                       Alert.alert('Invalid PIN', 'Please enter a valid 4-digit PIN', [{ text: 'OK' }], { cancelable: false });
                       return;
                     } else if (enteredPIN != confirmedPIN) {
-                      // Alert that the PIN's don't match
                       Alert.alert('Error', 'PIN\'s don\'t match', [{ text: 'OK' }], { cancelable: false });
                       return;
                     }
@@ -340,8 +360,6 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
       </Modal>
       <BottomTab navigation={navigation} />
     </View>
-
-
   );
 };
 
