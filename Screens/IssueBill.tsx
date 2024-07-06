@@ -24,7 +24,6 @@ import { decryptData, encryptData } from '../crypto-utils';
 import QRCodeStyled from 'react-native-qrcode-styled';
 import NfcManager, { NfcTech, NfcEvents, TagEvent } from 'react-native-nfc-manager';
 
-
 const TextInput = ({
     placeholderTextColor,
     ...props
@@ -75,25 +74,27 @@ const IssueBill: React.FC = () => {
     const [paidWithCardSuccessfully, setPaidWithCardSuccessfully] = useState<boolean>(false);
     const [paidWithCardFailure, setPaidWithCardFailure] = useState<boolean>(false);
 
-
     const [bill, setBill] = useState<object>({});
     const [billNumber, setBillNumber] = useState<number>();
 
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
-    const textColor = theme === 'light' ? '#333333' : '#DDDDDD';
+    const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
+    const borderColor = theme === 'light' ? '#CCCCCC' : '#444444';
+    const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0';
+    const buttonColor = theme === 'light' ? '#028174' : '#65e991';
+    const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20';
+    const linkColor = theme === 'light' ? '#028174' : '#92DE8B';
     const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
-    const buttonBackgroundColor = theme === 'light' ? '#94B9C5' : '#94B9C5';
-    const buttonTextColor = theme === 'light' ? 'text-white' : 'text-black';
 
     const ModalButton = ({ title, onPress, iconName }: { title: string, onPress: () => void, iconName: string }) => (
         <TouchableOpacity
-            style={[tw`flex-row items-center justify-center py-3 rounded-lg mx-1 px-4`, { backgroundColor: buttonBackgroundColor }]}
+            style={[tw`flex-row items-center justify-center py-3 rounded-lg mx-1 px-4`, { backgroundColor: buttonColor }]}
             onPress={onPress}
         >
-            <Icon name={iconName} size={28} color={theme === 'light' ? '#000000' : '#000000'} />
-            <Text style={[tw`text-xl font-bold ml-2`, { color: theme === 'light' ? '#000000' : '#000000' }]}>{title}</Text>
+            <Icon name={iconName} size={28} color={buttonTextColor} />
+            <Text style={[tw`text-xl font-bold ml-2`, { color: buttonTextColor }]}>{title}</Text>
         </TouchableOpacity>
     );
 
@@ -252,7 +253,7 @@ const IssueBill: React.FC = () => {
             <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
             <View style={tw`flex-row items-center mt-4 mx-4 py-2`}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={tw`mr-2`}>
-                    <Icon name="arrow-left" size={28} color={theme === 'light' ? '#000000' : '#FFFFFF'} />
+                    <Icon name="arrow-left" size={28} color={textColor} />
                 </TouchableOpacity>
                 <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>Issue Bill</Text>
             </View>
@@ -262,14 +263,14 @@ const IssueBill: React.FC = () => {
                         <Text style={[tw`text-sm pl-2 pb-1`, { color: textColor }]}>Amount</Text>
                         <View style={tw`flex-row w-full justify-between`}>
                             <TextInput
-                                style={[tw`flex-row w-grow mr-1 border-2 bg-transparent`, { borderColor: textColor, color: textColor }]}
+                                style={[tw`flex-row w-grow mr-1 border-2 bg-transparent`, { borderColor, color: textColor }]}
                                 onChangeText={(text) => {
                                     setAmount(text);
                                 }}
                                 placeholder="SYP XXXX"
                                 keyboardType="number-pad"
                                 maxLength={16}
-                                placeholderTextColor={textColor}
+                                placeholderTextColor={placeholderColor}
                                 value={amount}
                             />
                         </View>
@@ -278,19 +279,19 @@ const IssueBill: React.FC = () => {
                         <Text style={[tw`text-sm pl-2 pb-1`, { color: textColor }]}>Description (Optional)</Text>
                         <View style={tw`flex-row w-full justify-between`}>
                             <TextInput
-                                style={[tw`flex-row  w-grow mr-1 border-2 bg-transparent pt-3`, { borderColor: textColor, color: textColor, height: 150, textAlignVertical: 'top' }]}
+                                style={[tw`flex-row  w-grow mr-1 border-2 bg-transparent pt-3`, { borderColor, color: textColor, height: 150, textAlignVertical: 'top' }]}
                                 onChangeText={(text) => {
                                     setDescription(text);
                                 }}
                                 placeholder="(Optional) Describe this transaction here..."
                                 maxLength={250}
-                                placeholderTextColor={textColor}
+                                placeholderTextColor={placeholderColor}
                                 multiline={true}
                                 value={description || ""}
                             />
                         </View>
                         <TouchableOpacity
-                            style={[tw`flex-row justify-center items-center mt-8`, { backgroundColor: buttonBackgroundColor, padding: 16, borderRadius: 8 }]}
+                            style={[tw`flex-row justify-center items-center mt-8`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                             onPress={async () => {
                                 try {
                                     console.log(amount);
@@ -314,7 +315,7 @@ const IssueBill: React.FC = () => {
                                 }
                             }}
                         >
-                            <Icon name={"check"} size={20} color={theme === 'light' ? '#FFFFFF' : '#000000'} />
+                            <Icon name={"check"} size={20} color={buttonTextColor} />
                             <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                                 Issue Bill
                             </Text>
@@ -378,20 +379,21 @@ const IssueBill: React.FC = () => {
                                 </View>}
                             {bill.status !== "Paid" && <View>
                                 <TouchableOpacity
-                                    style={[tw`flex-row justify-center items-center border-2 w-full`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                    style={[tw`flex-row justify-center items-center mt-8`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                                     onPress={async () => {
                                         setNfcTagModalVisible(true);
                                         setupTagDetection();
                                     }}
                                 >
-                                    <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                                    <Icon name={"credit-card"} size={20} color={buttonTextColor} />
+                                    <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                                         Pay with Card
                                     </Text>
                                 </TouchableOpacity>
                             </View>}
                             <View>
                                 <TouchableOpacity
-                                    style={[tw`flex-row justify-center items-center border-2 w-full`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                    style={[tw`flex-row justify-center items-center w-full`, { borderColor, padding: 16, borderRadius: 8 }]}
                                     onPress={async () => {
                                         setFinalDetailsModalVisible(false);
                                         navigation.reset({
@@ -400,10 +402,11 @@ const IssueBill: React.FC = () => {
                                         });
                                     }}
                                 >
-                                    <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                                    <Text style={[tw`text-base font-bold ml-2`, { color: buttonColor }]}>
                                         Return to Home
                                     </Text>
                                 </TouchableOpacity>
+
                             </View>
                         </View>}
                     </View>
@@ -450,7 +453,7 @@ const IssueBill: React.FC = () => {
                                         });
                                     }}
                                 >
-                                    <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
+                                    <Text style={[tw`text-sm font-bold`, { color: buttonColor }]}>
                                         Back to Home
                                     </Text>
                                 </TouchableOpacity>
@@ -460,7 +463,7 @@ const IssueBill: React.FC = () => {
                                 <Icon name={"x"} size={100} color={textColor} />
                                 <Text style={[tw`text-xl font-bold`, { color: textColor }]}>Error Paying Bill</Text>
                                 <TouchableOpacity
-                                    style={[tw`flex-row justify-center items-center border-2 w-full mt-8`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                    style={[tw`flex-row justify-center items-center border-2 w-full mt-8`, { borderColor, padding: 16, borderRadius: 8 }]}
                                     onPress={() => {
                                         handleCheckAgain();
                                         setLoading(false);
@@ -482,7 +485,7 @@ const IssueBill: React.FC = () => {
                                         });
                                     }}
                                 >
-                                    <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
+                                    <Text style={[tw`text-sm font-bold`, { color: backgroundColor }]}>
                                         Back to Home
                                     </Text>
                                 </TouchableOpacity>
@@ -492,7 +495,6 @@ const IssueBill: React.FC = () => {
                 </View>
             </Modal>
             <BottomTab navigation={navigation} />
-
         </View >
     );
 };
