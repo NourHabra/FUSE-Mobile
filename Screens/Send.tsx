@@ -24,8 +24,6 @@ import { decryptData, encryptData } from '../crypto-utils';
 import axios from 'axios';
 import baseUrl from '../baseUrl';
 
-
-
 const Send: React.FC = () => {
     const { theme } = useTheme();
     const [accountDetailsModalVisible, setAccountDetailsModalVisible] = useState<boolean>(false);
@@ -36,7 +34,6 @@ const Send: React.FC = () => {
     const jwt: string = useSelector((state: any) => state.auth.jwt);
     const aesKey: string = useSelector((state: any) => state.auth.aesKey);
     const user = useSelector((state: any) => state.auth.user);
-
 
     const [message, setMessage] = useState<string>("");
     const [recipient, setRecipient] = useState<object>({});
@@ -83,10 +80,13 @@ const Send: React.FC = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
-    const textColor = theme === 'light' ? '#333333' : '#DDDDDD';
+    const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
+    const borderColor = theme === 'light' ? '#CCCCCC' : '#444444';
+    const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0';
+    const buttonColor = theme === 'light' ? '#028174' : '#65e991';
+    const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20';
+    const linkColor = theme === 'light' ? '#028174' : '#92DE8B';
     const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
-    const buttonBackgroundColor = theme === 'light' ? '#94B9C5' : '#94B9C5';
-    const buttonTextColor = theme === 'light' ? 'text-white' : 'text-black';
 
     useEffect(() => {
         const loadLogo = async () => {
@@ -103,11 +103,11 @@ const Send: React.FC = () => {
 
     const CustomButton = ({ title, onPress, iconName }: { title: string, onPress: () => void, iconName: string }) => (
         <TouchableOpacity
-            style={[tw`flex-row items-center justify-center w-1/2 py-3 my-2 rounded-full mx-1`, { backgroundColor: buttonBackgroundColor }]}
+            style={[tw`flex-row items-center justify-center w-1/2 py-3 my-2 rounded-full mx-1`, { backgroundColor: buttonColor }]}
             onPress={onPress}
         >
-            <Icon name={iconName} size={28} color={theme === 'light' ? '#FFFFFF' : '#000000'} />
-            <Text style={[tw`text-xl font-bold ml-2`, { color: theme === 'light' ? '#FFFFFF' : '#000000' }]}>{title}</Text>
+            <Icon name={iconName} size={28} color={buttonTextColor} />
+            <Text style={[tw`text-xl font-bold ml-2`, { color: buttonTextColor }]}>{title}</Text>
         </TouchableOpacity>
     );
 
@@ -127,6 +127,7 @@ const Send: React.FC = () => {
                 placeholder={placeholder}
                 keyboardType="number-pad"
                 maxLength={30}
+                placeholderTextColor={placeholderColor}
             />
         </View>
     );
@@ -242,7 +243,7 @@ const Send: React.FC = () => {
             <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
             <View style={tw`flex-row items-center mt-4 mx-4 py-2`}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={tw`mr-2`}>
-                    <Icon name="arrow-left" size={28} color={theme === 'light' ? '#000000' : '#FFFFFF'} />
+                    <Icon name="arrow-left" size={28} color={textColor} />
                 </TouchableOpacity>
                 <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>Send</Text>
             </View>
@@ -257,21 +258,21 @@ const Send: React.FC = () => {
                                 <Text style={[tw`text-sm pl-2 pb-1`, { color: textColor }]}>Account Number / Username</Text>
                                 <View style={tw`flex-row w-full justify-between`}>
                                     <TextInput
-                                        style={[tw`flex-row w-grow mr-1 border-2 bg-transparent`, { borderColor: textColor, color: textColor }]}
+                                        style={[tw`flex-row w-grow mr-1 border-2 bg-transparent`, { borderColor, color: textColor }]}
                                         onChangeText={(text) => {
                                             setAccountNumber(text);
                                         }}
                                         placeholder="XXXX XXXX XXXX XXXX"
                                         keyboardType="number-pad"
                                         maxLength={16}
-                                        placeholderTextColor={textColor}
+                                        placeholderTextColor={placeholderColor}
                                         onTouchStart={() => initializeFields()}
                                         value={accountNumber}
                                     />
                                     <TouchableOpacity
                                         style={[
                                             tw`flex-row items-center justify-center py-3 rounded-lg px-4 border-2`,
-                                            { borderColor: textColor },
+                                            { borderColor },
                                         ]}
                                         onPress={() => {
                                             Keyboard.dismiss();
@@ -331,10 +332,10 @@ const Send: React.FC = () => {
                             <AccountDetail title='Type' content={recipient.type} />
                             <AccountDetail title='Account Status' content={recipient.status} />
                             <TouchableOpacity
-                                style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonBackgroundColor, padding: 16, borderRadius: 8 }]}
+                                style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                                 onPress={() => confirmAccount()}
                             >
-                                <Icon name={"check"} size={20} color={theme === 'light' ? '#FFFFFF' : '#000000'} />
+                                <Icon name={"check"} size={20} color={buttonTextColor} />
                                 <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                                     Confirm
                                 </Text>
@@ -355,20 +356,19 @@ const Send: React.FC = () => {
                         {/* Input Amount */}
                         {showAmountInput &&
                             <View>
-                                <Text style={[tw`text-sm pl-2 pb-1`, { color: textColor }]}>Amount ({recipient.currency})</Text>
+                                <Text style={[tw`text-sm pl-2 pb-1`, { color: textColor }]}>Amount</Text>
                                 <View style={tw`flex-row w-full justify-between items-center`}>
                                     <TextInput
-                                        style={[tw`flex-row w-grow mr-1 border-2 bg-transparent`, { borderColor: textColor, color: textColor }]}
+                                        style={[tw`flex-row w-grow mr-1 border-2 bg-transparent`, { borderColor, color: textColor }]}
                                         onChangeText={(text) => setAmount(text)}
                                         placeholder="X,XXX.xx"
                                         keyboardType="number-pad"
-                                        placeholderTextColor={textColor}
+                                        placeholderTextColor={placeholderColor}
                                     />
-                                    <TouchableOpacity
-                                        style={[
-                                            tw`flex-row items-center justify-center py-3 rounded-lg px-4 border-2`,
-                                            { borderColor: textColor },
-                                        ]}
+                                    <TouchableOpacity style={[
+                                        tw`flex-row items-center justify-center py-3 rounded-lg px-4 border-2`,
+                                        { borderColor },
+                                    ]}
                                         onPress={() => {
                                             Keyboard.dismiss();
                                             inputAmount();
@@ -379,9 +379,7 @@ const Send: React.FC = () => {
                                             size={20}
                                             color={textColor}
                                         />
-                                        {/* <Text style={[tw`text-base font-bold ml-2`, { color: theme === 'light' ? '#FFFFFF' : '#000000' }]}>Share</Text> */}
                                     </TouchableOpacity>
-
                                 </View>
                             </View>
                         }
@@ -390,7 +388,7 @@ const Send: React.FC = () => {
                         {!loading && showFinalDetails && <View style={tw`h-full justify-center w-full`}>
                             <Text style={[tw`text-2xl font-bold mb-2`, { color: textColor }]}>Transaction Details</Text>
                             <View style={tw`w-full flex-row justify-center pb-4`}>
-                                <View style={[tw`w-full border h-0`, { borderColor: textColor }]} />
+                                <View style={[tw`w-full border h-0`, { borderColor }]} />
                             </View>
                             <AccountDetail title='Account Number' content={recipient.id} />
                             <AccountDetail title='Account Holder Name' content={recipient.user.name} />
@@ -398,13 +396,13 @@ const Send: React.FC = () => {
                             <AccountDetail title='Account Status' content={recipient.status} />
                             <AccountDetail title='Amount' content={amount} />
                             <View style={tw`w-full flex-row justify-center pb-4`}>
-                                <View style={[tw`w-full border h-0`, { borderColor: textColor }]} />
+                                <View style={[tw`w-full border h-0`, { borderColor }]} />
                             </View>
                             <TouchableOpacity
-                                style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonBackgroundColor, padding: 16, borderRadius: 8 }]}
+                                style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                                 onPress={() => confirmTransaction()}
                             >
-                                <Icon name={"check"} size={20} color={theme === 'light' ? '#FFFFFF' : '#000000'} />
+                                <Icon name={"check"} size={20} color={buttonTextColor} />
                                 <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                                     Transfer
                                 </Text>
@@ -423,7 +421,7 @@ const Send: React.FC = () => {
                         {showTransactionStatus && <View style={tw`flex-col items-center w-full h-full justify-center`}>
                             {transactionStatus == "success" &&
                                 <View style={tw`flex-col items-center`}>
-                                    <Icon name={"check"} size={120} color={textColor} />
+                                    <Icon name={"check"} size={120} color={buttonColor} />
                                     <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>
                                         Success
                                     </Text>
@@ -431,7 +429,7 @@ const Send: React.FC = () => {
                                         Transaction completed successfully.
                                     </Text>
                                     <TouchableOpacity
-                                        style={[tw`flex-row justify-center items-center border-2 mt-4`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                        style={[tw`flex-row justify-center items-center border-2 mt-4`, { borderColor, padding: 16, borderRadius: 8 }]}
                                         onPress={() => generatePDF()}
                                     >
                                         <Icon name={"share"} size={20} color={textColor} />
@@ -456,7 +454,7 @@ const Send: React.FC = () => {
                             }
                             {transactionStatus != "success" &&
                                 <View style={tw`flex-col items-center pt-16`}>
-                                    <Icon name={"check"} size={120} color={textColor} />
+                                    <Icon name={"x"} size={120} color={textColor} />
                                     <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>
                                         Failure
                                     </Text>
@@ -474,11 +472,11 @@ const Send: React.FC = () => {
                         or you can use QR Code instead
                     </Text>
                     <TouchableOpacity
-                        style={[tw`flex-row justify-center items-center border-2`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                         onPress={() => setAccountDetailsModalVisible(true)}
                     >
-                        <Icon name={"camera"} size={20} color={textColor} />
-                        <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                                <Icon name={"camera"} size={20} color={buttonTextColor} />
+                        <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                             Scan QR Code
                         </Text>
                     </TouchableOpacity>
@@ -572,7 +570,6 @@ class FillToAspectRatio extends React.Component<Props, State> {
         const { height, width } = layoutInfo;
         let wrapperWidth;
         let wrapperHeight;
-        // return <Text>lol: before </Text>
         const ratio = this.getRatio();
         if (ratio * height < width) {
             wrapperHeight = width / ratio;
@@ -583,7 +580,6 @@ class FillToAspectRatio extends React.Component<Props, State> {
         }
         const wrapperPaddingX = (width - wrapperWidth) / 2;
         const wrapperPaddingY = (height - wrapperHeight) / 2;
-
 
         return (
             <View onLayout={this.handleLayout} style={{
