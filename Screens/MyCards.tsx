@@ -150,7 +150,7 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
         }}
       >
         <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-90 h-full`}>
-          <View style={[tw`w-11/12 p-5 rounded-xl h-3/6 flex-col items-center justify-between`, { backgroundColor: cardBackgroundColor }]}>
+          <View style={[tw`w-11/12 p-5 rounded-xl h-auto flex-col items-center justify-between`, { backgroundColor: cardBackgroundColor }]}>
             {!showCreditCardResult && <View style={tw`flex-row justify-between items-center w-full mb-4`}>
               <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>
                 Issue New Card
