@@ -148,6 +148,7 @@ const Send: React.FC = () => {
 
     const handleBarCodeRead = (e: BarCodeReadEvent) => {
         setAccountNumber(e.data);
+        searchForAccount(e.data); 
         setMessage(e.data);
         setAccountDetailsModalVisible(false);
     };
@@ -472,10 +473,10 @@ const Send: React.FC = () => {
                         or you can use QR Code instead
                     </Text>
                     <TouchableOpacity
-                                style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
+                        style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                         onPress={() => setAccountDetailsModalVisible(true)}
                     >
-                                <Icon name={"camera"} size={20} color={buttonTextColor} />
+                        <Icon name={"camera"} size={20} color={buttonTextColor} />
                         <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                             Scan QR Code
                         </Text>
