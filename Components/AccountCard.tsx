@@ -12,7 +12,7 @@ interface AccountCardProps {
   balance: string;
 }
 
-const AccountCard: React.FC<AccountCardProps> = ({ type, balance }) => {
+const AccountCard = ({ navigation, type, balance }) => {
   return (
     <ImageBackground
       source={BackgroundImage}
@@ -27,7 +27,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ type, balance }) => {
         <Text style={tw`text-white font-bold text-3xl`}>{balance}</Text>
       </View>
       <View style={tw`w-full flex-row justify-end rounded-full`}>
-        <TouchableOpacity onPress={() => console.log("View Account Tapped")} style={tw`flex-row justify-end items-center px-1`}>
+        <TouchableOpacity onPress={() => navigation.navigate("Receive")} style={tw`flex-row justify-end items-center px-1`}>
           <Text style={tw`text-white text-lg pr-1`}>Details</Text>
           <Icon name="arrow-right-circle" size={20} color="white" />
         </TouchableOpacity>

@@ -135,7 +135,7 @@ const Home = ({ navigation }: { navigation: any }) => {
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <View style={{ width: cardWidth, marginHorizontal: cardSpacing / 2 }}>
-                  <AccountCard type={item.type} balance={item.balance} />
+                  <AccountCard navigation={navigation} type={item.type} balance={item.balance} />
                 </View>
               )}
               showsHorizontalScrollIndicator={false}
