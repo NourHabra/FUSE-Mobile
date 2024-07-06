@@ -119,6 +119,7 @@ const Home = ({ navigation }: { navigation: any }) => {
     <View style={[tw`flex-1`, { backgroundColor }]}>
       <StatusBar barStyle={statusBarStyle} backgroundColor={backgroundColor} />
       <ScrollView
+        style={tw`flex-1 h-full`}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -194,13 +195,15 @@ const Home = ({ navigation }: { navigation: any }) => {
                 <View style={tw`w-full flex-row justify-between px-4 items-center`}>
                   <Text style={[tw`text-xl font-bold`, { color: textColor }]}>Bills (Pending)</Text>
                 </View>
-                <ScrollView style={tw`w-full h-7/12 pt-4`} contentContainerStyle={tw`w-full flex-col items-center`}>
+                <ScrollView style={tw`w-full h-8/12 pt-4`} contentContainerStyle={tw`w-full flex-wrap flex-row justify-center pb-24`}>
                   {unpaidBills.length > 0 && unpaidBills.map((bill, index) => (
-                    <TouchableOpacity style={tw`w-full`} key={index} onPress={() => { }}>
-                      <View style={tw`w-full flex-row justify-between px-4 py-6 my-1 rounded-xl bg-black`}>
-                        <Text style={tw`text-white text-base`}>Bill #{bill.id}</Text>
-                        <Text style={tw`text-white text-base`}>{bill.details}</Text>
-                        <Text style={tw`text-white text-base`}>{bill.amount}</Text>
+                    <TouchableOpacity style={[tw`w-full p-1`]} key={index} onPress={() => { }}>
+                      <View style={[tw`w-full flex-row justify-between items-center px-4 py-2 rounded-3xl bg-transparent border`, { borderColor: primaryColor }]}>
+                        <View style={tw`flex-col items-start pl-2`}>
+                          <Text style={[tw`text-xl font-bold`, { color: theme === 'light' ? '#000000' : '#dedede' }]}>Bill #{bill.id}</Text>
+                          <Text style={[tw`text-sm pl-2`, { color: theme === 'light' ? '#000000' : '#dedede' }]}>{bill.details}</Text>
+                        </View>
+                        <Text style={[tw`text-2xl font-bold`, { color: theme === 'light' ? '#000000' : '#dedede' }]}>${bill.amount}</Text>
                       </View>
                     </TouchableOpacity>
                   ))}
@@ -214,9 +217,9 @@ const Home = ({ navigation }: { navigation: any }) => {
             }
           </View>
         </View>
-      </ScrollView>
+      </ScrollView >
       <BottomTab navigation={navigation} />
-    </View>
+    </View >
   );
 };
 
