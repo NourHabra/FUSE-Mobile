@@ -1,7 +1,5 @@
-// @FUSE-EXPO/Screens/TransactionHistory.tsx
-
 import React, { useState, useCallback } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, StatusBar, RefreshControl, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StatusBar, RefreshControl, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useTheme } from '../ThemeContext';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -55,53 +53,58 @@ const TransactionHistory: React.FC<{ navigation: any }> = ({ navigation }) => {
   );
 
   return (
-    <View style={[tw`flex-1`, { backgroundColor }]}>
-      <StatusBar backgroundColor={backgroundColor} barStyle={theme === 'light' ? 'dark-content' : 'light-content'} />
-      <View style={tw`flex-1 p-5`}>
-        <View style={tw`flex-row items-center mb-4`}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={tw`mr-2`}>
-            <Icon name="arrow-left" size={28} color={textColor} />
-          </TouchableOpacity>
-          <Text style={titleStyle}>Transaction History</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <View style={[tw`flex-1`, { backgroundColor }]}>
+        <StatusBar backgroundColor={backgroundColor} barStyle={theme === 'light' ? 'dark-content' : 'light-content'} />
+        <View style={tw`flex-1 p-5`}>
+          <View style={tw`flex-row items-center mb-4`}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={tw`mr-2`}>
+              <Icon name="arrow-left" size={28} color={textColor} />
+            </TouchableOpacity>
+            <Text style={titleStyle}>Transaction History</Text>
+          </View>
+          <View style={tw`flex-row items-center justify-between mb-4`}>
+            <TextInput
+              style={[tw`flex-1 p-3 rounded-lg mr-2`, { backgroundColor: cardBackgroundColor, color: textColor }]}
+              placeholder="Search"
+              placeholderTextColor={placeholderColor}
+              value={search}
+              onChangeText={setSearch}
+            />
+            <CustomButton iconName="format-list-bulleted" onPress={() => setFilter('all')} isActive={filter === 'all'} />
+            <CustomButton iconName="send" onPress={() => setFilter('send')} isActive={filter === 'send'} />
+            <CustomButton iconName="cash-multiple" onPress={() => setFilter('request')} isActive={filter === 'request'} />
+          </View>
+          {loading ? (
+            <ActivityIndicator size="large" color={buttonColor} />
+          ) : (
+            <FlatList
+              data={filteredTransactions}
+              keyExtractor={item => item.id}
+              renderItem={({ item }) => (
+                <View style={[tw`p-4 mb-2 rounded-lg`, { backgroundColor: cardBackgroundColor }]}>
+                  <Text style={[tw`text-lg font-bold`, { color: textColor }]}>{item.type === 'send' ? 'Sent' : 'Received'}</Text>
+                  <Text style={[tw`text-lg`, { color: textColor }]}>Amount: ${item.amount}</Text>
+                  <Text style={[tw`text-sm`, { color: placeholderColor }]}>Date: {item.date}</Text>
+                </View>
+              )}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={[buttonColor]}
+                  tintColor={buttonColor}
+                />
+              }
+            />
+          )}
         </View>
-        <View style={tw`flex-row items-center justify-between mb-4`}>
-          <TextInput
-            style={[tw`flex-1 p-3 rounded-lg mr-2`, { backgroundColor: cardBackgroundColor, color: textColor }]}
-            placeholder="Search"
-            placeholderTextColor={placeholderColor}
-            value={search}
-            onChangeText={setSearch}
-          />
-          <CustomButton iconName="format-list-bulleted" onPress={() => setFilter('all')} isActive={filter === 'all'} />
-          <CustomButton iconName="send" onPress={() => setFilter('send')} isActive={filter === 'send'} />
-          <CustomButton iconName="cash-multiple" onPress={() => setFilter('request')} isActive={filter === 'request'} />
-        </View>
-        {loading ? (
-          <ActivityIndicator size="large" color={buttonColor} />
-        ) : (
-          <FlatList
-            data={filteredTransactions}
-            keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-              <View style={[tw`p-4 mb-2 rounded-lg`, { backgroundColor: cardBackgroundColor }]}>
-                <Text style={[tw`text-lg font-bold`, { color: textColor }]}>{item.type === 'send' ? 'Sent' : 'Received'}</Text>
-                <Text style={[tw`text-lg`, { color: textColor }]}>Amount: ${item.amount}</Text>
-                <Text style={[tw`text-sm`, { color: placeholderColor }]}>Date: {item.date}</Text>
-              </View>
-            )}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                colors={[buttonColor]}
-                tintColor={buttonColor}
-              />
-            }
-          />
-        )}
+        <BottomTab navigation={navigation} />
       </View>
-      <BottomTab navigation={navigation} />
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

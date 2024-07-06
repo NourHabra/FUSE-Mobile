@@ -492,7 +492,7 @@ const Pay: React.FC = () => {
                         {showTransactionStatus && <View style={tw`flex-col items-center w-full h-full justify-center`}>
                             {transactionStatus == "success" &&
                                 <View style={tw`flex-col items-center`}>
-                                    <Icon name={"check"} size={120} color={textColor} />
+                                    <Icon name={"check"} size={120} color={buttonColor} />
                                     <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>
                                         Success
                                     </Text>
