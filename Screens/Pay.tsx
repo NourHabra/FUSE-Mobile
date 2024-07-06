@@ -98,9 +98,9 @@ const Pay: React.FC = () => {
     const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
     const borderColor = theme === 'light' ? '#CCCCCC' : '#444444';
     const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0';
-    const buttonColor = theme === 'light' ? '#028174' : '#92DE8B';
+    const buttonColor = theme === 'light' ? '#028174' : '#65e991';
     const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20';
-    const linkColor = theme === 'light' ? '#028174' : '#92DE8B';
+    const linkColor = theme === 'light' ? '#028174' : '#65e991';
     const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
     const lightBackgrounds = [CartGlass1, CartGlass3, CartGlass7, CartGlass8];
     const darkBackgrounds = [CartGlass1, CartGlass3, CartGlass7, CartGlass8];
@@ -400,16 +400,16 @@ const Pay: React.FC = () => {
                         {/* Bill details */}
                         {showSelectCard && <View style={tw`h-full`}>
                             <View style={tw`px-4`}>
-                            <Text style={[tw`text-2xl font-bold mb-2`, { color: textColor }]}>Select Card</Text>
-                            <View style={tw`w-full flex-row justify-center pb-4`}>
-                                <View style={[tw`w-full border h-0`, { borderColor }]} />
+                                <Text style={[tw`text-2xl font-bold mb-2`, { color: textColor }]}>Select Card</Text>
+                                <View style={tw`w-full flex-row justify-center pb-4`}>
+                                    <View style={[tw`w-full border h-0`, { borderColor }]} />
+                                </View>
+                                <AccountDetail title='Amount to pay' content={bill.amount} />
                             </View>
-                            <AccountDetail title='Amount to pay' content={bill.amount} />
-                            </View>
-                            <ScrollView 
-                                style={tw`w-full h-8/12`} 
+                            <ScrollView
+                                style={tw`w-full h-8/12`}
                                 contentContainerStyle={tw`w-full flex-col items-center`}
-                                showsVerticalScrollIndicator={false} 
+                                showsVerticalScrollIndicator={false}
                                 showsHorizontalScrollIndicator={false}
                                 refreshControl={
                                     <RefreshControl
@@ -422,24 +422,24 @@ const Pay: React.FC = () => {
                             >
                                 {cards.map((card, index) => {
                                     const backgroundImage = theme === 'light'
-                                        ? lightBackgrounds[Math.floor(Math.random() * lightBackgrounds.length)]                                        : darkBackgrounds[Math.floor(Math.random() * darkBackgrounds.length)];
+                                        ? lightBackgrounds[Math.floor(Math.random() * lightBackgrounds.length)] : darkBackgrounds[Math.floor(Math.random() * darkBackgrounds.length)];
 
                                     return (
-                                        <TouchableOpacity 
-                                            key={index} 
+                                        <TouchableOpacity
+                                            key={index}
                                             onPress={() => {
                                                 console.log(card.id);
                                                 selectCard(card)
                                             }}
                                             style={tw`w-full mb-4`} // Adjust the width and margin of the card container
                                         >
-                                            <CreditCard 
-                                                backgroundImage={backgroundImage} 
-                                                id={card.id} 
-                                                name={card.cardName} 
-                                                balance={card.balance} 
-                                                cvv={card.cvv} 
-                                                expiry={card.expiryDate} 
+                                            <CreditCard
+                                                backgroundImage={backgroundImage}
+                                                id={card.id}
+                                                name={card.cardName}
+                                                balance={card.balance}
+                                                cvv={card.cvv}
+                                                expiry={card.expiryDate}
                                             />
                                         </TouchableOpacity>
                                     )

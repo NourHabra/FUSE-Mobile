@@ -40,9 +40,9 @@ const Login = () => {
   const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
   const borderColor = theme === 'light' ? '#CCCCCC' : '#444444';
   const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0';
-  const buttonColor = theme === 'light' ? '#028174' : '#92DE8B';
+  const buttonColor = theme === 'light' ? '#028174' : '#65e991';
   const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20';
-  const linkColor = theme === 'light' ? '#028174' : '#92DE8B';
+  const linkColor = theme === 'light' ? '#028174' : '#65e991';
 
   useEffect(() => {
     (async () => {
@@ -265,16 +265,16 @@ const Login = () => {
       </View>
 
       {isBiometricSupported && useBiometrics && (
-  <TouchableOpacity
-    style={tw`absolute bottom-10 flex-row items-center`}
-    onPress={handleBiometricAuth}
-  >
-    <Icon name="account-lock-open" size={30} color={textColor} />
-    <Text style={[tw`text-sm ml-1`, { color: textColor }]}>
-      Login with Biometrics
-    </Text>
-  </TouchableOpacity>
-)}
+        <TouchableOpacity
+          style={tw`absolute bottom-10 flex-row items-center`}
+          onPress={handleBiometricAuth}
+        >
+          <Icon name="account-lock-open" size={30} color={textColor} />
+          <Text style={[tw`text-sm ml-1`, { color: textColor }]}>
+            Login with Biometrics
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

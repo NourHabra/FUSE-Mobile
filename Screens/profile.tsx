@@ -41,7 +41,7 @@ const Profile = () => {
       [
         {
           text: 'No',
-          onPress: () => {},
+          onPress: () => { },
           style: 'cancel',
         },
         {
@@ -59,7 +59,7 @@ const Profile = () => {
   const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
   const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
   const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
-  const buttonColor = theme === 'light' ? '#028174' : '#92DE8B';
+  const buttonColor = theme === 'light' ? '#028174' : '#65e991';
   const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20';
   const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0';
 
@@ -97,14 +97,14 @@ const Profile = () => {
             <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>John Doe</Text>
             <Text style={[tw`text-lg`, { color: placeholderColor }]}>johndoe@example.com</Text>
           </View>
-          
+
           <ProfileSection title="Account">
             <ProfileButton title="Personal Information" onPress={() => setPersonalInfoModalVisible(true)} />
             <ProfileButton title="Change Password" onPress={() => setChangePasswordModalVisible(true)} />
           </ProfileSection>
-          
+
           <ProfileSection title="Settings">
-            <ProfileButton title="Notifications" onPress={() => {/* Handle notifications */}} />
+            <ProfileButton title="Notifications" onPress={() => {/* Handle notifications */ }} />
             <ProfileButton title="Privacy" onPress={() => setOldPinModalVisible(true)} />
             <View style={tw`py-2 flex-row justify-between items-center`}>
               <Text style={[tw`text-lg`, { color: textColor }]}>Dark Theme</Text>
@@ -125,9 +125,9 @@ const Profile = () => {
               />
             </View>
           </ProfileSection>
-          
-          <TouchableOpacity 
-            style={[tw`w-full py-3 items-center rounded-lg`, { backgroundColor: '#FF3B30' }]} 
+
+          <TouchableOpacity
+            style={[tw`w-full py-3 items-center rounded-lg`, { backgroundColor: '#FF3B30' }]}
             onPress={handleLogout}
           >
             <Text style={tw`text-white text-lg font-bold`}>Logout</Text>
@@ -285,7 +285,7 @@ const Profile = () => {
             <View style={tw`mb-4 mt-8`}>
               <Text style={[tw`text-lg font-bold mb-4`, { color: textColor }]}>Enter New PIN</Text>
               <View style={tw`flex-row justify-center mb-4`}>
-                                {[0, 1, 2, 3].map((_, index) => (
+                {[0, 1, 2, 3].map((_, index) => (
                   <TextInput
                     key={index}
                     style={[tw`w-12 h-12 mx-1 text-center text-lg rounded-lg`, { backgroundColor: cardBackgroundColor, color: textColor }]}
@@ -305,8 +305,8 @@ const Profile = () => {
                   />
                 ))}
               </View>
-              <TouchableOpacity 
-                style={[tw`py-3 rounded-lg items-center`, { backgroundColor: buttonColor }]} 
+              <TouchableOpacity
+                style={[tw`py-3 rounded-lg items-center`, { backgroundColor: buttonColor }]}
                 onPress={() => {
                   setLoading(true);
                   // Simulate PIN change process

@@ -76,9 +76,9 @@ const Signup = () => {
   const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
   const borderColor = theme === 'light' ? '#CCCCCC' : '#444444';
   const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0';
-  const buttonColor = theme === 'light' ? '#028174' : '#92DE8B';
+  const buttonColor = theme === 'light' ? '#028174' : '#65e991';
   const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20';
-  const linkColor = theme === 'light' ? '#028174' : '#92DE8B';
+  const linkColor = theme === 'light' ? '#028174' : '#65e991';
 
   const handleSignupStep1 = async () => {
     setLoading(true);
@@ -161,10 +161,16 @@ const Signup = () => {
     <View style={{ flex: 1, backgroundColor, justifyContent: 'center', alignItems: 'center', padding: 16 }}>
       <StatusBar backgroundColor={backgroundColor} barStyle={theme === 'light' ? 'dark-content' : 'light-content'} />
       <View style={{ width: '100%', maxWidth: 400, padding: 24 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
-          <Text style={{ fontSize: 32, fontWeight: 'bold', color: textColor }}>
-            Sign Up
-          </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <View style={tw`flex-row items-center`}>
+            {step != 1 &&
+              <TouchableOpacity onPress={() => setStep(step - 1)} style={tw`mr-2`}>
+                <Icon name="arrow-left" size={28} color={theme === 'light' ? '#000000' : '#FFFFFF'} />
+              </TouchableOpacity>}
+            <Text style={{ fontSize: 32, fontWeight: 'bold', color: textColor }}>
+              Sign Up
+            </Text>
+          </View>
           <Image source={theme === 'light' ? FuseLogo : WhiteLogo} style={{ width: 50, height: 50 }} />
         </View>
 
@@ -203,6 +209,7 @@ const Signup = () => {
               placeholder="Full Name"
               textContentType="name"
               autoComplete="name"
+              value={name}
             />
 
             <Text style={[tw`text-sm pl-2 mb-1`, { color: textColor }]}>Phone</Text>
@@ -213,6 +220,7 @@ const Signup = () => {
               keyboardType="phone-pad"
               textContentType="telephoneNumber"
               autoComplete="tel"
+              value={phone}
             />
 
             <Text style={[tw`text-sm pl-2 mb-1`, { color: textColor }]}>Birth Date</Text>

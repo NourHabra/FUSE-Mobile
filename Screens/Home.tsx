@@ -102,6 +102,8 @@ const Home = ({ navigation }: { navigation: any }) => {
   const textColor = theme === 'light' ? '#333333' : '#DDDDDD';
   const iconColorClass = theme === 'light' ? 'black' : 'white';
   const statusBarStyle = theme === 'light' ? 'dark-content' : 'light-content';
+  const primaryColor = theme === 'light' ? '#006e63' : '#65e991';
+
 
   const cardWidth = Dimensions.get('window').width * 0.85;
   const cardSpacing = 10;
@@ -150,7 +152,7 @@ const Home = ({ navigation }: { navigation: any }) => {
                   style={[
                     tw`h-2 w-2 rounded-full mx-1`,
                     {
-                      backgroundColor: currentIndex === index ? '#32CD32' : '#D3D3D3',
+                      backgroundColor: currentIndex === index ? primaryColor : '#D3D3D3',
                     },
                   ]}
                 />
@@ -159,18 +161,19 @@ const Home = ({ navigation }: { navigation: any }) => {
           </View>
           <View style={tw`w-full flex-col items-center my-4`}>
             <View style={tw`w-full flex-row justify-evenly`}>
-              <TouchableOpacity onPress={() => navigation.navigate("Pay")} style={tw`w-1/4 justify-center items-center bg-blue-500 py-3 rounded-lg shadow-md`}>
-                <Icon name="credit-card" size={32} color={iconColorClass} style={tw`pb-2`} />
-                <Text style={[tw`text-lg font-semibold`, { color: iconColorClass }]}>Pay</Text>
+              <TouchableOpacity onPress={() => navigation.navigate("Pay")} style={tw`w-1/4 justify-center items-center py-3 rounded-lg`}>
+                <Icon name="credit-card" size={32} color={primaryColor} style={tw`pb-2`} />
+                <Text style={[tw`text-lg font-semibold`, { color: primaryColor }]}>Pay</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => navigation.navigate("Send")} style={tw`w-1/4 justify-center items-center bg-green-500 py-3 rounded-lg shadow-md`}>
-                <Icon name="send" size={32} color={iconColorClass} style={tw`pb-2`} />
-                <Text style={[tw`text-lg font-semibold`, { color: iconColorClass }]}>Send</Text>
+              <TouchableOpacity onPress={() => navigation.navigate("Send")} style={tw`w-1/4 justify-center items-center py-3 rounded-lg`}>
+                <Icon name="send" size={32} color={primaryColor} style={tw`pb-2`} />
+                <Text style={[tw`text-lg font-semibold`, { color: primaryColor }]}>Send</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => navigation.navigate("Receive")} style={tw`w-1/4 justify-center items-center bg-purple-500 py-3 rounded-lg shadow-md`}>
-                <Icon name="inbox" size={32} color={iconColorClass} style={tw`pb-2`} />
-                <Text style={[tw`text-lg font-semibold`, { color: iconColorClass }]}>Receive</Text>
-              </TouchableOpacity>
+              {role == "Merchant" &&
+                <TouchableOpacity onPress={() => navigation.navigate("IssueBill")} style={tw`w-1/4 justify-center items-center py-3 rounded-lg`}>
+                  <Icon name="edit" size={32} color={primaryColor} style={tw`pb-2`} />
+                  <Text style={[tw`text-lg font-semibold`, { color: primaryColor }]}>Issue Bill</Text>
+                </TouchableOpacity>}
             </View>
             {role == "Customer" &&
               <View style={tw`w-full flex-col justify-evenly items-center mt-4 bg-black`}>
@@ -188,10 +191,6 @@ const Home = ({ navigation }: { navigation: any }) => {
               <View style={tw`w-full flex-col justify-evenly items-center mt-4`}>
                 <View style={tw`w-full flex-row justify-between px-4 items-center`}>
                   <Text style={[tw`text-xl font-bold`, { color: textColor }]}>Bills (Pending)</Text>
-                  <TouchableOpacity onPress={() => navigation.navigate("IssueBill")} style={tw`w-auto flex-row justify-center items-center bg-purple-500 py-1 px-2 rounded-lg shadow-md`}>
-                    <Icon name="edit" size={32} color={iconColorClass} style={tw`mr-2`} />
-                    <Text style={[tw`text-lg font-bold`, { color: iconColorClass }]}>Issue Bill</Text>
-                  </TouchableOpacity>
                 </View>
                 <ScrollView style={tw`w-full h-7/12 pt-4`} contentContainerStyle={tw`w-full flex-col items-center`}>
                   {unpaidBills.length > 0 && unpaidBills.map((bill, index) => (

@@ -36,7 +36,7 @@ const TransactionHistory: React.FC<{ navigation: any }> = ({ navigation }) => {
   const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
   const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
   const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
-  const buttonColor = theme === 'light' ? '#028174' : '#92DE8B';
+  const buttonColor = theme === 'light' ? '#028174' : '#65e991';
   const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20';
   const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0';
 
