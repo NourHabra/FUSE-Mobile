@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard, ScrollView, Alert } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard, ScrollView, Alert, RefreshControl } from 'react-native';
 import {
     TextInput as DefaultTextInput,
     Platform,
@@ -29,7 +29,6 @@ import CartGlass1 from '../assets/Cart Glass 1.png';
 import CartGlass3 from '../assets/Cart Glass 3.png';
 import CartGlass7 from '../assets/Cart Glass 7.png';
 import CartGlass8 from '../assets/Cart Glass 8.png';
-
 
 const TextInput = ({
     placeholderTextColor,
@@ -62,9 +61,6 @@ const TextInput = ({
     );
 };
 
-
-
-
 const Pay: React.FC = () => {
     const { theme } = useTheme();
     const [accountDetailsModalVisible, setAccountDetailsModalVisible] = useState<boolean>(false);
@@ -78,7 +74,7 @@ const Pay: React.FC = () => {
     const [cards, setCards] = useState<object[]>([]);
     const [message, setMessage] = useState<string>("");
     const [billNumber, setBillNumber] = useState<string>("");
-    const [bill, setBill] = useState<objectl>({});
+    const [bill, setBill] = useState<object>({});
     const [loading, setLoading] = useState<boolean>(false);
     const [billFound, setBillFound] = useState<boolean>(true);
     const [selectedCard, setSelectedCard] = useState<object>({});
@@ -94,15 +90,18 @@ const Pay: React.FC = () => {
     const [showCta, setShowCta] = useState<boolean>(true);
     const [showSearchbar, setShowSearchbar] = useState<boolean>(true);
     const [showFinalDetails, setShowFinalDetails] = useState<boolean>(false);
+    const [refreshing, setRefreshing] = useState<boolean>(false);
 
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
-    const textColor = theme === 'light' ? '#333333' : '#DDDDDD';
+    const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
+    const borderColor = theme === 'light' ? '#CCCCCC' : '#444444';
+    const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0';
+    const buttonColor = theme === 'light' ? '#028174' : '#92DE8B';
+    const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20';
+    const linkColor = theme === 'light' ? '#028174' : '#92DE8B';
     const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
-    const buttonBackgroundColor = theme === 'light' ? '#94B9C5' : '#94B9C5';
-    const buttonTextColor = theme === 'light' ? 'text-white' : 'text-black';
-
     const lightBackgrounds = [CartGlass1, CartGlass3, CartGlass7, CartGlass8];
     const darkBackgrounds = [CartGlass1, CartGlass3, CartGlass7, CartGlass8];
 
@@ -119,27 +118,37 @@ const Pay: React.FC = () => {
         loadLogo();
     }, []);
 
-    useEffect(() => {
-        const fetchCards = async () => {
-            try {
-                const response = await axios.post(`${baseUrl}/card/user`, { jwt });
-                const decryptedPayload = decryptData(response.data.payload, aesKey);
-                setCards(decryptedPayload);
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-            }
-        };
+    const fetchCards = async () => {
+        try {
+            const response = await axios.post(`${baseUrl}/card/user`, { jwt });
+            const decryptedPayload = decryptData(response.data.payload, aesKey);
+            setCards(decryptedPayload);
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+    };
 
+    useEffect(() => {
         fetchCards();
+    }, []);
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        try {
+            await fetchCards();
+        } catch (error) {
+            console.error('Error refreshing data:', error);
+        }
+        setRefreshing(false);
     }, []);
 
     const CustomButton = ({ title, onPress, iconName }: { title: string, onPress: () => void, iconName: string }) => (
         <TouchableOpacity
-            style={[tw`flex-row items-center justify-center w-1/2 py-3 my-2 rounded-full mx-1`, { backgroundColor: buttonBackgroundColor }]}
+            style={[tw`flex-row items-center justify-center w-1/2 py-3 my-2 rounded-full mx-1`, { backgroundColor: buttonColor }]}
             onPress={onPress}
         >
-            <Icon name={iconName} size={28} color={theme === 'light' ? '#FFFFFF' : '#000000'} />
-            <Text style={[tw`text-xl font-bold ml-2`, { color: theme === 'light' ? '#FFFFFF' : '#000000' }]}>{title}</Text>
+            <Icon name={iconName} size={28} color={buttonTextColor} />
+            <Text style={[tw`text-xl font-bold ml-2`, { color: buttonTextColor }]}>{title}</Text>
         </TouchableOpacity>
     );
 
@@ -154,12 +163,13 @@ const Pay: React.FC = () => {
         <View style={tw`pb-4`}>
             <Text style={[tw`text-sm pl-2 pb-1`, { color: textColor }]}>{title}</Text>
             <TextInput
-                style={tw`flex-row`}
+                style={[tw`flex-row w-full border-2 bg-transparent`, { borderColor, color: textColor }]}
                 onChangeText={(text) => { setBillNumber(text); }}
                 placeholder={placeholder}
                 keyboardType="number-pad"
                 maxLength={30}
                 value={billNumber}
+                placeholderTextColor={placeholderColor}
             />
         </View>
     );
@@ -183,7 +193,6 @@ const Pay: React.FC = () => {
         }
     };
 
-
     const initializeFields = () => {
         setAccountFound(false);
         setBillNotFound(false);
@@ -200,10 +209,6 @@ const Pay: React.FC = () => {
     };
 
     const handleBarCodeRead = (e: BarCodeReadEvent) => {
-        // setBillNumber(e.data);
-        // setMessage(e.data);
-        // setAccountDetailsModalVisible(false);
-        // confirmBill
         searchForBill(e.data);
         setAccountDetailsModalVisible(false);
     };
@@ -291,16 +296,17 @@ const Pay: React.FC = () => {
         });
         await Sharing.shareAsync(newUri);
     };
+
     return (
         <View style={[tw`flex-col h-full justify-between`, { backgroundColor }]}>
             <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
             <View style={tw`flex-row items-center mt-4 mx-4 py-2`}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={tw`mr-2`}>
-                    <Icon name="arrow-left" size={28} color={theme === 'light' ? '#000000' : '#FFFFFF'} />
+                    <Icon name="arrow-left" size={28} color={textColor} />
                 </TouchableOpacity>
                 <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>Pay</Text>
             </View>
-            <View style={tw`px-5 pb-5 flex-col justify-between h-4/5`}>
+            <View style={tw`px-2.5 pb-5 flex-col justify-between h-4/5`}>
                 {/* Content excluding QR Code CTA */}
                 <View style={tw`flex-col justify-start`}>
                     {/* Search Section*/}
@@ -310,20 +316,20 @@ const Pay: React.FC = () => {
                             <Text style={[tw`text-sm pl-2 pb-1`, { color: textColor }]}>Bill Number</Text>
                             <View style={tw`flex-row w-full justify-between`}>
                                 <TextInput
-                                    style={[tw`flex-row w-grow mr-1 border-2 bg-transparent`, { borderColor: textColor, color: textColor }]}
+                                    style={[tw`flex-row w-grow mr-1 border-2 bg-transparent`, { borderColor, color: textColor }]}
                                     onChangeText={(text) => {
                                         setBillNumber(text);
                                     }}
                                     placeholder="XXXX XXXX XXXX XXXX"
                                     keyboardType="number-pad"
                                     maxLength={16}
-                                    placeholderTextColor={textColor}
+                                    placeholderTextColor={placeholderColor}
                                     onTouchStart={() => initializeFields()}
                                 />
                                 <TouchableOpacity
                                     style={[
                                         tw`flex-row items-center justify-center py-3 rounded-lg px-4 border-2`,
-                                        { borderColor: textColor },
+                                        { borderColor },
                                     ]}
                                     onPress={() => {
                                         Keyboard.dismiss();
@@ -335,9 +341,7 @@ const Pay: React.FC = () => {
                                         size={20}
                                         color={textColor}
                                     />
-                                    {/* <Text style={[tw`text-base font-bold ml-2`, { color: theme === 'light' ? '#FFFFFF' : '#000000' }]}>Share</Text> */}
                                 </TouchableOpacity>
-
                             </View>
                         </View>
                     </View>
@@ -367,7 +371,7 @@ const Pay: React.FC = () => {
                         {billFound && showBillDetails && <View>
                             <Text style={[tw`text-2xl font-bold mb-2`, { color: textColor }]}>Bill Details</Text>
                             <View style={tw`w-full flex-row justify-center pb-4`}>
-                                <View style={[tw`w-full border h-0`, { borderColor: textColor }]} />
+                                <View style={[tw`w-full border h-0`, { borderColor }]} />
                             </View>
                             <AccountDetail title='Bill Number' content={bill.id} />
                             <AccountDetail title='Category' content={bill.category} />
@@ -375,7 +379,7 @@ const Pay: React.FC = () => {
                             <AccountDetail title='Description' content={bill.details} />
                             <AccountDetail title='Amount' content={bill.amount} />
                             <TouchableOpacity
-                                style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonBackgroundColor, padding: 16, borderRadius: 8 }]}
+                                style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                                 onPress={() => confirmBill()}
                             >
                                 <Icon name={"check"} size={20} color={buttonTextColor} />
@@ -388,30 +392,55 @@ const Pay: React.FC = () => {
                                 onPress={() => cancelTransaction()}
                             >
                                 <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
-                                    Pay a differemt bill instead
+                                    Pay a different bill instead
                                 </Text>
                             </TouchableOpacity>
                         </View>}
 
                         {/* Bill details */}
                         {showSelectCard && <View style={tw`h-full`}>
+                            <View style={tw`px-4`}>
                             <Text style={[tw`text-2xl font-bold mb-2`, { color: textColor }]}>Select Card</Text>
                             <View style={tw`w-full flex-row justify-center pb-4`}>
-                                <View style={[tw`w-full border h-0`, { borderColor: textColor }]} />
+                                <View style={[tw`w-full border h-0`, { borderColor }]} />
                             </View>
                             <AccountDetail title='Amount to pay' content={bill.amount} />
-                            <ScrollView style={tw`w-full h-8/12`} contentContainerStyle={tw`w-full flex-col items-center`}>
+                            </View>
+                            <ScrollView 
+                                style={tw`w-full h-8/12`} 
+                                contentContainerStyle={tw`w-full flex-col items-center`}
+                                showsVerticalScrollIndicator={false} 
+                                showsHorizontalScrollIndicator={false}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={refreshing}
+                                        onRefresh={onRefresh}
+                                        colors={[theme === 'light' ? 'black' : 'white']}
+                                        tintColor={theme === 'light' ? 'black' : 'white'}
+                                    />
+                                }
+                            >
                                 {cards.map((card, index) => {
                                     const backgroundImage = theme === 'light'
-                                        ? lightBackgrounds[Math.floor(Math.random() * lightBackgrounds.length)]
-                                        : darkBackgrounds[Math.floor(Math.random() * darkBackgrounds.length)];
+                                        ? lightBackgrounds[Math.floor(Math.random() * lightBackgrounds.length)]                                        : darkBackgrounds[Math.floor(Math.random() * darkBackgrounds.length)];
 
                                     return (
-                                        <TouchableOpacity key={index} onPress={() => {
-                                            console.log(card.id);
-                                            selectCard(card)
-                                        }}>
-                                            <CreditCard backgroundImage={backgroundImage} id={card.id} name={card.cardName} balance={card.balance} cvv={card.cvv} expiry={card.expiryDate} />
+                                        <TouchableOpacity 
+                                            key={index} 
+                                            onPress={() => {
+                                                console.log(card.id);
+                                                selectCard(card)
+                                            }}
+                                            style={tw`w-full mb-4`} // Adjust the width and margin of the card container
+                                        >
+                                            <CreditCard 
+                                                backgroundImage={backgroundImage} 
+                                                id={card.id} 
+                                                name={card.cardName} 
+                                                balance={card.balance} 
+                                                cvv={card.cvv} 
+                                                expiry={card.expiryDate} 
+                                            />
                                         </TouchableOpacity>
                                     )
                                 })}
@@ -421,7 +450,7 @@ const Pay: React.FC = () => {
                                 onPress={() => cancelTransaction()}
                             >
                                 <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
-                                    Pay a differemt bill instead
+                                    Pay a different bill instead
                                 </Text>
                             </TouchableOpacity>
                         </View>}
@@ -430,22 +459,21 @@ const Pay: React.FC = () => {
                         {showFinalDetails && <View style={tw`justify-center w-full`}>
                             <Text style={[tw`text-2xl font-bold mb-2`, { color: textColor }]}>Transaction Details</Text>
                             <View style={tw`w-full flex-row justify-center pb-4`}>
-                                <View style={[tw`w-full border h-0`, { borderColor: textColor }]} />
+                                <View style={[tw`w-full border h-0`, { borderColor }]} />
                             </View>
                             <AccountDetail title='Bill Number' content={bill.id} />
                             <AccountDetail title='Category' content={bill.category} />
-                            {/* <AccountDetail title='Merchant' content={bill.merchantAccount.user.name} /> */}
                             <AccountDetail title='Description' content={bill.details} />
                             <AccountDetail title='Amount' content={bill.amount} />
                             <AccountDetail title='Card' content={selectedCard.id} />
                             <View style={tw`w-full flex-row justify-center pb-4`}>
-                                <View style={[tw`w-full border h-0`, { borderColor: textColor }]} />
+                                <View style={[tw`w-full border h-0`, { borderColor }]} />
                             </View>
                             <TouchableOpacity
-                                style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonBackgroundColor, padding: 16, borderRadius: 8 }]}
+                                style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                                 onPress={() => payBill(bill, selectedCard)}
                             >
-                                <Icon name={"credit-card"} size={20} color={theme === 'light' ? '#FFFFFF' : '#000000'} />
+                                <Icon name={"credit-card"} size={20} color={buttonTextColor} />
                                 <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                                     Pay
                                 </Text>
@@ -472,7 +500,7 @@ const Pay: React.FC = () => {
                                         Payment completed successfully.
                                     </Text>
                                     <TouchableOpacity
-                                        style={[tw`flex-row justify-center items-center border-2 mt-4`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                        style={[tw`flex-row justify-center items-center border-2 mt-4`, { borderColor, padding: 16, borderRadius: 8 }]}
                                         onPress={() => generatePDF()}
                                     >
                                         <Icon name={"share"} size={20} color={textColor} />
@@ -513,11 +541,11 @@ const Pay: React.FC = () => {
                                 or you can use QR Code instead
                             </Text>
                             <TouchableOpacity
-                                style={[tw`flex-row justify-center items-center border-2`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                                 onPress={() => setAccountDetailsModalVisible(true)}
                             >
-                                <Icon name={"camera"} size={20} color={textColor} />
-                                <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                                <Icon name={"camera"} size={20} color={buttonTextColor} />
+                                <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                                     Scan QR Code
                                 </Text>
                             </TouchableOpacity>
@@ -613,7 +641,6 @@ class FillToAspectRatio extends React.Component<Props, State> {
         const { height, width } = layoutInfo;
         let wrapperWidth;
         let wrapperHeight;
-        // return <Text>lol: before </Text>
         const ratio = this.getRatio();
         if (ratio * height < width) {
             wrapperHeight = width / ratio;
@@ -624,7 +651,6 @@ class FillToAspectRatio extends React.Component<Props, State> {
         }
         const wrapperPaddingX = (width - wrapperWidth) / 2;
         const wrapperPaddingY = (height - wrapperHeight) / 2;
-
 
         return (
             <View onLayout={this.handleLayout} style={{

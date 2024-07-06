@@ -142,7 +142,7 @@ const Signup = () => {
       console.log(decryptedPayload);
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Home' }],
+        routes: [{ name: 'Login' }],
       });
     } catch (error) {
       Alert.alert('Error', 'Failed to sign up');
