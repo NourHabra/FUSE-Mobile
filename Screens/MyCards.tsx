@@ -120,8 +120,8 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
         }
       >
         {cards.map((card, index) => {
-          const backgroundImage = theme === 'light' 
-            ? lightBackgrounds[Math.floor(Math.random() * lightBackgrounds.length)] 
+          const backgroundImage = theme === 'light'
+            ? lightBackgrounds[Math.floor(Math.random() * lightBackgrounds.length)]
             : darkBackgrounds[Math.floor(Math.random() * darkBackgrounds.length)];
 
           return (
@@ -129,13 +129,13 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
               const cardNumber = card.id;
               navigation.navigate('CardDetails', { cardNumber });
             }}>
-              <CreditCard 
-                id={card.id} 
-                name={card.cardName} 
-                balance={card.balance} 
-                cvv={card.cvv} 
-                expiry={card.expiryDate} 
-                backgroundImage={backgroundImage} 
+              <CreditCard
+                id={card.id}
+                name={card.cardName}
+                balance={card.balance}
+                cvv={card.cvv}
+                expiry={card.expiryDate}
+                backgroundImage={backgroundImage}
               />
             </TouchableOpacity>
           );
@@ -245,7 +245,7 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
                   </View>
                 </View>
                 <TouchableOpacity
-                  style={[tw`flex-row justify-center items-center border-2 w-full mt-4`, { borderColor                  : textColor, padding: 16, borderRadius: 8 }]}
+                  style={[tw`flex-row justify-center items-center border-2 w-full mt-4`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
                   onPress={() => {
                     if (enteredPIN.length != 4) {
                       Alert.alert('Invalid PIN', 'Please enter a valid 4-digit PIN', [{ text: 'OK' }], { cancelable: false });

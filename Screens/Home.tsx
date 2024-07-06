@@ -28,6 +28,8 @@ const Home = ({ navigation }: { navigation: any }) => {
     try {
       const response = await axios.post(`${baseUrl}/account/user`, { jwt });
       const decryptedPayload = decryptData(response.data.payload, aesKey);
+      console.log(decryptedPayload);
+
       decryptedPayload.sort((a, b) => {
         if (a.type === "Checking" && b.type === "Savings") {
           return -1;
@@ -135,7 +137,7 @@ const Home = ({ navigation }: { navigation: any }) => {
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <View style={{ width: cardWidth, marginHorizontal: cardSpacing / 2 }}>
-                  <AccountCard navigation={navigation} type={item.type} balance={item.balance} />
+                  <AccountCard navigation={navigation} type={item.type} balance={item.balance} id={item.id} />
                 </View>
               )}
               showsHorizontalScrollIndicator={false}

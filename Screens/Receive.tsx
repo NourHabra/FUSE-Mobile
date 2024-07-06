@@ -11,23 +11,28 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
-import NfcManager, { NfcTech, NfcEvents, TagEvent } from 'react-native-nfc-manager';
 import { useSelector } from 'react-redux';
-import { RootState } from '../Redux/store';
+import { decryptData, encryptData } from '../crypto-utils';
+import axios from 'axios';
+import baseUrl from '../baseUrl';
 
-const Receive: React.FC = () => {
+const Receive: React.FC<{ route: any }> = ({ route }) => {
+    const { id } = route.params;
+
     const { theme } = useTheme();
     const [accountDetailsModalVisible, setAccountDetailsModalVisible] = useState<boolean>(false);
-    const [nfcTagModalVisible, setNfcTagModalVisible] = useState<boolean>(false);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [logoBase64, setLogoBase64] = useState<string>('');
-    const [nfcSupported, setNfcSupported] = useState<boolean>(false);
-    const [nfcEnabled, setNfcEnabled] = useState<boolean>(false);
-    const [tagDetails, setTagDetails] = useState<string>('');
+    const [loading, setLoading] = useState<boolean>(false);
+    const [account, setAccount] = useState<object>({});
 
     const user = useSelector((state: any) => state.auth.user);
     const role = useSelector((state: any) => state.auth.role);
 
+    const jwt: string = useSelector((state: any) => state.auth.jwt);
+    const aesKey: string = useSelector((state: any) => state.auth.aesKey);
+
+    const primaryColor = theme === 'light' ? '#006e63' : '#65e991';
 
     useEffect(() => {
         const loadLogo = async () => {
@@ -43,72 +48,29 @@ const Receive: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        async function initNfc() {
-            const supported = await NfcManager.isSupported();
-            setNfcSupported(supported);
-            if (!supported) return;
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.post(`${baseUrl}/account/user/${id}`, { jwt });
+                const decryptedPayload = decryptData(response.data.payload, aesKey);
+                setAccount(decryptedPayload);
 
-            await NfcManager.start();
-            const enabled = await NfcManager.isEnabled();
-            setNfcEnabled(enabled);
-
-            setupTagDetection();
-        }
-
-        initNfc();
-
-        return () => {
-            NfcManager.setEventListener(NfcEvents.DiscoverTag, null);
-            NfcManager.unregisterTagEvent().catch(() => 0);
+                setLoading(false);
+            } catch (error: any) {
+                // alert('Error', error.response.data.message);
+                console.error('Error fetching data', error);
+                setLoading(false);
+            }
         };
+
+        fetchData();
     }, []);
-
-    const setupTagDetection = async () => {
-        NfcManager.setEventListener(NfcEvents.DiscoverTag, (tag: TagEvent) => {
-            console.log('NFC Tag Detected:', tag);
-            const payload = extractPayload(tag);
-            setTagDetails(payload);
-            setNfcTagModalVisible(true);
-            if (Platform.OS === 'ios') {
-                NfcManager.setAlertMessageIOS('NFC tag detected!');
-            }
-            NfcManager.unregisterTagEvent().catch(() => 0);
-        });
-
-        await NfcManager.registerTagEvent();
-    };
-
-    const extractPayload = (tag: TagEvent): string => {
-        if (tag.ndefMessage && tag.ndefMessage.length > 0) {
-            const ndefRecord = tag.ndefMessage[0];
-            if (ndefRecord.payload && ndefRecord.payload.length > 0) {
-                // Assuming the payload is a text record
-                const text = ndefRecord.payload.slice(3).map((byte: number) => String.fromCharCode(byte)).join('');
-                return text;
-            }
-        }
-        return 'No payload found';
-    };
-
-    const handleCheckAgain = async () => {
-        setTagDetails('');
-        setNfcTagModalVisible(false);
-        await NfcManager.unregisterTagEvent();
-        setupTagDetection();
-    };
 
     const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
     const textColor = theme === 'light' ? '#333333' : '#DDDDDD';
     const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
     const buttonBackgroundColor = theme === 'light' ? '#94B9C5' : '#94B9C5';
     const buttonTextColor = theme === 'light' ? 'text-white' : 'text-black';
-
-    const accountDetails = {
-        accountHolder: 'John Doe',
-        accountNumber: '1234 5678 9876 5432',
-        currency: 'Syrian Pound (SYP)',
-        iban: '282608010SY0000000000'
-    };
 
     const CustomButton = ({ title, onPress, iconName }: { title: string, onPress: () => void, iconName: string }) => (
         <TouchableOpacity
@@ -122,11 +84,11 @@ const Receive: React.FC = () => {
 
     const ModalButton = ({ title, onPress, iconName }: { title: string, onPress: () => void, iconName: string }) => (
         <TouchableOpacity
-            style={[tw`flex-row items-center justify-center py-3 rounded-lg mx-1 px-4`, { backgroundColor: buttonBackgroundColor }]}
+            style={[tw`flex-row items-center justify-center py-3 rounded-lg mx-1 px-4`, { backgroundColor: primaryColor }]}
             onPress={onPress}
         >
-            <Icon name={iconName} size={28} color={theme === 'light' ? '#000000' : '#000000'} />
-            <Text style={[tw`text-xl font-bold ml-2`, { color: theme === 'light' ? '#000000' : '#000000' }]}>{title}</Text>
+            <Icon name={iconName} size={28} color={theme === 'light' ? '#FFFFFF' : '#000000'} />
+            <Text style={[tw`text-xl font-bold ml-2`, { color: theme === 'light' ? '#FFFFFF' : '#000000' }]}>{title}</Text>
         </TouchableOpacity>
     );
 
@@ -178,13 +140,13 @@ const Receive: React.FC = () => {
                     <TouchableOpacity onPress={() => navigation.goBack()} style={tw`mr-2`}>
                         <Icon name="arrow-left" size={28} color={theme === 'light' ? '#000000' : '#FFFFFF'} />
                     </TouchableOpacity>
-                    <Text style={[tw`text-2xl font-bold`, { color: theme === 'light' ? '#000000' : '#FFFFFF' }]}>Receive</Text>
+                    <Text style={[tw`text-2xl font-bold`, { color: theme === 'light' ? '#000000' : '#FFFFFF' }]}>Account Details</Text>
                 </View>
                 <View style={tw`p-5`}>
                     <View style={tw`mt-2 items-center`}>
-                        <View style={tw`bg-white rounded-full`}>
+                        {account.id && <View style={tw`bg-white rounded-full`}>
                             <QRCodeStyled
-                                data={user.checkingNumber.toString()}
+                                data={account.id.toString()}
                                 style={[tw`rounded-2xl`, { backgroundColor: 'white' }]}
                                 padding={20}
                                 pieceSize={8}
@@ -192,7 +154,7 @@ const Receive: React.FC = () => {
                                 pieceBorderRadius={3}
                                 isPiecesGlued={true}
                             />
-                        </View>
+                        </View>}
                     </View>
                     <Text style={[tw`text-base mt-10`, { color: textColor }]}>
                         This is your personal QR Code, you can use it to receive transfers from others by simply showing it to the sender's scanner.
@@ -201,19 +163,11 @@ const Receive: React.FC = () => {
                         or you can share your account details instead
                     </Text>
                     <TouchableOpacity
-                        style={{ backgroundColor: buttonBackgroundColor, padding: 16, borderRadius: 8, alignItems: 'center' }}
+                        style={{ backgroundColor: primaryColor, padding: 16, borderRadius: 8, alignItems: 'center' }}
                         onPress={() => setAccountDetailsModalVisible(true)}
                     >
-                        <Text style={[tw`text-base font-bold`, { color: buttonTextColor }]}>
+                        <Text style={[tw`text-base font-bold`, { color: theme === 'light' ? '#FFFFFF' : '#000000' }]}>
                             Show Account Details
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={{ backgroundColor: buttonBackgroundColor, padding: 16, borderRadius: 8, alignItems: 'center', marginTop: 10 }}
-                        onPress={handleCheckAgain}
-                    >
-                        <Text style={[tw`text-base font-bold`, { color: buttonTextColor }]}>
-                            Check NFC Again
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -242,42 +196,13 @@ const Receive: React.FC = () => {
                             </TouchableOpacity>
                         </View>
                         {/* Account Details Text */}
-                        <View style={tw`my-4`}>
+                        {!loading && <View style={tw`my-4`}>
                             <AccountDetail title='Account Holder' content={user.name} />
-                            <AccountDetail title='Account Number' content={user.checkingNumber} />
-                            <AccountDetail title='Currency' content={role} />
-                            <AccountDetail title='IBAN' content={accountDetails.iban} />
-                        </View>
+                            <AccountDetail title='Account Number' content={account.id} />
+                            <AccountDetail title='Type' content={account.type} />
+                            <AccountDetail title='Status' content={account.status} />
+                        </View>}
                         <ModalButton title="Share" onPress={generatePDF} iconName="share" />
-                    </View>
-                </View>
-            </Modal>
-
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={nfcTagModalVisible}
-                onRequestClose={() => {
-                    setNfcTagModalVisible(!nfcTagModalVisible);
-                }}
-            >
-                <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-50`}>
-                    <View style={[tw`w-10/12 p-5 rounded-xl`, { backgroundColor: cardBackgroundColor, maxHeight: '50%' }]}>
-                        <View style={tw`flex-row justify-between items-center w-full`}>
-                            <Text style={[tw`text-xl font-bold`, { color: textColor }]}>
-                                NFC Tag Details
-                            </Text>
-                            <TouchableOpacity
-                                style={tw`p-2`}
-                                onPress={() => setNfcTagModalVisible(false)}
-                            >
-                                <Icon name="x" size={24} color={textColor} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={tw`my-4`}>
-                            <Text style={[tw`text-sm`, { color: textColor }]}>{tagDetails}</Text>
-                        </View>
-                        <ModalButton title="Check Again" onPress={handleCheckAgain} iconName="refresh-cw" />
                     </View>
                 </View>
             </Modal>
