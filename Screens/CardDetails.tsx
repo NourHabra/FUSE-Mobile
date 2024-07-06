@@ -36,10 +36,13 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
     }, []);
 
     const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
-    const textColor = theme === 'light' ? '#333333' : '#DDDDDD';
+    const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
+    const borderColor = theme === 'light' ? '#CCCCCC' : '#444444';
+    const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0';
+    const buttonColor = theme === 'light' ? '#028174' : '#65e991';
+    const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20';
+    const linkColor = theme === 'light' ? '#028174' : '#92DE8B';
     const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
-    const buttonBackgroundColor = theme === 'light' ? '#94B9C5' : '#94B9C5';
-    const buttonTextColor = theme === 'light' ? 'text-white' : 'text-black';
 
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -119,50 +122,50 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                         <View style={tw`w-full px-2 mt-8`}>
                             <View style={tw`flex-row justify-center items-center`}>
                                 <TouchableOpacity
-                                    style={tw`bg-white w-grow m-1 py-4 rounded-lg flex-row justify-center items-center`}
+                                    style={[tw`flex-row justify-center items-center w-grow m-1 py-4 rounded-lg`, { backgroundColor: buttonColor }]}
                                     onPress={() => {
                                         setTopupModalVisible(true);
                                     }}
                                 >
-                                    <Icon name="plus" size={20} color={"black"} />
-                                    <Text style={tw`text-lg font-bold ml-1`}>Topup</Text>
+                                    <Icon name="plus" size={20} color={buttonTextColor} />
+                                    <Text style={[tw`text-lg font-bold ml-1`, { color: buttonTextColor }]}>Topup</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
-                                    style={tw`bg-white w-grow m-1 py-4 rounded-lg flex-row justify-center items-center`}
+                                    style={[tw`flex-row justify-center items-center w-grow m-1 py-4 rounded-lg`, { backgroundColor: buttonColor }]}
                                     onPress={() => {
                                         setWithdrawModalVisible(true);
                                     }}
                                 >
-                                    <Icon name="minus" size={20} color={"black"} />
-                                    <Text style={tw`text-lg font-bold ml-1`}>Withdraw</Text>
+                                    <Icon name="minus" size={20} color={buttonTextColor} />
+                                    <Text style={[tw`text-lg font-bold ml-1`, { color: buttonTextColor }]}>Withdraw</Text>
                                 </TouchableOpacity>
                             </View>
                             <View style={tw`flex-row justify-center items-center`}>
                                 <TouchableOpacity
-                                    style={tw`bg-white w-grow m-1 py-4 rounded-lg flex-row justify-center items-center`}
+                                    style={[tw`flex-row justify-center items-center w-grow m-1 py-4 rounded-lg`, { backgroundColor: buttonColor }]}
                                     onPress={() => { setChangePINModalVisible(true); }}
                                 >
-                                    <Icon name="edit-2" size={20} color={"black"} />
-                                    <Text style={tw`text-lg font-bold ml-1`}>Change PIN</Text>
+                                    <Icon name="edit-2" size={20} color={buttonTextColor} />
+                                    <Text style={[tw`text-lg font-bold ml-1`, { color: buttonTextColor }]}>Change PIN</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
-                                    style={tw`bg-white w-grow m-1 py-4 rounded-lg flex-row justify-center items-center`}
+                                    style={[tw`flex-row justify-center items-center w-grow m-1 py-4 rounded-lg`, { backgroundColor: buttonColor }]}
                                     onPress={() => { setDeleteCardModalVisible(true); }}
                                 >
-                                    <Icon name="trash" size={20} color={"black"} />
-                                    <Text style={tw`text-lg font-bold ml-1`}>Cancel Card</Text>
+                                    <Icon name="trash" size={20} color={buttonTextColor} />
+                                    <Text style={[tw`text-lg font-bold ml-1`, { color: buttonTextColor }]}>Cancel Card</Text>
                                 </TouchableOpacity>
                             </View>
                             <View style={tw`flex-row justify-center items-center`}>
                                 <TouchableOpacity
-                                    style={tw`bg-white w-grow m-1 py-4 rounded-lg flex-row justify-center items-center`}
+                                    style={[tw`flex-row justify-center items-center w-grow m-1 py-4 rounded-lg`, { backgroundColor: buttonColor }]}
                                     onPress={() => {
                                         handleNfcWrite();
                                         setNfcModalVisible(true);
                                     }}
                                 >
-                                    <Icon name="wifi" size={20} color={"black"} />
-                                    <Text style={tw`text-lg font-bold ml-1`}>Create Digital Card</Text>
+                                    <Icon name="wifi" size={20} color={buttonTextColor} />
+                                    <Text style={[tw`text-lg font-bold ml-1`, { color: buttonTextColor }]}>Create Digital Card</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -203,7 +206,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                 </View>
                                 <View>
                                     <TouchableOpacity
-                                        style={[tw`flex-row justify-center items-center border-2 w-full mt-4`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                        style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                                         onPress={async () => {
                                             setLoading(true);
 
@@ -228,8 +231,8 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                             }
                                         }}
                                     >
-                                        <Icon name={"trash"} size={20} color={textColor} />
-                                        <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                                        <Icon name={"trash"} size={20} color={buttonTextColor} />
+                                        <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                                             Delete Card
                                         </Text>
                                     </TouchableOpacity>
@@ -262,7 +265,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                     </Text>
                                 </View>
                                 <TouchableOpacity
-                                    style={[tw`flex-row justify-center items-center border-2 w-full mt-4`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                    style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                                     onPress={async () => {
                                         setDeleteCardModalVisible(false);
                                         navigation.reset({
@@ -271,7 +274,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                         });
                                     }}
                                 >
-                                    <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                                    <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                                         Back to Home
                                     </Text>
                                 </TouchableOpacity>
@@ -342,7 +345,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                 </View>
                                 <View>
                                     <TouchableOpacity
-                                        style={[tw`flex-row justify-center items-center border-2 w-full mt-4`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                        style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                                         onPress={async () => {
                                             if (newPIN.length != 4 || confirmNewPIN.length != 4 || newPIN != confirmNewPIN) {
                                                 Alert.alert('Error', 'Please enter matching 4-digit PINs');
@@ -375,7 +378,8 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                             }
                                         }}
                                     >
-                                        <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                                        <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor
+                                        }]}>
                                             Change PIN
                                         </Text>
                                     </TouchableOpacity>
@@ -401,7 +405,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                     </Text>
                                 </View>
                                 <TouchableOpacity
-                                    style={[tw`flex-row justify-center items-center border-2 w-full mt-4`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                    style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                                     onPress={async () => {
                                         setChangePINModalVisible(false);
                                         navigation.reset({
@@ -410,7 +414,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                         });
                                     }}
                                 >
-                                    <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                                    <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                                         Back to Home
                                     </Text>
                                 </TouchableOpacity>
@@ -463,7 +467,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                 </View>
                                 <View>
                                     <TouchableOpacity
-                                        style={[tw`flex-row justify-center items-center border-2 w-full mt-4`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                        style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                                         onPress={async () => {
                                             if (topupAmount.length < 1) {
                                                 Alert.alert('Error', 'Please enter a valid topup amount');
@@ -496,7 +500,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                             }
                                         }}
                                     >
-                                        <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                                        <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                                             Top Up Card
                                         </Text>
                                     </TouchableOpacity>
@@ -522,7 +526,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                     </Text>
                                 </View>
                                 <TouchableOpacity
-                                    style={[tw`flex-row justify-center items-center border-2 w-full mt-4`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                    style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                                     onPress={async () => {
                                         setTopupModalVisible(false);
                                         navigation.reset({
@@ -531,7 +535,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                         });
                                     }}
                                 >
-                                    <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                                    <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                                         Back to Home
                                     </Text>
                                 </TouchableOpacity>
@@ -566,7 +570,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                             <View style={tw`w-full h-grow flex-col justify-between`}>
                                 <View style={tw`w-full flex-col items-center justify-center`}>
                                     <View style={tw`w-full`}>
-                                        <Text style={[tw`text-sm pl-2 pb-1`, { color: textColor }]}>Topup Amount</Text>
+                                        <Text style={[tw`text-sm pl-2 pb-1`, { color: textColor }]}>Withdraw Amount</Text>
                                         <View style={tw`flex-row w-full justify-between`}>
                                             <TextInput
                                                 style={[tw`flex-row w-grow mr-1 border-2 bg-transparent`, { borderColor: textColor, color: textColor }]}
@@ -584,7 +588,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                 </View>
                                 <View>
                                     <TouchableOpacity
-                                        style={[tw`flex-row justify-center items-center border-2 w-full mt-4`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                        style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                                         onPress={async () => {
                                             if (withdrawAmount.length < 1) {
                                                 Alert.alert('Error', 'Please enter a valid withdraw amount');
@@ -617,7 +621,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                             }
                                         }}
                                     >
-                                        <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                                        <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                                             Withdraw from Card
                                         </Text>
                                     </TouchableOpacity>
@@ -640,7 +644,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                     </Text>
                                 </View>
                                 <TouchableOpacity
-                                    style={[tw`flex-row justify-center items-center border-2 w-full mt-4`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                                    style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
                                     onPress={async () => {
                                         setWithdrawModalVisible(false);
                                         navigation.reset({
@@ -649,7 +653,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                         });
                                     }}
                                 >
-                                    <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                                    <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                                         Back to Home
                                     </Text>
                                 </TouchableOpacity>

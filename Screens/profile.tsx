@@ -8,6 +8,8 @@ import { RootStackParamList } from '../AppNavigator';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSelector } from 'react-redux';
+import { RootState } from '../Redux/store';
 
 type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Profile'>;
 
@@ -26,6 +28,8 @@ const Profile = () => {
 
   const oldPinRefs = useRef<(TextInput | null)[]>([]);
   const newPinRefs = useRef<(TextInput | null)[]>([]);
+
+  const user = useSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
     (async () => {
@@ -94,8 +98,8 @@ const Profile = () => {
               source={{ uri: 'https://via.placeholder.com/150' }}
               style={tw`w-20 h-20 rounded-full mb-2`}
             />
-            <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>John Doe</Text>
-            <Text style={[tw`text-lg`, { color: placeholderColor }]}>johndoe@example.com</Text>
+            <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>{user?.name}</Text>
+            <Text style={[tw`text-lg`, { color: placeholderColor }]}>{user?.email}</Text>
           </View>
 
           <ProfileSection title="Account">
@@ -154,13 +158,13 @@ const Profile = () => {
             </TouchableOpacity>
             <View style={tw`mb-4 mt-8`}>
               <View style={tw`flex-row justify-between items-center mb-4 p-2 border-b border-gray-300`}>
-                <Text style={[tw`text-lg`, { color: textColor }]}>Name: John Doe</Text>
+                <Text style={[tw`text-lg`, { color: textColor }]}>Name: {user?.name}</Text>
                 <TouchableOpacity onPress={() => { /* Handle edit action */ }}>
                   <Icon name="pencil" size={24} color={buttonColor} />
                 </TouchableOpacity>
               </View>
               <View style={tw`flex-row justify-between items-center mb-4 p-2 border-b border-gray-300`}>
-                <Text style={[tw`text-lg`, { color: textColor }]}>Email: johndoe@example.com</Text>
+                <Text style={[tw`text-lg`, { color: textColor }]}>Email: {user?.email}</Text>
                 <TouchableOpacity onPress={() => { /* Handle edit action */ }}>
                   <Icon name="pencil" size={24} color={buttonColor} />
                 </TouchableOpacity>
