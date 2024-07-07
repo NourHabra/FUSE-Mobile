@@ -54,7 +54,9 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
   const textColor = theme === 'light' ? '#333333' : '#DDDDDD';
   const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
   const buttonBackgroundColor = theme === 'light' ? '#94B9C5' : '#94B9C5';
-  const buttonTextColor = theme === 'light' ? 'text-white' : 'text-black';
+  const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20';
+  const primaryColor = theme === 'light' ? '#006e63' : '#65e991';
+
 
   const [newCardModalVisible, setNewCardModalVisible] = useState<boolean>(false);
   const [showCreateCardInput, setShowCreateCardInput] = useState<boolean>(true);
@@ -119,6 +121,7 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
           />
         }
       >
+        {cards.length === 0 && <Text style={[tw`text-lg pt-16`, { color: textColor }]}>You have no cards yet.</Text>}
         {cards.map((card, index) => {
           const backgroundImage = theme === 'light'
             ? lightBackgrounds[Math.floor(Math.random() * lightBackgrounds.length)]
@@ -197,7 +200,7 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
                   </View>
                 </View>
                 <TouchableOpacity
-                  style={[tw`flex-row justify-center items-center border-2 w-full mt-4`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                  style={[tw`flex-row justify-center items-center w-full mt-4`, { padding: 16, borderRadius: 8, backgroundColor: primaryColor }]}
                   onPress={() => {
                     if (newCardName.length < 1 || newCardBalance.length < 1) {
                       Alert.alert('Invalid Input', 'Please enter a card name and an initial balance', [{ text: 'OK' }], { cancelable: false });
@@ -207,7 +210,7 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
                     setEnterPIN(true);
                   }}
                 >
-                  <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                  <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                     Next
                   </Text>
                 </TouchableOpacity>
@@ -245,7 +248,7 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
                   </View>
                 </View>
                 <TouchableOpacity
-                  style={[tw`flex-row justify-center items-center border-2 w-full mt-4`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                  style={[tw`flex-row justify-center items-center w-full mt-4`, { padding: 16, borderRadius: 8, backgroundColor: primaryColor }]}
                   onPress={() => {
                     if (enteredPIN.length != 4) {
                       Alert.alert('Invalid PIN', 'Please enter a valid 4-digit PIN', [{ text: 'OK' }], { cancelable: false });
@@ -255,7 +258,7 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
                     setConfirmPIN(true);
                   }}
                 >
-                  <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                  <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                     Enter PIN
                   </Text>
                 </TouchableOpacity>
@@ -289,7 +292,7 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
                   </View>
                 </View>
                 <TouchableOpacity
-                  style={[tw`flex-row justify-center items-center border-2 w-full mt-4`, { borderColor: textColor, padding: 16, borderRadius: 8 }]}
+                  style={[tw`flex-row justify-center items-center w-full mt-4`, { padding: 16, borderRadius: 8, backgroundColor: primaryColor }]}
                   onPress={async () => {
                     if (confirmedPIN.length != 4) {
                       Alert.alert('Invalid PIN', 'Please enter a valid 4-digit PIN', [{ text: 'OK' }], { cancelable: false });
@@ -328,7 +331,7 @@ const MyCards: React.FC<{ navigation: any }> = ({ navigation }) => {
                     }
                   }}
                 >
-                  <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                  <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
                     Issue Card
                   </Text>
                 </TouchableOpacity>

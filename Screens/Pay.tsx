@@ -322,7 +322,7 @@ const Pay: React.FC = () => {
                                     }}
                                     placeholder="XXXX XXXX XXXX XXXX"
                                     keyboardType="number-pad"
-                                    maxLength={16}
+                                    maxLength={20}
                                     placeholderTextColor={placeholderColor}
                                     onTouchStart={() => initializeFields()}
                                 />

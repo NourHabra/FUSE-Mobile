@@ -17,17 +17,17 @@ const AccountCard = ({ navigation, type, balance, id }) => {
       imageStyle={tw`rounded-3xl`}
     >
       <View style={tw`flex-col w-full`}>
-        <Text style={tw`text-white text-sm`}>{id}</Text>
-        <Text style={tw`text-white text-lg`}>{type}</Text>
+        <Text style={tw`text-white text-sm`}>{id.replace(/(.{4})/g, '$1  ').trim()}</Text>
+        <Text style={tw`text-white text-xl font-bold`}>{type}</Text>
       </View>
       <View style={tw`w-full flex-row justify-between items-end`}>
         <View style={tw`flex-col`}>
           <Text style={tw`text-white text-sm`}>Current Balance</Text>
-          <Text style={tw`text-white font-bold text-3xl`}>{balance}</Text>
+          <Text style={tw`text-white font-bold text-3xl`}>${balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
         </View>
         <TouchableOpacity onPress={() => navigation.navigate("Receive", { id })} style={tw`flex-row justify-end items-center px-1`}>
-          <Text style={tw`text-white text-lg pr-1`}>Details</Text>
-          <Icon name="arrow-right-circle" size={20} color="white" />
+          <Text style={tw`text-white text-sm pr-1`}>Details</Text>
+          <Icon name="arrow-right-circle" size={15} color="white" />
         </TouchableOpacity>
       </View>
     </ImageBackground>

@@ -13,7 +13,7 @@ const CreditCard = ({ id, name, balance, cvv, expiry, backgroundImage }: { id: s
         <View>
           <Text style={tw`text-sm text-white`}>Balance</Text>
           <View style={tw`flex-row justify-start items-center`}>
-            <Text style={tw`text-sm tracking-wide text-white`}>SYP</Text>
+            <Text style={tw`text-sm tracking-wide text-white`}>$</Text>
             <Text style={tw`text-xl tracking-wide pl-1 text-white`}>{balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
           </View>
         </View>

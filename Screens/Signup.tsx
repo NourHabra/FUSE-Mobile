@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { setAuthData, setAesKey } from '../Redux/slices/authSlice';
 import baseUrl from '../baseUrl';
 import { generateAesKey, encryptAesKey, encryptData, decryptData } from '../crypto-utils';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from 'react-native-vector-icons/Feather';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import FuseLogo from '../assets/FuseLogo.png';
@@ -71,6 +71,10 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [hasEightChars, setHasEightChars] = useState(false);
+  const [hasCapitalLetter, setHasCapitalLetter] = useState(false);
+  const [hasNumber, setHasNumber] = useState(false);
+  const [hasSpecialChar, setHasSpecialChar] = useState(false);
 
   const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
   const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
@@ -221,6 +225,7 @@ const Signup = () => {
               textContentType="telephoneNumber"
               autoComplete="tel"
               value={phone}
+              maxLength={10}
             />
 
             <Text style={[tw`text-sm pl-2 mb-1`, { color: textColor }]}>Birth Date</Text>
@@ -257,7 +262,13 @@ const Signup = () => {
               <TextInput
                 style={[tw`flex-row w-grow`]}
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  setHasEightChars(text.length >= 8);
+                  setHasCapitalLetter(text.match(/[A-Z]/g) ? true : false)
+                  setHasNumber(text.match(/[0-9]/g) ? true : false)
+                  setHasSpecialChar(text.match(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g) ? true : false)
+                }}
                 secureTextEntry={!passwordVisible}
                 textContentType="newPassword"
                 autoComplete="new-password"
@@ -266,6 +277,24 @@ const Signup = () => {
               <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)} style={{ padding: 8 }}>
                 <Icon name={passwordVisible ? 'eye-off' : 'eye'} size={24} color={placeholderColor} />
               </TouchableOpacity>
+            </View>
+            <View style={tw`mb-2 -mt-2`}>
+              {!hasEightChars && <View style={tw`flex-row items-center `}>
+                <Icon name={hasEightChars ? "check" : "x"} size={15} color={textColor} />
+                <Text style={[tw`text-xs ml-1`, { color: textColor }]}>Password must be at least 8 characters long</Text>
+              </View>}
+              {!hasCapitalLetter && <View style={tw`flex-row items-center `}>
+                <Icon name={hasCapitalLetter ? "check" : "x"} size={15} color={textColor} />
+                <Text style={[tw`text-xs ml-1`, { color: textColor }]}>Password must have at least one capital letter</Text>
+              </View>}
+              {!hasNumber && <View style={tw`flex-row items-center `}>
+                <Icon name={hasNumber ? "check" : "x"} size={15} color={textColor} />
+                <Text style={[tw`text-xs ml-1`, { color: textColor }]}>Password must be at least one number</Text>
+              </View>}
+              {!hasSpecialChar && <View style={tw`flex-row items-center `}>
+                <Icon name={hasSpecialChar ? "check" : "x"} size={15} color={textColor} />
+                <Text style={[tw`text-xs ml-1`, { color: textColor }]}>Password must have at least one special character</Text>
+              </View>}
             </View>
 
             <Text style={[tw`text-sm pl-2 mb-1`, { color: textColor }]}>Confirm Password</Text>

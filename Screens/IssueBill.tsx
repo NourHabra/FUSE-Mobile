@@ -267,7 +267,7 @@ const IssueBill: React.FC = () => {
                                 onChangeText={(text) => {
                                     setAmount(text);
                                 }}
-                                placeholder="SYP XXXX"
+                                placeholder="$ X,XXX"
                                 keyboardType="number-pad"
                                 maxLength={16}
                                 placeholderTextColor={placeholderColor}

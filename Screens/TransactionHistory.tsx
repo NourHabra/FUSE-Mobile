@@ -1,10 +1,14 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, StatusBar, RefreshControl, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StatusBar, RefreshControl, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useTheme } from '../ThemeContext';
 import tw from 'twrnc';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from 'react-native-vector-icons/Feather';
 import BottomTab from '../Components/BottomTab';
-
+import { useSelector } from 'react-redux';
+import { RootState } from '../Redux/store';
+import axios from 'axios';
+import baseUrl from '../baseUrl';
+import { decryptData, encryptData } from '../crypto-utils';
 const transactions = [
   // Sample data
   { id: '1', type: 'send', amount: '100', date: '2023-01-01' },
@@ -14,13 +18,55 @@ const transactions = [
 
 const TransactionHistory: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { theme } = useTheme();
+  const primaryColor = theme === 'light' ? '#006e63' : '#65e991';
+
   const [search, setSearch] = useState<string>('');
   const [filter, setFilter] = useState<'all' | 'send' | 'request'>('all');
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const jwt = useSelector((state: RootState) => state.auth.jwt);
+  const aesKey = useSelector((state: RootState) => state.auth.aesKey);
+
+  const [bills, setBills] = useState<any[]>([]);
+  const [deposits, setDeposits] = useState<any[]>([]);
+  const [transfers, setTransfers] = useState<any[]>([]);
+
+  const [sent, setSent] = useState<any[]>([]);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [sends, setSends] = useState<any[]>([]);
+
+
+  useEffect(() => {
+    const fetchCards = async () => {
+      try {
+        const response = await axios.post(`${baseUrl}/user/received`, { jwt });
+        const decryptedPayload = decryptData(response.data.payload, aesKey);
+        const response2 = await axios.post(`${baseUrl}/user/sent`, { jwt });
+        const decryptedPayload2 = decryptData(response2.data.payload, aesKey);
+
+        console.log("Incoming");
+        console.log(decryptedPayload.recived);
+        console.log("Outgoing");
+        console.log(decryptedPayload2.sent);
+
+        setBills(decryptedPayload.recived.bills);
+        setDeposits(decryptedPayload.recived.deposits);
+        setTransfers(decryptedPayload.recived.transfer);
+
+        setSent(decryptedPayload2.sent)
+        setPayments(decryptedPayload2.sent.bills)
+        setSends(decryptedPayload2.sent.transfers)
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchCards();
+  }, []);
+
   const filteredTransactions = transactions.filter(transaction => {
-    const matchesSearch = transaction.amount.includes(search) || transaction.date.includes(search);
+    const matchesSearch = transaction.amount?.includes(search) || transaction.date?.includes(search);
     const matchesFilter = filter === 'all' || transaction.type === filter;
     return matchesSearch && matchesFilter;
   });
@@ -59,49 +105,90 @@ const TransactionHistory: React.FC<{ navigation: any }> = ({ navigation }) => {
     >
       <View style={[tw`flex-1`, { backgroundColor }]}>
         <StatusBar backgroundColor={backgroundColor} barStyle={theme === 'light' ? 'dark-content' : 'light-content'} />
-        <View style={tw`flex-1 p-5`}>
-          <View style={tw`flex-row items-center mb-4`}>
+        <View style={tw`flex-1`}>
+          <View style={tw`flex-row items-center mb-4 p-5`}>
             <TouchableOpacity onPress={() => navigation.goBack()} style={tw`mr-2`}>
               <Icon name="arrow-left" size={28} color={textColor} />
             </TouchableOpacity>
             <Text style={titleStyle}>Transaction History</Text>
           </View>
-          <View style={tw`flex-row items-center justify-between mb-4`}>
-            <TextInput
-              style={[tw`flex-1 p-3 rounded-lg mr-2`, { backgroundColor: cardBackgroundColor, color: textColor }]}
-              placeholder="Search"
-              placeholderTextColor={placeholderColor}
-              value={search}
-              onChangeText={setSearch}
-            />
-            <CustomButton iconName="format-list-bulleted" onPress={() => setFilter('all')} isActive={filter === 'all'} />
-            <CustomButton iconName="send" onPress={() => setFilter('send')} isActive={filter === 'send'} />
-            <CustomButton iconName="cash-multiple" onPress={() => setFilter('request')} isActive={filter === 'request'} />
-          </View>
-          {loading ? (
-            <ActivityIndicator size="large" color={buttonColor} />
-          ) : (
-            <FlatList
-              data={filteredTransactions}
-              keyExtractor={item => item.id}
-              renderItem={({ item }) => (
-                <View style={[tw`p-4 mb-2 rounded-lg`, { backgroundColor: cardBackgroundColor }]}>
-                  <Text style={[tw`text-lg font-bold`, { color: textColor }]}>{item.type === 'send' ? 'Sent' : 'Received'}</Text>
-                  <Text style={[tw`text-lg`, { color: textColor }]}>Amount: ${item.amount}</Text>
-                  <Text style={[tw`text-sm`, { color: placeholderColor }]}>Date: {item.date}</Text>
+          <ScrollView
+            style={tw``}
+          >
+            {transfers && transfers.map((transfer, index) => (
+              <View key={index} style={[tw`flex-row items-center justify-start mx-2 my-0.5 py-2 px-4 border rounded-2xl`, { borderColor: primaryColor }]}>
+                <Icon name="arrow-down" size={25} color={primaryColor} />
+                <View style={tw`w-grow ml-4`}>
+                  <Text style={[tw`text-xs`, { color: textColor }]}>{new Date(transfer.createdAt).toDateString()} - Transfer</Text>
+                  {/* <Text style={[tw`text-base`, { color: textColor }]}>Transfer</Text> */}
+                  {/* <Text style={[tw`text-base`, { color: textColor }]}>ID: {transfer.id}</Text> */}
+                  <Text style={[tw`text-xl font-bold`, { color: textColor }]}>{transfer.sAccount.user.name}</Text>
                 </View>
-              )}
-              refreshControl={
-                <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={onRefresh}
-                  colors={[buttonColor]}
-                  tintColor={buttonColor}
-                />
-              }
-            />
-          )}
+                <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>${transfer.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
+                {/* <Text style={titleStyle}>Date: {transfer.date}</Text> */}
+              </View>
+            ))}
+            {bills && bills.map((bill, index) => (
+              <View key={index} style={[tw`flex-row items-center justify-start mx-2 my-0.5 py-2 px-4 border rounded-2xl`, { borderColor: primaryColor }]}>
+                <Icon name="arrow-down" size={25} color={primaryColor} />
+                <View style={tw`w-grow ml-4`}>
+                  <Text style={[tw`text-xs`, { color: textColor }]}>{new Date(bill.payedAt).toDateString()} - Payment</Text>
+                  {/* <Text style={[tw`text-base`, { color: textColor }]}>bill</Text> */}
+                  {/* <Text style={[tw`text-base`, { color: textColor }]}>ID: {bill.id}</Text> */}
+                  <Text style={[tw`text-xl font-bold`, { color: textColor }]}>{bill.card.account.user.name}</Text>
+                  <Text style={[tw`text-xs`, { color: textColor }]}>{bill.details != "" ? bill.details : "No details available"}</Text>
+                </View>
+                <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>${bill.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
+                {/* <Text style={titleStyle}>Date: {bill.date}</Text> */}
+              </View>
+            ))}
+            {deposits && deposits.map((cashTransaction, index) => (
+              <View key={index} style={[tw`flex-row items-center justify-start mx-2 my-0.5 py-2 px-4 border rounded-2xl`, { borderColor: primaryColor }]}>
+                <Icon name="arrow-down" size={25} color={primaryColor} />
+                <View style={tw`w-grow ml-4`}>
+                  <Text style={[tw`text-xs`, { color: textColor }]}>{new Date(cashTransaction.payedAt).toDateString()} - Payment</Text>
+                  {/* <Text style={[tw`text-base`, { color: textColor }]}>cashTransaction</Text> */}
+                  {/* <Text style={[tw`text-base`, { color: textColor }]}>ID: {cashTransaction.id}</Text> */}
+                  <Text style={[tw`text-xl font-bold`, { color: textColor }]}>{cashTransaction.card.account.user.name}</Text>
+                  <Text style={[tw`text-xs`, { color: textColor }]}>{cashTransaction.details}</Text>
+                </View>
+                <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>${cashTransaction.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
+                {/* <Text style={titleStyle}>Date: {cashTransaction.date}</Text> */}
+              </View>
+            ))}
+
+            {/* Outgoing */}
+            {payments && payments.map((payment, index) => (
+              <View key={index} style={[tw`flex-row items-center justify-start mx-2 my-0.5 py-2 px-4 border rounded-2xl`, { borderColor: primaryColor }]}>
+                <Icon name="arrow-up" size={25} color={"red"} />
+                <View style={tw`w-grow ml-4`}>
+                  <Text style={[tw`text-xs`, { color: textColor }]}>{new Date(payment.payedAt).toDateString()} - Payment</Text>
+                  {/* <Text style={[tw`text-base`, { color: textColor }]}>payment</Text> */}
+                  {/* <Text style={[tw`text-base`, { color: textColor }]}>ID: {payment.id}</Text> */}
+                  <Text style={[tw`text-xl font-bold`, { color: textColor }]}>{payment.merchantAccount.user.merchant.Category.name}</Text>
+                  <Text style={[tw`text-base font-bold`, { color: textColor }]}>{payment.merchantAccount.user.name}</Text>
+                  {/* <Text style={[tw`text-xs`, { color: textColor }]}>{payment.details}</Text> */}
+                </View>
+                <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>${payment.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
+                {/* <Text style={titleStyle}>Date: {payment.date}</Text> */}
+              </View>
+            ))}
+            {sends && sends.map((transfer, index) => (
+              <View key={index} style={[tw`flex-row items-center justify-start mx-2 my-0.5 py-2 px-4 border rounded-2xl`, { borderColor: primaryColor }]}>
+                <Icon name="arrow-down" size={25} color={primaryColor} />
+                <View style={tw`w-grow ml-4`}>
+                  <Text style={[tw`text-xs`, { color: textColor }]}>{new Date(transfer.createdAt).toDateString()} - Transfer</Text>
+                  {/* <Text style={[tw`text-base`, { color: textColor }]}>Transfer</Text> */}
+                  {/* <Text style={[tw`text-base`, { color: textColor }]}>ID: {transfer.id}</Text> */}
+                  <Text style={[tw`text-xl font-bold`, { color: textColor }]}>{transfer.dAccount.user.name}</Text>
+                </View>
+                <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>${transfer.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
+                {/* <Text style={titleStyle}>Date: {transfer.date}</Text> */}
+              </View>
+            ))}
+          </ScrollView>
         </View>
+
         <BottomTab navigation={navigation} />
       </View>
     </KeyboardAvoidingView>

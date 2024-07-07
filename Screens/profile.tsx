@@ -98,6 +98,7 @@ const Profile = () => {
               source={{ uri: 'https://via.placeholder.com/150' }}
               style={tw`w-20 h-20 rounded-full mb-2`}
             />
+            <Text style={[tw`text-lg font-bold`, { color: placeholderColor }]}>{user?.id}</Text>
             <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>{user?.name}</Text>
             <Text style={[tw`text-lg`, { color: placeholderColor }]}>{user?.email}</Text>
           </View>
