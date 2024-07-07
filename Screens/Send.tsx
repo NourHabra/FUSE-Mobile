@@ -6,7 +6,6 @@ import {
     Image,
 } from "react-native";
 import TextInput from "../Components/TextInput";
-import BottomTab from '../Components/BottomTab';
 import { useTheme } from '../ThemeContext';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/Feather';
@@ -148,7 +147,7 @@ const Send: React.FC = () => {
 
     const handleBarCodeRead = (e: BarCodeReadEvent) => {
         setAccountNumber(e.data);
-        searchForAccount(e.data); 
+        searchForAccount(e.data);
         setMessage(e.data);
         setAccountDetailsModalVisible(false);
     };
@@ -468,22 +467,26 @@ const Send: React.FC = () => {
                     </View>
                 </View>
                 {/* Scan QR CTA Button */}
-                {showCta && <View>
-                    <Text style={[tw`text-sm mt-10 mb-1 pl-2`, { color: textColor }]}>
-                        or you can use QR Code instead
-                    </Text>
-                    <TouchableOpacity
-                        style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
-                        onPress={() => setAccountDetailsModalVisible(true)}
-                    >
-                        <Icon name={"camera"} size={20} color={buttonTextColor} />
-                        <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
-                            Scan QR Code
+                {showCta && (
+                    <View style={tw`mt-4 mb-4 px-2.5`}>
+                        <Text style={[tw`text-sm mb-1 pl-2`, { color: textColor }]}>
+                            or you can use QR Code instead
                         </Text>
-                    </TouchableOpacity>
-                </View>}
+                        <TouchableOpacity
+                            style={[
+                                tw`flex-row justify-center items-center`,
+                                { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }
+                            ]}
+                            onPress={() => setAccountDetailsModalVisible(true)}
+                        >
+                            <Icon name={"camera"} size={20} color={buttonTextColor} />
+                            <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
+                                Scan QR Code
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
             </View>
-            <BottomTab navigation={navigation} />
 
             <Modal
                 animationType="slide"

@@ -104,7 +104,7 @@ const Receive: React.FC<{ route: any }> = ({ route }) => {
             console.error('Logo base64 data is not loaded yet');
             return;
         }
-
+    
         const htmlContent = `
             <html>
             <body>
@@ -112,25 +112,31 @@ const Receive: React.FC<{ route: any }> = ({ route }) => {
                     <img src="${logoBase64}" style="position: absolute; top: 20px; left: 20px; width: 100px; height: auto;" />
                     <div style="margin-top: 140px;">
                         <h1>Account Details</h1>
-                        <p><strong>Account Holder:</strong> ${accountDetails.accountHolder}</p>
-                        <p><strong>Account Number:</strong> ${accountDetails.accountNumber}</p>
-                        <p><strong>Currency:</strong> ${accountDetails.currency}</p>
-                        <p><strong>IBAN:</strong> ${accountDetails.iban}</p>
+                        <p><strong>Account Holder:</strong> ${user.name}</p>
+                        <p><strong>Account Number:</strong> ${account.id}</p>
+                        <p><strong>Type:</strong> ${account.type}</p>
+                        <p><strong>Status:</strong> ${account.status}</p>
                     </div>
                 </div>
             </body>
             </html>
         `;
-
-        const { uri } = await Print.printToFileAsync({ html: htmlContent });
-        const fileName = `AccountDetails_${accountDetails.accountHolder.replace(/\s+/g, '_')}.pdf`;
-        const newUri = `${FileSystem.documentDirectory}${fileName}`;
-        await FileSystem.moveAsync({
-            from: uri,
-            to: newUri,
-        });
-        await Sharing.shareAsync(newUri);
+    
+        try {
+            const { uri } = await Print.printToFileAsync({ html: htmlContent });
+            const fileName = `AccountDetails_${user.name.replace(/\s+/g, '_')}.pdf`;
+            const newUri = `${FileSystem.documentDirectory}${fileName}`;
+            await FileSystem.moveAsync({
+                from: uri,
+                to: newUri,
+            });
+            await Sharing.shareAsync(newUri);
+        } catch (error) {
+            console.error('Error generating or sharing PDF:', error);
+            // You might want to show an error message to the user here
+        }
     };
+    
 
     return (
         <View style={[tw`flex-1`, { backgroundColor }]}>

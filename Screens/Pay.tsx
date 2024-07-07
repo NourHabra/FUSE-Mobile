@@ -1,12 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard, ScrollView, Alert, RefreshControl } from 'react-native';
+import { KeyboardAvoidingView,View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard, ScrollView, Alert, RefreshControl } from 'react-native';
 import {
     TextInput as DefaultTextInput,
     Platform,
     TextInputProps,
     Image,
 } from "react-native";
-import BottomTab from '../Components/BottomTab';
 import { useTheme } from '../ThemeContext';
 import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/Feather';
@@ -179,9 +178,9 @@ const Pay: React.FC = () => {
         try {
             const response = await axios.post(`${baseUrl}/bill/${billNumber}`, { jwt });
             const decryptedPayload = decryptData(response.data.payload, aesKey);
-            console.log(decryptedPayload);
+            console.log('Decrypted Bill Data:', decryptedPayload); // Log the decrypted bill data
             setBill(decryptedPayload);
-
+    
             setShowBillDetails(true);
             setShowCta(false);
             setShowSearchbar(false);
@@ -266,39 +265,52 @@ const Pay: React.FC = () => {
     const generatePDF = async () => {
         if (!logoBase64) {
             console.error('Logo base64 data is not loaded yet');
+            Alert.alert('Error', 'Logo is still loading. Please try again in a moment.');
             return;
         }
-
+    
+        const payedBill = bill.payedBill[0];
+        const cardDetails = bill.payedBill[1];
+    
         const htmlContent = `
-                <html>
-                    <body>
-                        <div style="padding: 20px; position: relative;">
-                            <img src="${logoBase64}" style="position: absolute; top: 20px; left: 20px; width: 100px; height: auto;" />
-                            <div style="margin-top: 140px;">
-                                <h1>Transaction Details</h1>
-                                <h1>PAYMENT</h1>
-                                <p><strong>Sender:</strong> ${"Sender Name"}</p>
-                                <p><strong>Bill Number:</strong> ${paidBill?.id}</p>
-                                <p><strong>Amount:</strong> ${paidBill?.amount}</p>
-                                <p><strong>Amount:</strong> ${paidBill?.amount}</p>
-                            </div>
-                        </div>
-                    </body>
-                </html>
-                `;
-
-        const { uri } = await Print.printToFileAsync({ html: htmlContent });
-        const fileName = `Transaction_${bill?.billNumber.replace(/\s+/g, '_')}.pdf`;
-        const newUri = `${FileSystem.documentDirectory}${fileName}`;
-        await FileSystem.moveAsync({
-            from: uri,
-            to: newUri,
-        });
-        await Sharing.shareAsync(newUri);
+            <html>
+            <body>
+                <div style="padding: 20px; position: relative;">
+                    <img src="${logoBase64}" style="position: absolute; top: 80px; left: 20px; width: 100px; height: auto;" />
+                    <div style="margin-top: 65px;">
+                        <center><h1>Transaction Details</h1></center>
+                        <center><h2>PAYMENT</h2></center>
+                        <br>
+                        <p><strong>Payed At:</strong> ${payedBill.payedAt}</p>
+                        <p><strong>Status:</strong> ${payedBill.status}</p>
+                        <p><strong>Category:</strong> ${payedBill.category}</p>
+                        <p><strong>Amount: $</strong> ${payedBill.amount}</p>
+                        <p><strong>Card ID:</strong> ${cardDetails.id}</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+    
+        try {
+            const { uri } = await Print.printToFileAsync({ html: htmlContent });
+            const fileName = `Transaction_${payedBill.id}.pdf`;
+            const newUri = `${FileSystem.documentDirectory}${fileName}`;
+            await FileSystem.moveAsync({
+                from: uri,
+                to: newUri,
+            });
+            await Sharing.shareAsync(newUri);
+        } catch (error) {
+            console.error('Error generating or sharing PDF:', error);
+            Alert.alert('Error', 'An error occurred while generating or sharing the PDF. Please try again.');
+        }
     };
+    
+
 
     return (
-        <View style={[tw`flex-col h-full justify-between`, { backgroundColor }]}>
+        <View style={[tw`flex-1 justify-between`, { backgroundColor }]}>
             <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
             <View style={tw`flex-row items-center mt-4 mx-4 py-2`}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={tw`mr-2`}>
@@ -306,7 +318,7 @@ const Pay: React.FC = () => {
                 </TouchableOpacity>
                 <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>Pay</Text>
             </View>
-            <View style={tw`px-2.5 pb-5 flex-col justify-between h-4/5`}>
+            <View style={tw`px-5 pb-5 flex-col justify-between h-4/5`}>
                 {/* Content excluding QR Code CTA */}
                 <View style={tw`flex-col justify-start`}>
                     {/* Search Section*/}
@@ -348,7 +360,7 @@ const Pay: React.FC = () => {
                     }
 
                     {/* Middle Content */}
-                    <View style={tw`mt-4 h-full`}>
+                    <View style={tw`mt-4`}>
                         {/* Loading */}
                         {loading &&
                             <View style={tw`flex-row justify-center items-center w-full mt-24`}>
@@ -535,26 +547,29 @@ const Pay: React.FC = () => {
                                 </View>
                             }
                         </View>}
-                        {/* Scan QR CTA Button */}
-                        {showCta && <View style={tw`mt-120`}>
-                            <Text style={[tw`text-sm mb-1 pl-2`, { color: textColor }]}>
-                                or you can use QR Code instead
+                {/* Scan QR CTA Button */}
+                {showCta && (
+                    <View style={tw`mt-105 mb-4 px-2.5`}>
+                        <Text style={[tw`text-sm mb-1 pl-2`, { color: textColor }]}>
+                            or you can use QR Code instead
+                        </Text>
+                        <TouchableOpacity
+                            style={[
+                                tw`flex-row justify-center items-center`,
+                                { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }
+                            ]}
+                            onPress={() => setAccountDetailsModalVisible(true)}
+                        >
+                            <Icon name={"camera"} size={20} color={buttonTextColor} />
+                            <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
+                                Scan QR Code
                             </Text>
-                            <TouchableOpacity
-                                style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
-                                onPress={() => setAccountDetailsModalVisible(true)}
-                            >
-                                <Icon name={"camera"} size={20} color={buttonTextColor} />
-                                <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
-                                    Scan QR Code
-                                </Text>
-                            </TouchableOpacity>
-                        </View>}
+                        </TouchableOpacity>
                     </View>
-                </View>
+                )}
             </View>
-            <BottomTab navigation={navigation} />
-
+        </View>
+            </View>
             <Modal
                 animationType="slide"
                 transparent={true}
