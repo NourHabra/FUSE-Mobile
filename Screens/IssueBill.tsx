@@ -494,7 +494,7 @@ const IssueBill: React.FC = () => {
                     </View>
                 </View>
             </Modal>
-            <BottomTab navigation={navigation} />
+            {/* <BottomTab navigation={navigation} /> */}
         </View >
     );
 };
