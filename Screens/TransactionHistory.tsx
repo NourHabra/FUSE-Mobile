@@ -20,21 +20,10 @@ const TransactionHistory: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { theme } = useTheme();
   const primaryColor = theme === 'light' ? '#006e63' : '#65e991';
 
-  const [search, setSearch] = useState<string>('');
-  const [filter, setFilter] = useState<'all' | 'send' | 'request'>('all');
-  const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(false);
-
   const jwt = useSelector((state: RootState) => state.auth.jwt);
   const aesKey = useSelector((state: RootState) => state.auth.aesKey);
 
-  const [bills, setBills] = useState<any[]>([]);
-  const [deposits, setDeposits] = useState<any[]>([]);
-  const [transfers, setTransfers] = useState<any[]>([]);
-
-  const [sent, setSent] = useState<any[]>([]);
-  const [payments, setPayments] = useState<any[]>([]);
-  const [sends, setSends] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
 
 
   useEffect(() => {
@@ -45,38 +34,86 @@ const TransactionHistory: React.FC<{ navigation: any }> = ({ navigation }) => {
         const response2 = await axios.post(`${baseUrl}/user/sent`, { jwt });
         const decryptedPayload2 = decryptData(response2.data.payload, aesKey);
 
-        console.log("Incoming");
-        console.log(decryptedPayload.recived);
-        console.log("Outgoing");
-        console.log(decryptedPayload2.sent);
+        const allTransactions = [];
 
-        setBills(decryptedPayload.recived.bills);
-        setDeposits(decryptedPayload.recived.deposits);
-        setTransfers(decryptedPayload.recived.transfer);
+        // Received
+        decryptedPayload.recived.bills.forEach(bill => {
+          allTransactions.push(
+            {
+              id: bill.id,
+              direction: "incoming",
+              type: "Payment",
+              date: new Date(bill.payedAt),
+              person: bill.card ? bill.card.account.user.name : "N/A",
+              details: bill.details,
+              amount: bill.amount,
+            }
+          );
+        });
+        decryptedPayload.recived.cash.forEach(deposit => {
+          allTransactions.push(
+            {
+              id: deposit.id,
+              direction: "incoming",
+              type: "Deposit",
+              date: new Date(deposit.createdAt),
+              person: deposit.card ? deposit.card.account.user.name : "N/A",
+              details: "No details available",
+              amount: deposit.amount,
+            }
+          );
+        });
+        decryptedPayload.recived.transfer.forEach(transfer => {
+          allTransactions.push(
+            {
+              id: transfer.id,
+              direction: "incoming",
+              type: "Transfer",
+              date: new Date(transfer.createdAt),
+              person: transfer.sAccount ? transfer.sAccount.user.name : "N/A",
+              details: "No details available",
+              amount: transfer.amount,
+            }
+          );
+        });
+        // console.log("All Transactions: " + JSON.stringify(allTransactions));
 
-        setSent(decryptedPayload2.sent)
-        setPayments(decryptedPayload2.sent.bills)
-        setSends(decryptedPayload2.sent.transfers)
+        // Sent
+        decryptedPayload2.sent.bills.forEach(bill => {
+          allTransactions.push(
+            {
+              id: bill.id,
+              direction: "outgoing",
+              type: "Payment",
+              date: new Date(bill.payedAt),
+              person: bill.merchantAccount.user.merchant.Category.name,
+              details: bill.details || "No details available",
+              amount: bill.amount,
+            }
+          );
+        });
+        decryptedPayload2.sent.transfer.forEach(transfer => {
+          allTransactions.push(
+            {
+              id: transfer.id,
+              direction: "outgoing",
+              type: "Transfer",
+              date: new Date(transfer.createdAt),
+              person: transfer.dAccount ? transfer.dAccount.user.name : "N/A",
+              details: "No details available",
+              amount: transfer.amount,
+            }
+          );
+        });
+
+        allTransactions.sort((a, b) => b.date.getTime() - a.date.getTime());
+        setTransactions(allTransactions);
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
     };
 
     fetchCards();
-  }, []);
-
-  const filteredTransactions = transactions.filter(transaction => {
-    const matchesSearch = transaction.amount?.includes(search) || transaction.date?.includes(search);
-    const matchesFilter = filter === 'all' || transaction.type === filter;
-    return matchesSearch && matchesFilter;
-  });
-
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    // Simulate a network request
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
   }, []);
 
   const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
@@ -115,75 +152,18 @@ const TransactionHistory: React.FC<{ navigation: any }> = ({ navigation }) => {
           <ScrollView
             style={tw``}
           >
-            {transfers && transfers.map((transfer, index) => (
+            {transactions && transactions.map((transaction, index) => (
               <View key={index} style={[tw`flex-row items-center justify-start mx-2 my-0.5 py-2 px-4 border rounded-2xl`, { borderColor: primaryColor }]}>
-                <Icon name="arrow-down" size={25} color={primaryColor} />
+                <Icon
+                  name={transaction.direction == "incoming" ? "arrow-down" : "arrow-up"}
+                  size={25}
+                  color={transaction.direction == "incoming" ? primaryColor : "red"} />
                 <View style={tw`w-grow ml-4`}>
-                  <Text style={[tw`text-xs`, { color: textColor }]}>{new Date(transfer.createdAt).toDateString()} - Transfer</Text>
-                  {/* <Text style={[tw`text-base`, { color: textColor }]}>Transfer</Text> */}
-                  {/* <Text style={[tw`text-base`, { color: textColor }]}>ID: {transfer.id}</Text> */}
-                  <Text style={[tw`text-xl font-bold`, { color: textColor }]}>{transfer.sAccount.user.name}</Text>
+                  <Text style={[tw`text-xs`, { color: textColor }]}>{transaction.date.toDateString()} - {transaction.type}</Text>
+                  <Text style={[tw`text-xl font-bold`, { color: textColor }]}>{transaction.person}</Text>
+                  <Text style={[tw`text-xs`, { color: textColor }]}>{transaction.details}</Text>
                 </View>
-                <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>${transfer.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
-                {/* <Text style={titleStyle}>Date: {transfer.date}</Text> */}
-              </View>
-            ))}
-            {bills && bills.map((bill, index) => (
-              <View key={index} style={[tw`flex-row items-center justify-start mx-2 my-0.5 py-2 px-4 border rounded-2xl`, { borderColor: primaryColor }]}>
-                <Icon name="arrow-down" size={25} color={primaryColor} />
-                <View style={tw`w-grow ml-4`}>
-                  <Text style={[tw`text-xs`, { color: textColor }]}>{new Date(bill.payedAt).toDateString()} - Payment</Text>
-                  {/* <Text style={[tw`text-base`, { color: textColor }]}>bill</Text> */}
-                  {/* <Text style={[tw`text-base`, { color: textColor }]}>ID: {bill.id}</Text> */}
-                  <Text style={[tw`text-xl font-bold`, { color: textColor }]}>{bill.card.account.user.name}</Text>
-                  <Text style={[tw`text-xs`, { color: textColor }]}>{bill.details != "" ? bill.details : "No details available"}</Text>
-                </View>
-                <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>${bill.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
-                {/* <Text style={titleStyle}>Date: {bill.date}</Text> */}
-              </View>
-            ))}
-            {deposits && deposits.map((cashTransaction, index) => (
-              <View key={index} style={[tw`flex-row items-center justify-start mx-2 my-0.5 py-2 px-4 border rounded-2xl`, { borderColor: primaryColor }]}>
-                <Icon name="arrow-down" size={25} color={primaryColor} />
-                <View style={tw`w-grow ml-4`}>
-                  <Text style={[tw`text-xs`, { color: textColor }]}>{new Date(cashTransaction.payedAt).toDateString()} - Payment</Text>
-                  {/* <Text style={[tw`text-base`, { color: textColor }]}>cashTransaction</Text> */}
-                  {/* <Text style={[tw`text-base`, { color: textColor }]}>ID: {cashTransaction.id}</Text> */}
-                  <Text style={[tw`text-xl font-bold`, { color: textColor }]}>{cashTransaction.card.account.user.name}</Text>
-                  <Text style={[tw`text-xs`, { color: textColor }]}>{cashTransaction.details}</Text>
-                </View>
-                <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>${cashTransaction.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
-                {/* <Text style={titleStyle}>Date: {cashTransaction.date}</Text> */}
-              </View>
-            ))}
-
-            {/* Outgoing */}
-            {payments && payments.map((payment, index) => (
-              <View key={index} style={[tw`flex-row items-center justify-start mx-2 my-0.5 py-2 px-4 border rounded-2xl`, { borderColor: primaryColor }]}>
-                <Icon name="arrow-up" size={25} color={"red"} />
-                <View style={tw`w-grow ml-4`}>
-                  <Text style={[tw`text-xs`, { color: textColor }]}>{new Date(payment.payedAt).toDateString()} - Payment</Text>
-                  {/* <Text style={[tw`text-base`, { color: textColor }]}>payment</Text> */}
-                  {/* <Text style={[tw`text-base`, { color: textColor }]}>ID: {payment.id}</Text> */}
-                  <Text style={[tw`text-xl font-bold`, { color: textColor }]}>{payment.merchantAccount.user.merchant.Category.name}</Text>
-                  <Text style={[tw`text-base font-bold`, { color: textColor }]}>{payment.merchantAccount.user.name}</Text>
-                  {/* <Text style={[tw`text-xs`, { color: textColor }]}>{payment.details}</Text> */}
-                </View>
-                <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>${payment.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
-                {/* <Text style={titleStyle}>Date: {payment.date}</Text> */}
-              </View>
-            ))}
-            {sends && sends.map((transfer, index) => (
-              <View key={index} style={[tw`flex-row items-center justify-start mx-2 my-0.5 py-2 px-4 border rounded-2xl`, { borderColor: primaryColor }]}>
-                <Icon name="arrow-down" size={25} color={primaryColor} />
-                <View style={tw`w-grow ml-4`}>
-                  <Text style={[tw`text-xs`, { color: textColor }]}>{new Date(transfer.createdAt).toDateString()} - Transfer</Text>
-                  {/* <Text style={[tw`text-base`, { color: textColor }]}>Transfer</Text> */}
-                  {/* <Text style={[tw`text-base`, { color: textColor }]}>ID: {transfer.id}</Text> */}
-                  <Text style={[tw`text-xl font-bold`, { color: textColor }]}>{transfer.dAccount.user.name}</Text>
-                </View>
-                <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>${transfer.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
-                {/* <Text style={titleStyle}>Date: {transfer.date}</Text> */}
+                <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>${transaction.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
               </View>
             ))}
           </ScrollView>
