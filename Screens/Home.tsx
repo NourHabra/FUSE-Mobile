@@ -17,6 +17,7 @@ const Home = ({ navigation }: { navigation: any }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [cards, setCards] = useState([]);
   const [unpaidBills, setUnpaidBills] = useState([]);
+  const [expenses, setExpenses] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
   const jwt = useSelector((state: RootState) => state.auth.jwt);
@@ -28,7 +29,7 @@ const Home = ({ navigation }: { navigation: any }) => {
     try {
       const response = await axios.post(`${baseUrl}/account/user`, { jwt });
       const decryptedPayload = decryptData(response.data.payload, aesKey);
-      console.log(decryptedPayload);
+      // console.log(decryptedPayload);
 
       decryptedPayload.sort((a, b) => {
         if (a.type === "Checking" && b.type === "Savings") {
@@ -49,10 +50,21 @@ const Home = ({ navigation }: { navigation: any }) => {
     try {
       const response = await axios.post(`${baseUrl}/bill/unpaid`, { jwt });
       const decryptedPayload = decryptData(response.data.payload, aesKey);
-      console.log('Unpaid Bills:', decryptedPayload);
+      // console.log('Unpaid Bills:', decryptedPayload);
       setUnpaidBills(decryptedPayload);
     } catch (error) {
       console.error('Error fetching unpaid bills:', error);
+    }
+  };
+
+  const fetchExpenses = async () => {
+    try {
+      const response = await axios.post(`${baseUrl}/user/expenses`, { jwt });
+      const decryptedPayload = decryptData(response.data.payload, aesKey);
+      console.log('Expenses:', decryptedPayload.expenses);
+      setExpenses(decryptedPayload.expenses);
+    } catch (error) {
+      console.error('Error fetching expenses:', error);
     }
   };
 
@@ -62,7 +74,8 @@ const Home = ({ navigation }: { navigation: any }) => {
       await fetchUserData();
       if (role === "Merchant") {
         await fetchUnpaidBills();
-      }
+      } else
+        await fetchExpenses();
     } catch (error) {
       console.error('Error refreshing data:', error);
     }
@@ -76,7 +89,8 @@ const Home = ({ navigation }: { navigation: any }) => {
   useEffect(() => {
     if (role === "Merchant") {
       fetchUnpaidBills();
-    }
+    } else
+      fetchExpenses();
   }, [role]);
 
   useEffect(() => {
@@ -179,12 +193,18 @@ const Home = ({ navigation }: { navigation: any }) => {
                 </TouchableOpacity>}
             </View>
             {role == "Customer" &&
-              <View style={tw`w-full flex-col justify-evenly items-center mt-4 bg-black`}>
-                <Text style={tw`text-white text-base`}>Customer Transactions Goes Here</Text>
+              <View style={tw`w-full flex-col justify-evenly mt-4`}>
+                <Text style={[tw`text-xl ml-4`, { color: textColor }]}>Latest Transactions</Text>
                 <ScrollView style={tw`w-full h-8/12`} contentContainerStyle={tw`w-full flex-col items-center`}>
-                  {cards.map((card, index) => (
+                  {expenses.length > 0 && expenses.map((expense, index) => (
                     <TouchableOpacity key={index} onPress={() => { }}>
-                      <Text style={tw`text-white text-base`}>Transaction #{index}</Text>
+                      <View style={[tw`w-full flex-row justify-between items-center my-0.5 px-4 py-2 rounded-3xl bg-transparent border`, { borderColor: primaryColor }]}>
+                        <View>
+                          <Text style={[tw`text-base`, { color: theme === 'light' ? '#000000' : '#dedede' }]}>{new Date(expense.date).toDateString()}</Text>
+                          <Text style={[tw`text-xl font-bold`, { color: theme === 'light' ? '#000000' : '#dedede' }]}>{expense.category}</Text>
+                        </View>
+                        <Text style={[tw`text-2xl font-bold`, { color: theme === 'light' ? '#000000' : '#dedede' }]}>${expense.amount}</Text>
+                      </View>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
