@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { KeyboardAvoidingView,View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard, ScrollView, Alert, RefreshControl } from 'react-native';
+import { KeyboardAvoidingView, View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard, ScrollView, Alert, RefreshControl } from 'react-native';
 import {
     TextInput as DefaultTextInput,
     Platform,
@@ -180,7 +180,7 @@ const Pay: React.FC = () => {
             const decryptedPayload = decryptData(response.data.payload, aesKey);
             console.log('Decrypted Bill Data:', decryptedPayload); // Log the decrypted bill data
             setBill(decryptedPayload);
-    
+
             setShowBillDetails(true);
             setShowCta(false);
             setShowSearchbar(false);
@@ -268,10 +268,10 @@ const Pay: React.FC = () => {
             Alert.alert('Error', 'Logo is still loading. Please try again in a moment.');
             return;
         }
-    
+
         const payedBill = bill.payedBill[0];
         const cardDetails = bill.payedBill[1];
-    
+
         const htmlContent = `
             <html>
             <body>
@@ -291,7 +291,7 @@ const Pay: React.FC = () => {
             </body>
             </html>
         `;
-    
+
         try {
             const { uri } = await Print.printToFileAsync({ html: htmlContent });
             const fileName = `Transaction_${payedBill.id}.pdf`;
@@ -306,7 +306,7 @@ const Pay: React.FC = () => {
             Alert.alert('Error', 'An error occurred while generating or sharing the PDF. Please try again.');
         }
     };
-    
+
 
 
     return (
@@ -547,28 +547,28 @@ const Pay: React.FC = () => {
                                 </View>
                             }
                         </View>}
-                {/* Scan QR CTA Button */}
-                {showCta && (
-                    <View style={tw`mt-105 mb-4 px-2.5`}>
-                        <Text style={[tw`text-sm mb-1 pl-2`, { color: textColor }]}>
-                            or you can use QR Code instead
-                        </Text>
-                        <TouchableOpacity
-                            style={[
-                                tw`flex-row justify-center items-center`,
-                                { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }
-                            ]}
-                            onPress={() => setAccountDetailsModalVisible(true)}
-                        >
-                            <Icon name={"camera"} size={20} color={buttonTextColor} />
-                            <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
-                                Scan QR Code
-                            </Text>
-                        </TouchableOpacity>
+                        {/* Scan QR CTA Button */}
+                        {showCta && (
+                            <View style={tw`mt-105 mb-4 px-2.5`}>
+                                <Text style={[tw`text-sm mb-1 pl-2`, { color: textColor }]}>
+                                    or you can use QR Code instead
+                                </Text>
+                                <TouchableOpacity
+                                    style={[
+                                        tw`flex-row justify-center items-center`,
+                                        { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }
+                                    ]}
+                                    onPress={() => setAccountDetailsModalVisible(true)}
+                                >
+                                    <Icon name={"camera"} size={20} color={buttonTextColor} />
+                                    <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
+                                        Scan QR Code
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </View>
-                )}
-            </View>
-        </View>
+                </View>
             </View>
             <Modal
                 animationType="slide"

@@ -113,7 +113,7 @@ const TransactionHistory: React.FC<{ navigation: any }> = ({ navigation }) => {
       }
     };
 
-    fetchCards();
+    // fetchCards();
   }, []);
 
   const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';

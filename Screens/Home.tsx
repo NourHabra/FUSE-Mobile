@@ -61,7 +61,7 @@ const Home = ({ navigation }: { navigation: any }) => {
     try {
       const response = await axios.post(`${baseUrl}/user/expenses`, { jwt });
       const decryptedPayload = decryptData(response.data.payload, aesKey);
-      console.log('Expenses:', decryptedPayload.expenses);
+      // console.log('Expenses:', decryptedPayload.expenses);
       setExpenses(decryptedPayload.expenses);
     } catch (error) {
       console.error('Error fetching expenses:', error);
