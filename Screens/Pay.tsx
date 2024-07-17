@@ -11,8 +11,7 @@ import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../AppNavigator';
-import { Input } from "@rneui/base";
-import { RNCamera, BarCodeReadEvent } from 'react-native-camera';
+import { CameraView, Camera, BarcodeScanningResult } from 'expo-camera';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Asset } from 'expo-asset';
@@ -66,10 +65,9 @@ const Pay: React.FC = () => {
     const [number, onChangeNumber] = React.useState<boolean>();
     const [accNumberErrorMsg, setAccNumberErrorMsg] = useState<string>("Ayyy");
     const [logoBase64, setLogoBase64] = useState<string>('');
-
+    const [hasPermission, setHasPermission] = useState<boolean | null>(null);
     const jwt: string = useSelector((state: any) => state.auth.jwt);
     const aesKey: string = useSelector((state: any) => state.auth.aesKey);
-
     const [cards, setCards] = useState<object[]>([]);
     const [message, setMessage] = useState<string>("");
     const [billNumber, setBillNumber] = useState<string>("");
@@ -103,6 +101,14 @@ const Pay: React.FC = () => {
     const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
     const lightBackgrounds = [CartGlass1, CartGlass3, CartGlass7, CartGlass8];
     const darkBackgrounds = [CartGlass1, CartGlass3, CartGlass7, CartGlass8];
+
+    useEffect(() => {
+        (async () => {
+            const { status } = await Camera.requestCameraPermissionsAsync();
+            setHasPermission(status === 'granted');
+        })();
+    }, []);
+
 
     useEffect(() => {
         const loadLogo = async () => {
@@ -207,10 +213,11 @@ const Pay: React.FC = () => {
         setShowTransactionStatus(false);
     };
 
-    const handleBarCodeRead = (e: BarCodeReadEvent) => {
-        searchForBill(e.data);
+    const handleBarCodeRead = ({ type, data }: BarcodeScanningResult) => {
+        searchForBill(data);
         setAccountDetailsModalVisible(false);
     };
+
 
     const confirmBill = () => {
         setBillConfirmed(true);
@@ -593,13 +600,19 @@ const Pay: React.FC = () => {
                         </View>
                         {/* Camera */}
                         <View style={tw`h-4/5 w-full`}>
-                            <FillToAspectRatio>
-                                <RNCamera
+                            {hasPermission && (
+                                <CameraView
                                     style={tw`h-full w-full`}
-                                    onBarCodeRead={handleBarCodeRead}
-                                    captureAudio={false}
+                                    onBarcodeScanned={handleBarCodeRead}
                                 />
-                            </FillToAspectRatio>
+                            )}
+                            {!hasPermission && (
+                                <View style={tw`flex-1 justify-center items-center`}>
+                                    <Text style={[tw`text-lg`, { color: textColor }]}>
+                                        No camera access. Please grant camera permissions to use this feature.
+                                    </Text>
+                                </View>
+                            )}
                         </View>
                         <Text style={[tw`text-sm pt-2`, { color: textColor }]}>
                             Point your camera to a bill QR Code to quickly perform your transaction.

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard, Alert } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard, Alert, SafeAreaView } from 'react-native';
 import {
     Platform,
     TextInputProps,
@@ -11,8 +11,7 @@ import tw from 'twrnc';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../AppNavigator';
-import { Input } from "@rneui/base";
-import { RNCamera, BarCodeReadEvent } from 'react-native-camera';
+import { CameraView, Camera, BarcodeScanningResult } from 'expo-camera';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Asset } from 'expo-asset';
@@ -29,6 +28,7 @@ const Send: React.FC = () => {
     const [number, onChangeNumber] = React.useState<boolean>();
     const [accNumberErrorMsg, setAccNumberErrorMsg] = useState<string>("Ayyy");
     const [logoBase64, setLogoBase64] = useState<string>('');
+    const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 
     const jwt: string = useSelector((state: any) => state.auth.jwt);
     const aesKey: string = useSelector((state: any) => state.auth.aesKey);
@@ -87,6 +87,8 @@ const Send: React.FC = () => {
     const linkColor = theme === 'light' ? '#028174' : '#92DE8B';
     const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
 
+    const cameraRef = useRef<React.ComponentType<any>>(null);
+
     useEffect(() => {
         const loadLogo = async () => {
             const logoAsset = Asset.fromModule(require('../assets/FuseLogo.png'));
@@ -99,6 +101,21 @@ const Send: React.FC = () => {
 
         loadLogo();
     }, []);
+
+    useEffect(() => {
+        (async () => {
+            const { status } = await Camera.requestCameraPermissionsAsync();
+            setHasPermission(status === 'granted');
+        })();
+    }, []);
+
+
+    const handleBarCodeScanned = ({ type, data }: BarcodeScanningResult) => {
+        setAccountNumber(data);
+        searchForAccount(data);
+        setMessage(data);
+        setAccountDetailsModalVisible(false);
+    };
 
     const CustomButton = ({ title, onPress, iconName }: { title: string, onPress: () => void, iconName: string }) => (
         <TouchableOpacity
@@ -143,13 +160,6 @@ const Send: React.FC = () => {
         setShowAmountInput(false);
         setShowFinalDetails(false);
         setShowCta(true);
-    };
-
-    const handleBarCodeRead = (e: BarCodeReadEvent) => {
-        setAccountNumber(e.data);
-        searchForAccount(e.data);
-        setMessage(e.data);
-        setAccountDetailsModalVisible(false);
     };
 
     const confirmAccount = () => {
@@ -239,369 +249,302 @@ const Send: React.FC = () => {
         await Sharing.shareAsync(newUri);
     };
     return (
-        <View style={[tw`flex-1 justify-between`, { backgroundColor }]}>
-            <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
-            <View style={tw`flex-row items-center mt-4 mx-4 py-2`}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={tw`mr-2`}>
-                    <Icon name="arrow-left" size={28} color={textColor} />
-                </TouchableOpacity>
-                <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>Send</Text>
-            </View>
-            <View style={tw`px-5 pb-5 flex-col justify-between h-4/5`}>
-                {/* Content excluding QR Code CTA */}
-                <View style={tw`flex-col justify-start`}>
-                    {/* Search Section & Favourites */}
-                    {showSearchbar && <View>
-                        {/* Account Input Field */}
-                        <View>
+        <SafeAreaView style={{ flex: 1, backgroundColor }}>
+            <View style={[tw`flex-1 justify-between`, { backgroundColor }]}>
+                <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
+                <View style={tw`flex-row items-center mt-4 mx-4 py-2`}>
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={tw`mr-2`}>
+                        <Icon name="arrow-left" size={28} color={textColor} />
+                    </TouchableOpacity>
+                    <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>Send</Text>
+                </View>
+                <View style={tw`px-5 pb-5 flex-col justify-between h-4/5`}>
+                    {/* Content excluding QR Code CTA */}
+                    <View style={tw`flex-col justify-start`}>
+                        {/* Search Section & Favourites */}
+                        {showSearchbar && <View>
+                            {/* Account Input Field */}
                             <View>
-                                <Text style={[tw`text-sm pl-2 pb-1`, { color: textColor }]}>Account Number / Username</Text>
-                                <View style={tw`flex-row w-full justify-between`}>
-                                    <TextInput
-                                        style={[tw`flex-row w-grow mr-1 border-2 bg-transparent`, { borderColor, color: textColor }]}
-                                        onChangeText={(text) => {
-                                            setAccountNumber(text);
-                                        }}
-                                        placeholder="XXXX XXXX XXXX XXXX"
-                                        keyboardType="number-pad"
-                                        maxLength={20}
-                                        placeholderTextColor={placeholderColor}
-                                        onTouchStart={() => initializeFields()}
-                                        value={accountNumber}
-                                    />
-                                    <TouchableOpacity
-                                        style={[
+                                <View>
+                                    <Text style={[tw`text-sm pl-2 pb-1`, { color: textColor }]}>Account Number / Username</Text>
+                                    <View style={tw`flex-row w-full justify-between`}>
+                                        <TextInput
+                                            style={[tw`flex-row w-grow mr-1 border-2 bg-transparent`, { borderColor, color: textColor }]}
+                                            onChangeText={(text) => {
+                                                setAccountNumber(text);
+                                            }}
+                                            placeholder="XXXX XXXX XXXX XXXX"
+                                            keyboardType="number-pad"
+                                            maxLength={20}
+                                            placeholderTextColor={placeholderColor}
+                                            onTouchStart={() => initializeFields()}
+                                            value={accountNumber}
+                                        />
+                                        <TouchableOpacity
+                                            style={[
+                                                tw`flex-row items-center justify-center py-3 rounded-lg px-4 border-2`,
+                                                { borderColor },
+                                            ]}
+                                            onPress={() => {
+                                                Keyboard.dismiss();
+                                                searchForAccount(accountNumber);
+                                            }}
+                                        >
+                                            <Icon
+                                                name={"search"}
+                                                size={20}
+                                                color={textColor}
+                                            />
+                                            {/* <Text style={[tw`text-base font-bold ml-2`, { color: theme === 'light' ? '#FFFFFF' : '#000000' }]}>Share</Text> */}
+                                        </TouchableOpacity>
+
+                                    </View>
+                                </View>
+                            </View>
+                            {/* Favourites */}
+                            <View style={tw`pt-2`}>
+                                <TouchableOpacity onPress={() => { setShowFavourites(!showFavourites); Keyboard.dismiss(); }} style={tw`flex-row items-center justify-between pb-2`}>
+                                    <View style={tw`flex-row items-center`}>
+                                        {!showFavourites && <Text style={[tw`text-base`, { color: textColor }]}>Show </Text>}
+                                        {showFavourites && <Text style={[tw`text-base`, { color: textColor }]}>Hide </Text>}
+                                        <Text style={[tw`text-base`, { color: textColor }]}>Favourites</Text>
+                                    </View>
+                                    {!showFavourites && <Icon name={"plus"} size={20} color={textColor} />}
+                                    {showFavourites && <Icon name={"minus"} size={20} color={textColor} />}
+                                </TouchableOpacity>
+                                {showFavourites && <View style={tw`flex-row items-center justify-between w-full`}>
+                                    {['Nour', 'Mustafa', 'Dana', 'Abdullah'].map((card, index) => (
+                                        <TouchableOpacity key={index} style={tw`items-center justify-start w-20 pt-2 pb-4 rounded-lg`} onPress={() => { setShowFavourites(false) }}>
+                                            <Image
+                                                source={{ uri: 'https://www.noracooks.com/wp-content/uploads/2020/05/square.jpg' }}
+                                                style={tw`w-16 h-16 rounded-full mb-2`}
+                                            />
+                                            <Text style={[tw`text-sm`, { color: textColor }]}>{card}</Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>}
+                            </View>
+                        </View>
+                        }
+
+                        {/* Middle Content */}
+                        <View style={tw`mt-4`}>
+                            {/* Loading */}
+                            {loading &&
+                                <View style={tw`flex-row justify-center items-center w-full mt-24`}>
+                                    <ActivityIndicator size="large" color={textColor} />
+                                </View>
+                            }
+
+                            {/* Account details */}
+                            {accountFound && showAccountDetails && <View>
+                                <AccountDetail title='Account Number' content={recipient.id} />
+                                <AccountDetail title='Account Holder Name' content={recipient.user.name} />
+                                <AccountDetail title='Type' content={recipient.type} />
+                                <AccountDetail title='Account Status' content={recipient.status} />
+                                <TouchableOpacity
+                                    style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
+                                    onPress={() => confirmAccount()}
+                                >
+                                    <Icon name={"check"} size={20} color={buttonTextColor} />
+                                    <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
+                                        Confirm
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>}
+
+                            {/* Account Not Found */}
+                            {accountNotFound && <View style={tw`flex-col items-center w-full`}>
+                                <Icon name={"user-x"} size={120} color={textColor} />
+                                <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>
+                                    Account Not Found
+                                </Text>
+                                <Text style={[tw`text-sm font-bold text-center w-2/3`, { color: textColor }]}>
+                                    Please make sure you have entered the correct account number and try again.
+                                </Text>
+                            </View>}
+
+                            {/* Input Amount */}
+                            {showAmountInput &&
+                                <View>
+                                    <Text style={[tw`text-sm pl-2 pb-1`, { color: textColor }]}>Amount</Text>
+                                    <View style={tw`flex-row w-full justify-between items-center`}>
+                                        <TextInput
+                                            style={[tw`flex-row w-grow mr-1 border-2 bg-transparent`, { borderColor, color: textColor }]}
+                                            onChangeText={(text) => setAmount(text)}
+                                            placeholder="X,XXX.xx"
+                                            keyboardType="number-pad"
+                                            placeholderTextColor={placeholderColor}
+                                        />
+                                        <TouchableOpacity style={[
                                             tw`flex-row items-center justify-center py-3 rounded-lg px-4 border-2`,
                                             { borderColor },
                                         ]}
-                                        onPress={() => {
-                                            Keyboard.dismiss();
-                                            searchForAccount(accountNumber);
-                                        }}
-                                    >
-                                        <Icon
-                                            name={"search"}
-                                            size={20}
-                                            color={textColor}
-                                        />
-                                        {/* <Text style={[tw`text-base font-bold ml-2`, { color: theme === 'light' ? '#FFFFFF' : '#000000' }]}>Share</Text> */}
-                                    </TouchableOpacity>
+                                            onPress={() => {
+                                                Keyboard.dismiss();
+                                                inputAmount();
+                                            }}
+                                        >
+                                            <Icon
+                                                name={"check"}
+                                                size={20}
+                                                color={textColor}
+                                            />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            }
 
+                            {/* Final Transaction Details */}
+                            {!loading && showFinalDetails && <View style={tw`h-full justify-center w-full`}>
+                                <Text style={[tw`text-2xl font-bold mb-2`, { color: textColor }]}>Transaction Details</Text>
+                                <View style={tw`w-full flex-row justify-center pb-4`}>
+                                    <View style={[tw`w-full border h-0`, { borderColor }]} />
                                 </View>
-                            </View>
-                        </View>
-                        {/* Favourites */}
-                        <View style={tw`pt-2`}>
-                            <TouchableOpacity onPress={() => { setShowFavourites(!showFavourites); Keyboard.dismiss(); }} style={tw`flex-row items-center justify-between pb-2`}>
-                                <View style={tw`flex-row items-center`}>
-                                    {!showFavourites && <Text style={[tw`text-base`, { color: textColor }]}>Show </Text>}
-                                    {showFavourites && <Text style={[tw`text-base`, { color: textColor }]}>Hide </Text>}
-                                    <Text style={[tw`text-base`, { color: textColor }]}>Favourites</Text>
+                                <AccountDetail title='Account Number' content={recipient.id} />
+                                <AccountDetail title='Account Holder Name' content={recipient.user.name} />
+                                <AccountDetail title='Type' content={recipient.type} />
+                                <AccountDetail title='Account Status' content={recipient.status} />
+                                <AccountDetail title='Amount' content={amount} />
+                                <View style={tw`w-full flex-row justify-center pb-4`}>
+                                    <View style={[tw`w-full border h-0`, { borderColor }]} />
                                 </View>
-                                {!showFavourites && <Icon name={"plus"} size={20} color={textColor} />}
-                                {showFavourites && <Icon name={"minus"} size={20} color={textColor} />}
-                            </TouchableOpacity>
-                            {showFavourites && <View style={tw`flex-row items-center justify-between w-full`}>
-                                {['Nour', 'Mustafa', 'Dana', 'Abdullah'].map((card, index) => (
-                                    <TouchableOpacity key={index} style={tw`items-center justify-start w-20 pt-2 pb-4 rounded-lg`} onPress={() => { setShowFavourites(false) }}>
-                                        <Image
-                                            source={{ uri: 'https://www.noracooks.com/wp-content/uploads/2020/05/square.jpg' }}
-                                            style={tw`w-16 h-16 rounded-full mb-2`}
-                                        />
-                                        <Text style={[tw`text-sm`, { color: textColor }]}>{card}</Text>
-                                    </TouchableOpacity>
-                                ))}
+                                <TouchableOpacity
+                                    style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
+                                    onPress={() => confirmTransaction()}
+                                >
+                                    <Icon name={"check"} size={20} color={buttonTextColor} />
+                                    <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
+                                        Transfer
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[tw`flex-row justify-center items-center p-4`]}
+                                    onPress={() => confirmTransaction()}
+                                >
+                                    <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
+                                        Perform a different transaction instead
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>}
+
+                            {/* Transaction Status */}
+                            {showTransactionStatus && <View style={tw`flex-col items-center w-full h-full justify-center`}>
+                                {transactionStatus == "success" &&
+                                    <View style={tw`flex-col items-center`}>
+                                        <Icon name={"check"} size={120} color={buttonColor} />
+                                        <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>
+                                            Success
+                                        </Text>
+                                        <Text style={[tw`text-base font-bold mb-4`, { color: textColor }]}>
+                                            Transaction completed successfully.
+                                        </Text>
+                                        <TouchableOpacity
+                                            style={[tw`flex-row justify-center items-center border-2 mt-4`, { borderColor, padding: 16, borderRadius: 8 }]}
+                                            onPress={() => generatePDF()}
+                                        >
+                                            <Icon name={"share"} size={20} color={textColor} />
+                                            <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                                                Share Transaction
+                                            </Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={[tw`flex-row justify-center items-center p-4`]}
+                                            onPress={() => {
+                                                navigation.reset({
+                                                    index: 0,
+                                                    routes: [{ name: 'Home' }],
+                                                });
+                                            }}
+                                        >
+                                            <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
+                                                Back to Home
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                }
+                                {transactionStatus != "success" &&
+                                    <View style={tw`flex-col items-center pt-16`}>
+                                        <Icon name={"x"} size={120} color={textColor} />
+                                        <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>
+                                            Failure
+                                        </Text>
+                                        <Text style={[tw`text-base font-bold mb-4`, { color: textColor }]}>
+                                            An error occurred, please try again later.
+                                        </Text>
+                                    </View>
+                                }
                             </View>}
                         </View>
                     </View>
-                    }
-
-                    {/* Middle Content */}
-                    <View style={tw`mt-4`}>
-                        {/* Loading */}
-                        {loading &&
-                            <View style={tw`flex-row justify-center items-center w-full mt-24`}>
-                                <ActivityIndicator size="large" color={textColor} />
-                            </View>
-                        }
-
-                        {/* Account details */}
-                        {accountFound && showAccountDetails && <View>
-                            <AccountDetail title='Account Number' content={recipient.id} />
-                            <AccountDetail title='Account Holder Name' content={recipient.user.name} />
-                            <AccountDetail title='Type' content={recipient.type} />
-                            <AccountDetail title='Account Status' content={recipient.status} />
+                    {/* Scan QR CTA Button */}
+                    {showCta && (
+                        <View style={tw`mt-4 mb-4 px-2.5`}>
+                            <Text style={[tw`text-sm mb-1 pl-2`, { color: textColor }]}>
+                                or you can use QR Code instead
+                            </Text>
                             <TouchableOpacity
-                                style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
-                                onPress={() => confirmAccount()}
+                                style={[
+                                    tw`flex-row justify-center items-center`,
+                                    { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }
+                                ]}
+                                onPress={() => setAccountDetailsModalVisible(true)}
                             >
-                                <Icon name={"check"} size={20} color={buttonTextColor} />
+                                <Icon name={"camera"} size={20} color={buttonTextColor} />
                                 <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
-                                    Confirm
+                                    Scan QR Code
                                 </Text>
-                            </TouchableOpacity>
-                        </View>}
-
-                        {/* Account Not Found */}
-                        {accountNotFound && <View style={tw`flex-col items-center w-full`}>
-                            <Icon name={"user-x"} size={120} color={textColor} />
-                            <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>
-                                Account Not Found
-                            </Text>
-                            <Text style={[tw`text-sm font-bold text-center w-2/3`, { color: textColor }]}>
-                                Please make sure you have entered the correct account number and try again.
-                            </Text>
-                        </View>}
-
-                        {/* Input Amount */}
-                        {showAmountInput &&
-                            <View>
-                                <Text style={[tw`text-sm pl-2 pb-1`, { color: textColor }]}>Amount</Text>
-                                <View style={tw`flex-row w-full justify-between items-center`}>
-                                    <TextInput
-                                        style={[tw`flex-row w-grow mr-1 border-2 bg-transparent`, { borderColor, color: textColor }]}
-                                        onChangeText={(text) => setAmount(text)}
-                                        placeholder="X,XXX.xx"
-                                        keyboardType="number-pad"
-                                        placeholderTextColor={placeholderColor}
-                                    />
-                                    <TouchableOpacity style={[
-                                        tw`flex-row items-center justify-center py-3 rounded-lg px-4 border-2`,
-                                        { borderColor },
-                                    ]}
-                                        onPress={() => {
-                                            Keyboard.dismiss();
-                                            inputAmount();
-                                        }}
-                                    >
-                                        <Icon
-                                            name={"check"}
-                                            size={20}
-                                            color={textColor}
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        }
-
-                        {/* Final Transaction Details */}
-                        {!loading && showFinalDetails && <View style={tw`h-full justify-center w-full`}>
-                            <Text style={[tw`text-2xl font-bold mb-2`, { color: textColor }]}>Transaction Details</Text>
-                            <View style={tw`w-full flex-row justify-center pb-4`}>
-                                <View style={[tw`w-full border h-0`, { borderColor }]} />
-                            </View>
-                            <AccountDetail title='Account Number' content={recipient.id} />
-                            <AccountDetail title='Account Holder Name' content={recipient.user.name} />
-                            <AccountDetail title='Type' content={recipient.type} />
-                            <AccountDetail title='Account Status' content={recipient.status} />
-                            <AccountDetail title='Amount' content={amount} />
-                            <View style={tw`w-full flex-row justify-center pb-4`}>
-                                <View style={[tw`w-full border h-0`, { borderColor }]} />
-                            </View>
-                            <TouchableOpacity
-                                style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
-                                onPress={() => confirmTransaction()}
-                            >
-                                <Icon name={"check"} size={20} color={buttonTextColor} />
-                                <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
-                                    Transfer
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[tw`flex-row justify-center items-center p-4`]}
-                                onPress={() => confirmTransaction()}
-                            >
-                                <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
-                                    Perform a different transaction instead
-                                </Text>
-                            </TouchableOpacity>
-                        </View>}
-
-                        {/* Transaction Status */}
-                        {showTransactionStatus && <View style={tw`flex-col items-center w-full h-full justify-center`}>
-                            {transactionStatus == "success" &&
-                                <View style={tw`flex-col items-center`}>
-                                    <Icon name={"check"} size={120} color={buttonColor} />
-                                    <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>
-                                        Success
-                                    </Text>
-                                    <Text style={[tw`text-base font-bold mb-4`, { color: textColor }]}>
-                                        Transaction completed successfully.
-                                    </Text>
-                                    <TouchableOpacity
-                                        style={[tw`flex-row justify-center items-center border-2 mt-4`, { borderColor, padding: 16, borderRadius: 8 }]}
-                                        onPress={() => generatePDF()}
-                                    >
-                                        <Icon name={"share"} size={20} color={textColor} />
-                                        <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
-                                            Share Transaction
-                                        </Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style={[tw`flex-row justify-center items-center p-4`]}
-                                        onPress={() => {
-                                            navigation.reset({
-                                                index: 0,
-                                                routes: [{ name: 'Home' }],
-                                            });
-                                        }}
-                                    >
-                                        <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
-                                            Back to Home
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
-                            }
-                            {transactionStatus != "success" &&
-                                <View style={tw`flex-col items-center pt-16`}>
-                                    <Icon name={"x"} size={120} color={textColor} />
-                                    <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>
-                                        Failure
-                                    </Text>
-                                    <Text style={[tw`text-base font-bold mb-4`, { color: textColor }]}>
-                                        An error occurred, please try again later.
-                                    </Text>
-                                </View>
-                            }
-                        </View>}
-                    </View>
-                </View>
-                {/* Scan QR CTA Button */}
-                {showCta && (
-                    <View style={tw`mt-4 mb-4 px-2.5`}>
-                        <Text style={[tw`text-sm mb-1 pl-2`, { color: textColor }]}>
-                            or you can use QR Code instead
-                        </Text>
-                        <TouchableOpacity
-                            style={[
-                                tw`flex-row justify-center items-center`,
-                                { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }
-                            ]}
-                            onPress={() => setAccountDetailsModalVisible(true)}
-                        >
-                            <Icon name={"camera"} size={20} color={buttonTextColor} />
-                            <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
-                                Scan QR Code
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-            </View>
-
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={accountDetailsModalVisible}
-                onRequestClose={() => {
-                    setAccountDetailsModalVisible(!accountDetailsModalVisible);
-                }}
-            >
-                <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-75 h-full`}>
-                    <View style={[tw`w-11/12 p-5 rounded-xl h-4/6 flex-col items-center justify-start`, { backgroundColor: cardBackgroundColor }]}>
-                        <View style={tw`flex-row justify-between items-center w-full mb-4`}>
-                            <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>
-                                Scan Account QR Code
-                            </Text>
-                            <TouchableOpacity
-                                style={tw`p-2`}
-                                onPress={() => setAccountDetailsModalVisible(false)}
-                            >
-                                <Icon name="x" size={28} color={textColor} />
                             </TouchableOpacity>
                         </View>
-                        {/* Camera */}
-                        <View style={tw`h-4/5 w-full`}>
-                            <FillToAspectRatio>
-                                <RNCamera
-                                    style={tw`h-full w-full`}
-                                    onBarCodeRead={handleBarCodeRead}
-                                    captureAudio={false}
-                                />
-                            </FillToAspectRatio>
-                        </View>
-                        <Text style={[tw`text-sm pt-2`, { color: textColor }]}>
-                            Point your camera to an account QR Code to quickly perform your transaction.
-                        </Text>
-                    </View>
+                    )}
                 </View>
-            </Modal>
-        </View >
-    );
-};
 
-type LayoutInfo = {
-    width: number,
-    height: number,
-};
-
-type State = {
-    layoutInfo: LayoutInfo | null | undefined,
-};
-
-type Props = {
-    ratio: string,
-    children: React.ReactNode,
-};
-
-class FillToAspectRatio extends React.Component<Props, State> {
-    static defaultProps = {
-        ratio: '4:3',
-    };
-    state = {
-        layoutInfo: null,
-    };
-    handleLayout = ({ nativeEvent: { layout: { width, height } } }: { nativeEvent: { layout: LayoutInfo } }) => {
-        this.setState({
-            layoutInfo: { width, height },
-        });
-    };
-
-    getRatio = () => {
-        const { ratio } = this.props;
-        const [ratioWidth, ratioHeight] = ratio.split(':').map(x => Number(x));
-        return ratioHeight / ratioWidth;
-    };
-
-    render() {
-        const { layoutInfo } = this.state;
-
-        if (!layoutInfo) {
-            return <View key="pre-info" onLayout={this.handleLayout} style={{
-                flex: 1, overflow: 'hidden', position: 'relative'
-            }} />;
-        }
-
-        const { height, width } = layoutInfo;
-        let wrapperWidth;
-        let wrapperHeight;
-        const ratio = this.getRatio();
-        if (ratio * height < width) {
-            wrapperHeight = width / ratio;
-            wrapperWidth = width;
-        } else {
-            wrapperWidth = ratio * height;
-            wrapperHeight = height;
-        }
-        const wrapperPaddingX = (width - wrapperWidth) / 2;
-        const wrapperPaddingY = (height - wrapperHeight) / 2;
-
-        return (
-            <View onLayout={this.handleLayout} style={{
-                flex: 1, overflow: 'hidden', position: 'relative'
-            }}>
-                <View
-                    style={{
-                        width: wrapperWidth,
-                        height: wrapperHeight,
-                        marginLeft: wrapperPaddingX,
-                        marginTop: wrapperPaddingY,
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={accountDetailsModalVisible}
+                    onRequestClose={() => {
+                        setAccountDetailsModalVisible(!accountDetailsModalVisible);
                     }}
                 >
-                    {this.props.children}
-                </View>
+                    <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-75 h-full`}>
+                        <View style={[tw`w-11/12 p-5 rounded-xl h-4/6 flex-col items-center justify-start`, { backgroundColor: cardBackgroundColor }]}>
+                            <View style={tw`flex-row justify-between items-center w-full mb-4`}>
+                                <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>
+                                    Scan Account QR Code
+                                </Text>
+                                <TouchableOpacity
+                                    style={tw`p-2`}
+                                    onPress={() => setAccountDetailsModalVisible(false)}
+                                >
+                                    <Icon name="x" size={28} color={textColor} />
+                                </TouchableOpacity>
+                            </View>
+                            {/* Camera */}
+                            <View style={tw`h-4/5 w-full`}>
+                                {hasPermission && (
+                                    <CameraView
+                                        style={tw`h-full w-full`}
+                                        onBarcodeScanned={handleBarCodeScanned}
+                                    />
+                                )}
+                                {!hasPermission && (
+                                    <View style={tw`flex-1 justify-center items-center`}>
+                                        <Text style={[tw`text-lg`, { color: textColor }]}>
+                                            No camera access. Please grant camera permissions to use this feature.
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+                            <Text style={[tw`text-sm pt-2`, { color: textColor }]}>
+                                Point your camera to an account QR Code to quickly perform your transaction.
+                            </Text>
+                        </View>
+                    </View>
+                </Modal>
             </View >
-        );
-    }
-}
+        </SafeAreaView>
+    );
+};
 
 export default Send;

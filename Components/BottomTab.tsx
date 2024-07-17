@@ -29,7 +29,7 @@ const BottomTab: React.FC<BottomTabProps> = ({ navigation }) => {
   const tabs = [
     { name: 'Home', icon: 'home-outline', label: 'Home' },
     { name: 'MyCard', icon: 'card-outline', label: 'My Cards' },
-    { name: 'MyExpenses', icon: 'wallet-outline', label: 'Expenses' },
+    // { name: 'MyExpenses', icon: 'wallet-outline', label: 'Expenses' },
     { name: 'TransactionHistory', icon: 'swap-horizontal-outline', label: 'History' },
     { name: 'Profile', icon: 'person-outline', label: 'Profile' },
   ];
