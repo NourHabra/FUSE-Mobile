@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { KeyboardAvoidingView, View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard, ScrollView, Alert, RefreshControl } from 'react-native';
+import { KeyboardAvoidingView, View, Text, StatusBar, TouchableOpacity, Modal, ActivityIndicator, Keyboard, ScrollView, Alert, RefreshControl, TouchableWithoutFeedback, SafeAreaView } from 'react-native';
 import {
     TextInput as DefaultTextInput,
     Platform,
@@ -22,11 +22,13 @@ import { RootState } from '../Redux/store';
 import { decryptData, encryptData } from '../crypto-utils';
 import axios from 'axios';
 import baseUrl from '../baseUrl';
+import { BlurView } from 'expo-blur';
 
-import CartGlass1 from '../assets/Cart Glass 1.png';
-import CartGlass3 from '../assets/Cart Glass 3.png';
-import CartGlass7 from '../assets/Cart Glass 7.png';
+
 import CartGlass8 from '../assets/Cart Glass 8.png';
+
+import BottomTab from '../Components/BottomTab';
+
 
 const TextInput = ({
     placeholderTextColor,
@@ -91,7 +93,7 @@ const Pay: React.FC = () => {
 
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
-    const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
+    const backgroundColor = theme === 'light' ? '#FFFFFF' : '#1A1A1A';
     const textColor = theme === 'light' ? '#1F1F1F' : '#FFFFFF';
     const borderColor = theme === 'light' ? '#CCCCCC' : '#444444';
     const placeholderColor = theme === 'light' ? '#999999' : '#A0A0A0';
@@ -99,8 +101,6 @@ const Pay: React.FC = () => {
     const buttonTextColor = theme === 'light' ? '#FFFFFF' : '#181E20';
     const linkColor = theme === 'light' ? '#028174' : '#65e991';
     const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
-    const lightBackgrounds = [CartGlass1, CartGlass3, CartGlass7, CartGlass8];
-    const darkBackgrounds = [CartGlass1, CartGlass3, CartGlass7, CartGlass8];
 
     useEffect(() => {
         (async () => {
@@ -317,311 +317,312 @@ const Pay: React.FC = () => {
 
 
     return (
-        <View style={[tw`flex-1 justify-between`, { backgroundColor }]}>
-            <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
-            <View style={tw`flex-row items-center mt-4 mx-4 py-2`}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={tw`mr-2`}>
-                    <Icon name="arrow-left" size={28} color={textColor} />
-                </TouchableOpacity>
-                <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>Pay</Text>
-            </View>
-            <View style={tw`px-5 pb-5 flex-col justify-between h-4/5`}>
-                {/* Content excluding QR Code CTA */}
-                <View style={tw`flex-col justify-start`}>
-                    {/* Search Section*/}
-                    {showSearchbar && <View style={tw``}>
-                        {/* Bill Number Input Field */}
-                        <View style={tw``}>
-                            <Text style={[tw`text-sm pl-2 pb-1`, { color: textColor }]}>Bill Number</Text>
-                            <View style={tw`flex-row w-full justify-between`}>
-                                <TextInput
-                                    style={[tw`flex-row w-grow mr-1 border-2 bg-transparent`, { borderColor, color: textColor }]}
-                                    onChangeText={(text) => {
-                                        setBillNumber(text);
-                                    }}
-                                    placeholder="XXXX XXXX XXXX XXXX"
-                                    keyboardType="number-pad"
-                                    maxLength={20}
-                                    placeholderTextColor={placeholderColor}
-                                    onTouchStart={() => initializeFields()}
-                                />
-                                <TouchableOpacity
-                                    style={[
-                                        tw`flex-row items-center justify-center py-3 rounded-lg px-4 border-2`,
-                                        { borderColor },
-                                    ]}
-                                    onPress={() => {
-                                        Keyboard.dismiss();
-                                        searchForBill(billNumber);
-                                    }}
-                                >
-                                    <Icon
-                                        name={"search"}
-                                        size={20}
-                                        color={textColor}
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View style={{ flex: 1, backgroundColor }}>
+                <SafeAreaView style={{ flex: 1, backgroundColor }}>
+                    <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
+                    <View style={tw`flex-row items-center mt-4 mx-4 py-2`}>
+                        <TouchableOpacity onPress={() => navigation.goBack()} style={tw`mr-2`}>
+                            <Icon name="arrow-left" size={28} color={textColor} />
+                        </TouchableOpacity>
+                        <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>Pay</Text>
                     </View>
-                    }
-
-                    {/* Middle Content */}
-                    <View style={tw`mt-4`}>
-                        {/* Loading */}
-                        {loading &&
-                            <View style={tw`flex-row justify-center items-center w-full mt-24`}>
-                                <ActivityIndicator size="large" color={textColor} />
-                            </View>
-                        }
-
-                        {/* Bill Not Found */}
-                        {billNotFound && <View style={tw`flex-col items-center w-full mt-16`}>
-                            <Icon name={"file-minus"} size={120} color={textColor} />
-                            <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>
-                                Bill Not Found
-                            </Text>
-                            <Text style={[tw`text-sm font-bold text-center w-2/3`, { color: textColor }]}>
-                                Please make sure you have entered the correct bill number and try again.
-                            </Text>
-                        </View>}
-
-                        {/* Bill details */}
-                        {billFound && showBillDetails && <View>
-                            <Text style={[tw`text-2xl font-bold mb-2`, { color: textColor }]}>Bill Details</Text>
-                            <View style={tw`w-full flex-row justify-center pb-4`}>
-                                <View style={[tw`w-full border h-0`, { borderColor }]} />
-                            </View>
-                            <AccountDetail title='Bill Number' content={bill.id} />
-                            <AccountDetail title='Category' content={bill.category} />
-                            <AccountDetail title='Merchant' content={bill.merchantAccount.user.name} />
-                            <AccountDetail title='Description' content={bill.details} />
-                            <AccountDetail title='Amount' content={bill.amount} />
-                            <TouchableOpacity
-                                style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
-                                onPress={() => confirmBill()}
-                            >
-                                <Icon name={"check"} size={20} color={buttonTextColor} />
-                                <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
-                                    Confirm
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[tw`flex-row justify-center items-center p-4`]}
-                                onPress={() => cancelTransaction()}
-                            >
-                                <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
-                                    Pay a different bill instead
-                                </Text>
-                            </TouchableOpacity>
-                        </View>}
-
-                        {/* Bill details */}
-                        {showSelectCard && <View style={tw`h-full`}>
-                            <View style={tw`px-4`}>
-                                <Text style={[tw`text-2xl font-bold mb-2`, { color: textColor }]}>Select Card</Text>
-                                <View style={tw`w-full flex-row justify-center pb-4`}>
-                                    <View style={[tw`w-full border h-0`, { borderColor }]} />
-                                </View>
-                                <AccountDetail title='Amount to pay' content={bill.amount} />
-                            </View>
-                            <ScrollView
-                                style={tw`w-full h-8/12`}
-                                contentContainerStyle={tw`w-full flex-col items-center`}
-                                showsVerticalScrollIndicator={false}
-                                showsHorizontalScrollIndicator={false}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={refreshing}
-                                        onRefresh={onRefresh}
-                                        colors={[theme === 'light' ? 'black' : 'white']}
-                                        tintColor={theme === 'light' ? 'black' : 'white'}
-                                    />
-                                }
-                            >
-                                {cards.map((card, index) => {
-                                    const backgroundImage = theme === 'light'
-                                        ? lightBackgrounds[Math.floor(Math.random() * lightBackgrounds.length)] : darkBackgrounds[Math.floor(Math.random() * darkBackgrounds.length)];
-
-                                    return (
-                                        <TouchableOpacity
-                                            key={index}
-                                            onPress={() => {
-                                                console.log(card.id);
-                                                selectCard(card)
+                    <View style={tw`px-5 pb-5 flex-col justify-between h-4/5`}>
+                        {/* Content excluding QR Code CTA */}
+                        <View style={tw`flex-col justify-start`}>
+                            {/* Search Section*/}
+                            {showSearchbar && <View style={tw``}>
+                                {/* Bill Number Input Field */}
+                                <View style={tw``}>
+                                    <Text style={[tw`text-sm pl-2 pb-1`, { color: textColor }]}>Bill Number</Text>
+                                    <View style={tw`flex-row w-full justify-between`}>
+                                        <TextInput
+                                            style={[tw`flex-row w-grow mr-1 border-2 bg-transparent`, { borderColor, color: textColor }]}
+                                            onChangeText={(text) => {
+                                                setBillNumber(text);
                                             }}
-                                            style={tw`w-full mb-4`} // Adjust the width and margin of the card container
+                                            placeholder="XXXX XXXX XXXX XXXX"
+                                            keyboardType="number-pad"
+                                            maxLength={20}
+                                            placeholderTextColor={placeholderColor}
+                                            onTouchStart={() => initializeFields()}
+                                        />
+                                        <TouchableOpacity
+                                            style={[
+                                                tw`flex-row items-center justify-center py-3 rounded-lg px-4 border-2`,
+                                                { borderColor },
+                                            ]}
+                                            onPress={() => {
+                                                Keyboard.dismiss();
+                                                searchForBill(billNumber);
+                                            }}
                                         >
-                                            <CreditCard
-                                                backgroundImage={backgroundImage}
-                                                id={card.id}
-                                                name={card.cardName}
-                                                balance={card.balance}
-                                                cvv={card.cvv}
-                                                expiry={card.expiryDate}
+                                            <Icon
+                                                name={"search"}
+                                                size={20}
+                                                color={textColor}
                                             />
                                         </TouchableOpacity>
-                                    )
-                                })}
-                            </ScrollView>
-                            <TouchableOpacity
-                                style={[tw`flex-row justify-center items-center p-4`]}
-                                onPress={() => cancelTransaction()}
-                            >
-                                <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
-                                    Pay a different bill instead
-                                </Text>
-                            </TouchableOpacity>
-                        </View>}
-
-                        {/* Final Bill Details */}
-                        {showFinalDetails && <View style={tw`justify-center w-full`}>
-                            <Text style={[tw`text-2xl font-bold mb-2`, { color: textColor }]}>Transaction Details</Text>
-                            <View style={tw`w-full flex-row justify-center pb-4`}>
-                                <View style={[tw`w-full border h-0`, { borderColor }]} />
+                                    </View>
+                                </View>
                             </View>
-                            <AccountDetail title='Bill Number' content={bill.id} />
-                            <AccountDetail title='Category' content={bill.category} />
-                            <AccountDetail title='Description' content={bill.details} />
-                            <AccountDetail title='Amount' content={bill.amount} />
-                            <AccountDetail title='Card' content={selectedCard.id} />
-                            <View style={tw`w-full flex-row justify-center pb-4`}>
-                                <View style={[tw`w-full border h-0`, { borderColor }]} />
-                            </View>
-                            <TouchableOpacity
-                                style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
-                                onPress={() => payBill(bill, selectedCard)}
-                            >
-                                <Icon name={"credit-card"} size={20} color={buttonTextColor} />
-                                <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
-                                    Pay
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[tw`flex-row justify-center items-center p-4`]}
-                                onPress={() => cancelTransaction()}
-                            >
-                                <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
-                                    Pay a different bill instead
-                                </Text>
-                            </TouchableOpacity>
-                        </View>}
+                            }
 
-                        {/* Transaction Status */}
-                        {showTransactionStatus && <View style={tw`flex-col items-center w-full h-full justify-center`}>
-                            {transactionStatus == "success" &&
-                                <View style={tw`flex-col items-center`}>
-                                    <Icon name={"check"} size={120} color={buttonColor} />
+                            {/* Middle Content */}
+                            <View style={tw`mt-4`}>
+                                {/* Loading */}
+                                {loading &&
+                                    <View style={tw`flex-row justify-center items-center w-full mt-24`}>
+                                        <ActivityIndicator size="large" color={textColor} />
+                                    </View>
+                                }
+
+                                {/* Bill Not Found */}
+                                {billNotFound && <View style={tw`flex-col items-center w-full mt-16`}>
+                                    <Icon name={"file-minus"} size={120} color={textColor} />
                                     <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>
-                                        Success
+                                        Bill Not Found
                                     </Text>
-                                    <Text style={[tw`text-base font-bold mb-4`, { color: textColor }]}>
-                                        Payment completed successfully.
+                                    <Text style={[tw`text-sm font-bold text-center w-2/3`, { color: textColor }]}>
+                                        Please make sure you have entered the correct bill number and try again.
                                     </Text>
+                                </View>}
+
+                                {/* Bill details */}
+                                {billFound && showBillDetails && <View>
+                                    <Text style={[tw`text-2xl font-bold mb-2`, { color: textColor }]}>Bill Details</Text>
+                                    <View style={tw`w-full flex-row justify-center pb-4`}>
+                                        <View style={[tw`w-full border h-0`, { borderColor }]} />
+                                    </View>
+                                    <AccountDetail title='Bill Number' content={bill.id} />
+                                    <AccountDetail title='Category' content={bill.category} />
+                                    <AccountDetail title='Merchant' content={bill.merchantAccount.user.name} />
+                                    <AccountDetail title='Description' content={bill.details} />
+                                    <AccountDetail title='Amount' content={bill.amount} />
                                     <TouchableOpacity
-                                        style={[tw`flex-row justify-center items-center border-2 mt-4`, { borderColor, padding: 16, borderRadius: 8 }]}
-                                        onPress={() => generatePDF()}
+                                        style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
+                                        onPress={() => confirmBill()}
                                     >
-                                        <Icon name={"share"} size={20} color={textColor} />
-                                        <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
-                                            Share Payment
+                                        <Icon name={"check"} size={20} color={buttonTextColor} />
+                                        <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
+                                            Confirm
                                         </Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         style={[tw`flex-row justify-center items-center p-4`]}
-                                        onPress={() => {
-                                            navigation.reset({
-                                                index: 0,
-                                                routes: [{ name: 'Home' }],
-                                            });
-                                        }}
+                                        onPress={() => cancelTransaction()}
                                     >
                                         <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
-                                            Back to Home
+                                            Pay a different bill instead
                                         </Text>
                                     </TouchableOpacity>
-                                </View>
-                            }
-                            {transactionStatus != "success" &&
-                                <View style={tw`flex-col items-center pt-16`}>
-                                    <Icon name={"x"} size={120} color={textColor} />
-                                    <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>
-                                        Failure
-                                    </Text>
-                                    <Text style={[tw`text-base font-bold mb-4`, { color: textColor }]}>
-                                        An error occurred, please try again later.
-                                    </Text>
-                                </View>
-                            }
-                        </View>}
-                        {/* Scan QR CTA Button */}
-                        {showCta && (
-                            <View style={tw`mt-105 mb-4 px-2.5`}>
-                                <Text style={[tw`text-sm mb-1 pl-2`, { color: textColor }]}>
-                                    or you can use QR Code instead
+                                </View>}
+
+                                {/* Bill details */}
+                                {showSelectCard && <View style={tw`h-full`}>
+                                    <View style={tw`px-4`}>
+                                        <Text style={[tw`text-2xl font-bold mb-2`, { color: textColor }]}>Select Card</Text>
+                                        <View style={tw`w-full flex-row justify-center pb-4`}>
+                                            <View style={[tw`w-full border h-0`, { borderColor }]} />
+                                        </View>
+                                        <AccountDetail title='Amount to pay' content={bill.amount} />
+                                    </View>
+                                    <ScrollView
+                                        style={tw`w-full h-8/12`}
+                                        contentContainerStyle={tw`w-full flex-col items-center`}
+                                        showsVerticalScrollIndicator={false}
+                                        showsHorizontalScrollIndicator={false}
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={refreshing}
+                                                onRefresh={onRefresh}
+                                                colors={[theme === 'light' ? 'black' : 'white']}
+                                                tintColor={theme === 'light' ? 'black' : 'white'}
+                                            />
+                                        }
+                                    >
+                                        {cards.map((card, index) => (
+                                            <TouchableOpacity
+                                                key={index}
+                                                onPress={() => selectCard(card)}
+                                                style={tw`w-full mb-4`}
+                                            >
+                                                <CreditCard
+                                                    backgroundImage={CartGlass8}
+                                                    id={card.id}
+                                                    name={card.cardName}
+                                                    balance={card.balance}
+                                                    cvv={card.cvv}
+                                                    expiry={card.expiryDate}
+                                                />
+                                            </TouchableOpacity>
+                                        ))}
+
+
+                                    </ScrollView>
+                                    <TouchableOpacity
+                                        style={[tw`flex-row justify-center items-center p-4`]}
+                                        onPress={() => cancelTransaction()}
+                                    >
+                                        <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
+                                            Pay a different bill instead
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>}
+
+                                {/* Final Bill Details */}
+                                {showFinalDetails && <View style={tw`justify-center w-full`}>
+                                    <Text style={[tw`text-2xl font-bold mb-2`, { color: textColor }]}>Transaction Details</Text>
+                                    <View style={tw`w-full flex-row justify-center pb-4`}>
+                                        <View style={[tw`w-full border h-0`, { borderColor }]} />
+                                    </View>
+                                    <AccountDetail title='Bill Number' content={bill.id} />
+                                    <AccountDetail title='Category' content={bill.category} />
+                                    <AccountDetail title='Description' content={bill.details} />
+                                    <AccountDetail title='Amount' content={bill.amount} />
+                                    <AccountDetail title='Card' content={selectedCard.id} />
+                                    <View style={tw`w-full flex-row justify-center pb-4`}>
+                                        <View style={[tw`w-full border h-0`, { borderColor }]} />
+                                    </View>
+                                    <TouchableOpacity
+                                        style={[tw`flex-row justify-center items-center`, { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }]}
+                                        onPress={() => payBill(bill, selectedCard)}
+                                    >
+                                        <Icon name={"credit-card"} size={20} color={buttonTextColor} />
+                                        <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
+                                            Pay
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[tw`flex-row justify-center items-center p-4`]}
+                                        onPress={() => cancelTransaction()}
+                                    >
+                                        <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
+                                            Pay a different bill instead
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>}
+
+                                {/* Transaction Status */}
+                                {showTransactionStatus && <View style={tw`flex-col items-center w-full h-full justify-center`}>
+                                    {transactionStatus == "success" &&
+                                        <View style={tw`flex-col items-center`}>
+                                            <Icon name={"check"} size={120} color={buttonColor} />
+                                            <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>
+                                                Success
+                                            </Text>
+                                            <Text style={[tw`text-base font-bold mb-4`, { color: textColor }]}>
+                                                Payment completed successfully.
+                                            </Text>
+                                            <TouchableOpacity
+                                                style={[tw`flex-row justify-center items-center border-2 mt-4`, { borderColor, padding: 16, borderRadius: 8 }]}
+                                                onPress={() => generatePDF()}
+                                            >
+                                                <Icon name={"share"} size={20} color={textColor} />
+                                                <Text style={[tw`text-base font-bold ml-2`, { color: textColor }]}>
+                                                    Share Payment
+                                                </Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity
+                                                style={[tw`flex-row justify-center items-center p-4`]}
+                                                onPress={() => {
+                                                    navigation.reset({
+                                                        index: 0,
+                                                        routes: [{ name: 'Home' }],
+                                                    });
+                                                }}
+                                            >
+                                                <Text style={[tw`text-sm font-bold`, { color: textColor }]}>
+                                                    Back to Home
+                                                </Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    }
+                                    {transactionStatus != "success" &&
+                                        <View style={tw`flex-col items-center pt-16`}>
+                                            <Icon name={"x"} size={120} color={textColor} />
+                                            <Text style={[tw`text-2xl font-bold mb-4`, { color: textColor }]}>
+                                                Failure
+                                            </Text>
+                                            <Text style={[tw`text-base font-bold mb-4`, { color: textColor }]}>
+                                                An error occurred, please try again later.
+                                            </Text>
+                                        </View>
+                                    }
+                                </View>}
+                                {/* Scan QR CTA Button */}
+                                {showCta && (
+                                    <View style={tw`mt-105 mb-4 px-2.5`}>
+                                        <Text style={[tw`text-sm mb-1 pl-2`, { color: textColor }]}>
+                                            or you can use QR Code instead
+                                        </Text>
+                                        <TouchableOpacity
+                                            style={[
+                                                tw`flex-row justify-center items-center`,
+                                                { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }
+                                            ]}
+                                            onPress={() => setAccountDetailsModalVisible(true)}
+                                        >
+                                            <Icon name={"camera"} size={20} color={buttonTextColor} />
+                                            <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
+                                                Scan QR Code
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
+                    </View>
+                </SafeAreaView>
+                <BottomTab navigation={navigation} />
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={accountDetailsModalVisible}
+                    onRequestClose={() => {
+                        setAccountDetailsModalVisible(!accountDetailsModalVisible);
+                    }}
+                >
+                    <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-75 h-full`}>
+                        <View style={[tw`w-11/12 p-5 rounded-xl h-4/6 flex-col items-center justify-start`, { backgroundColor: cardBackgroundColor }]}>
+                            <View style={tw`flex-row justify-between items-center w-full mb-4`}>
+                                <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>
+                                    Scan Bill QR Code
                                 </Text>
                                 <TouchableOpacity
-                                    style={[
-                                        tw`flex-row justify-center items-center`,
-                                        { backgroundColor: buttonColor, padding: 16, borderRadius: 8 }
-                                    ]}
-                                    onPress={() => setAccountDetailsModalVisible(true)}
+                                    style={tw`p-2`}
+                                    onPress={() => setAccountDetailsModalVisible(false)}
                                 >
-                                    <Icon name={"camera"} size={20} color={buttonTextColor} />
-                                    <Text style={[tw`text-base font-bold ml-2`, { color: buttonTextColor }]}>
-                                        Scan QR Code
-                                    </Text>
+                                    <Icon name="x" size={28} color={textColor} />
                                 </TouchableOpacity>
                             </View>
-                        )}
-                    </View>
-                </View>
-            </View>
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={accountDetailsModalVisible}
-                onRequestClose={() => {
-                    setAccountDetailsModalVisible(!accountDetailsModalVisible);
-                }}
-            >
-                <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-75 h-full`}>
-                    <View style={[tw`w-11/12 p-5 rounded-xl h-4/6 flex-col items-center justify-start`, { backgroundColor: cardBackgroundColor }]}>
-                        <View style={tw`flex-row justify-between items-center w-full mb-4`}>
-                            <Text style={[tw`text-2xl font-bold`, { color: textColor }]}>
-                                Scan Bill QR Code
+                            {/* Camera */}
+                            <View style={tw`h-4/5 w-full`}>
+                                {hasPermission && (
+                                    <CameraView
+                                        style={tw`h-full w-full`}
+                                        onBarcodeScanned={handleBarCodeRead}
+                                    />
+                                )}
+                                {!hasPermission && (
+                                    <View style={tw`flex-1 justify-center items-center`}>
+                                        <Text style={[tw`text-lg`, { color: textColor }]}>
+                                            No camera access. Please grant camera permissions to use this feature.
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+                            <Text style={[tw`text-sm pt-2`, { color: textColor }]}>
+                                Point your camera to a bill QR Code to quickly perform your transaction.
                             </Text>
-                            <TouchableOpacity
-                                style={tw`p-2`}
-                                onPress={() => setAccountDetailsModalVisible(false)}
-                            >
-                                <Icon name="x" size={28} color={textColor} />
-                            </TouchableOpacity>
                         </View>
-                        {/* Camera */}
-                        <View style={tw`h-4/5 w-full`}>
-                            {hasPermission && (
-                                <CameraView
-                                    style={tw`h-full w-full`}
-                                    onBarcodeScanned={handleBarCodeRead}
-                                />
-                            )}
-                            {!hasPermission && (
-                                <View style={tw`flex-1 justify-center items-center`}>
-                                    <Text style={[tw`text-lg`, { color: textColor }]}>
-                                        No camera access. Please grant camera permissions to use this feature.
-                                    </Text>
-                                </View>
-                            )}
-                        </View>
-                        <Text style={[tw`text-sm pt-2`, { color: textColor }]}>
-                            Point your camera to a bill QR Code to quickly perform your transaction.
-                        </Text>
                     </View>
-                </View>
-            </Modal>
-        </View >
+                </Modal>
+            </View>
+        </TouchableWithoutFeedback>
     );
+
+
 };
 
 type LayoutInfo = {

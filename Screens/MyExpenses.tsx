@@ -68,7 +68,7 @@
 
 // const MyExpenses: React.FC<{ navigation: any }> = ({ navigation }) => {
 //   const { theme } = useTheme();
-//   const backgroundColor = theme === 'light' ? '#FFFFFF' : '#303030';
+//   const backgroundColor = theme === 'light' ? '#FFFFFF' : '#1A1A1A';
 //   const textColor = theme === 'light' ? '#333333' : '#DDDDDD'; // More vibrant text color
 //   const cardBackgroundColor = theme === 'light' ? '#F0F0F0' : '#424242';
 //   const amountColor = theme === 'light' ? '#181E20' : '#94B9C5';
