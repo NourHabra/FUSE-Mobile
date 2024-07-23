@@ -100,7 +100,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-             <View style={{ flex: 1, backgroundColor }}>
+            <View style={{ flex: 1, backgroundColor }}>
                 <SafeAreaView style={[tw`flex-1`, { backgroundColor }]}>
                     <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={backgroundColor} />
                     <KeyboardAvoidingView
@@ -164,7 +164,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                                 </TouchableOpacity>
                                             </View>
                                             <View style={tw`flex-row justify-center items-center`}>
-                                                <TouchableOpacity
+                                                {/* <TouchableOpacity
                                                     style={[tw`flex-row justify-center items-center w-grow m-1 py-4 rounded-lg`, { backgroundColor: buttonColor }]}
                                                     onPress={() => {
                                                         // handleNfcWrite();
@@ -173,7 +173,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                                 >
                                                     <Icon name="wifi" size={20} color={buttonTextColor} />
                                                     <Text style={[tw`text-lg font-bold ml-1`, { color: buttonTextColor }]}>Create Digital Card</Text>
-                                                </TouchableOpacity>
+                                                </TouchableOpacity> */}
                                             </View>
                                         </View>
                                     </View>
@@ -670,7 +670,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                     </View>
                                 </View>
                             </Modal>
-                            <Modal
+                            {/* <Modal
                                 animationType="slide"
                                 transparent={true}
                                 visible={nfcModalVisible}
@@ -715,7 +715,7 @@ const CardDetails: React.FC<{ navigation: any, route: any }> = ({ navigation, ro
                                         </View>
                                     </View>
                                 </View>
-                            </Modal>
+                            </Modal> */}
                         </ScrollView>
                     </KeyboardAvoidingView>
                 </SafeAreaView>

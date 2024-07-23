@@ -197,7 +197,6 @@ const Receive: React.FC<{ route: any }> = ({ route }) => {
                             </TouchableOpacity>
                         </ScrollView>
                     </View>
-                    <BottomTab navigation={navigation} />
 
                     <Modal
                         animationType="slide"
@@ -231,6 +230,8 @@ const Receive: React.FC<{ route: any }> = ({ route }) => {
                         </View>
                     </Modal>
                 </SafeAreaView>
+
+                <BottomTab navigation={navigation} />
             </View>
         </TouchableWithoutFeedback>
     );
